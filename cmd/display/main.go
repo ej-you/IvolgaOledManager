@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"sschmc/config"
 	"sschmc/internal/display"
@@ -25,9 +26,15 @@ func startApp() error {
 	if err != nil {
 		return err
 	}
+	defer oled.Close()
 
 	if err := oled.Greetings(); err != nil {
 		return err
 	}
+	time.Sleep(5 * time.Second)
+	if err := oled.Clear(); err != nil {
+		return err
+	}
+
 	return nil
 }

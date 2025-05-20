@@ -16,6 +16,7 @@ var _ Display = (*display)(nil)
 type Display interface {
 	Close() error
 
+	Clear() error
 	Greetings() error
 }
 
@@ -48,4 +49,9 @@ func (d display) Greetings() error {
 		return fmt.Errorf("display image: %w", err)
 	}
 	return nil
+}
+
+// Clear clears image.
+func (d display) Clear() error {
+	return d.device.DisplayClear()
 }
