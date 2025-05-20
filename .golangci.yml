@@ -1,0 +1,86 @@
+version: "2"
+
+run:
+  tests: false
+
+linters:
+  default: none
+  enable:
+    - asciicheck
+    - bodyclose
+    - copyloopvar
+    - cyclop
+    - dogsled
+    - dupl
+    - errcheck
+    - errorlint
+    - funlen
+    - ginkgolinter
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - godox
+    - goprintffuncname
+    - gosec
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - mnd
+    - nakedret
+    - nestif
+    - noctx
+    - prealloc
+    - revive
+    - unconvert
+    - unparam
+    - unused
+    - varnamelen
+    - whitespace
+
+  settings:
+    cyclop:
+      max-complexity: 10
+    errorlint:
+      comparison: true
+    goconst:
+      ignore-string-values: .*?%s|%v|%w.*
+      numbers: true
+      ignore-calls: false
+    gocritic:
+      enable-all: true
+    gocyclo:
+      min-complexity: 10
+    lll:
+      line-length: 99
+    nestif:
+      min-complexity: 3
+    prealloc:
+      simple: false
+      for-loops: true
+    whitespace:
+      multi-func: true
+
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters: # more readable
+          - varnamelen
+        path: internal/pkg/ssd1306/image\.go
+        text: "parameter name '[xy]' is too short for the scope of its usage"
+    paths:
+      - bin
+
+issues:
+  fix: false
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
