@@ -1,0 +1,3 @@
+app:
+  oled_bus: "2" # i2c bus of ssd1306 oled display
+  greetings_img_path: "./assets/greetings.png" # path to image for greetings output
