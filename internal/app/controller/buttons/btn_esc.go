@@ -1,7 +1,6 @@
 package buttons
 
 import (
-	"fmt"
 	"log"
 
 	"sschmc/internal/app/constants"
@@ -37,9 +36,12 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 
 // btnEscNone clears rendered data and updates app-status in storage to none.
 func (b *Buttons) btnEscNone() error {
-	if err := b.render.Clear(); err != nil {
-		return fmt.Errorf("clear rendered: %w", err)
-	}
 	b.store.Set(constants.KeyAppStatus, constants.ValueAppStatusNone)
+	// update render according to new app-status
+	b.render <- struct{}{}
+
+	// if err := b.render.Clear(); err != nil {
+	// 	return fmt.Errorf("clear rendered: %w", err)
+	// }
 	return nil
 }
