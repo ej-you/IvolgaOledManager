@@ -6,5 +6,5 @@ package db
 // 	"sschmc/internal/app/entity"
 // )
 
-type LogRepoDB interface {
+type MessageRepoDB interface {
 }

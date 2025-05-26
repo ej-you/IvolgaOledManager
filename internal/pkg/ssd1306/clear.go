@@ -8,8 +8,8 @@ import (
 )
 
 // DisplayClear clears OLED display.
-func (s SSD1306) DisplayClear() error {
-	black := image1bit.NewVerticalLSB(image.Rect(0, 0, 128, 64))
+func (s *SSD1306) DisplayClear() error {
+	black := image1bit.NewVerticalLSB(image.Rect(0, 0, _displayWidth, 64))
 	if err := s.device.Draw(s.device.Bounds(), black, image.Pt(0, 0)); err != nil {
 		return fmt.Errorf("clear display: %w", err)
 	}

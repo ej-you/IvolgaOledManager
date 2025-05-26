@@ -9,6 +9,8 @@ import (
 	"periph.io/x/devices/v3/ssd1306"
 )
 
+const _displayWidth = 128 // oled width
+
 type SSD1306 struct {
 	device    *ssd1306.Dev
 	busCloser func() error
@@ -31,7 +33,7 @@ func NewSSD1306(bus string) (*SSD1306, error) {
 }
 
 // Close clears OLED display (turn off all pixels) and closes OLED bus.
-func (s SSD1306) Close() error {
+func (s *SSD1306) Close() error {
 	if err := s.device.Halt(); err != nil {
 		return fmt.Errorf("clear ssd1306 oled: %w", err)
 	}

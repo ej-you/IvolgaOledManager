@@ -8,7 +8,7 @@ import (
 )
 
 // DisplayImage displays image from given path to the OLED display.
-func (s SSD1306) DisplayImage(imagePath string, x, y int) error {
+func (s *SSD1306) DisplayImage(imagePath string, x, y int) error {
 	file, err := os.Open(imagePath)
 	if err != nil {
 		return fmt.Errorf("open image file: %w", err)
