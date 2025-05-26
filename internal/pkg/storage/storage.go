@@ -3,7 +3,7 @@
 package storage
 
 type Storage interface {
-	Get(key string) string
-	Set(key string, value string)
+	Get(key string) any
+	Set(key string, value any)
 	Delete(key string)
 }

@@ -15,7 +15,7 @@ func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
 		appStatus string
 	)
 	return func() {
-		appStatus = b.store.Get(constants.KeyAppStatus)
+		appStatus = b.store.App.GetStatus()
 
 		switch appStatus {
 		case constants.ValueAppStatusNone:

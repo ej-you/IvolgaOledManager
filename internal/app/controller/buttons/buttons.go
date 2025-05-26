@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
+	"sschmc/internal/app/repo/storage"
 	"sschmc/internal/pkg/gpiobutton"
-	"sschmc/internal/pkg/storage"
 )
 
 type Buttons struct {
-	store   storage.Storage
+	store   storage.StorageManager
 	render  chan<- struct{}
 	btnEsc  gpiobutton.GPIOButton
 	btnUp   gpiobutton.GPIOButton
@@ -26,7 +26,7 @@ type Buttons struct {
 // The store param is an app key-value storage.
 // The render param is a renderer for output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
-	store storage.Storage, render chan<- struct{}) (*Buttons, error) {
+	store storage.StorageManager, render chan<- struct{}) (*Buttons, error) {
 
 	var err error
 	buttons := &Buttons{

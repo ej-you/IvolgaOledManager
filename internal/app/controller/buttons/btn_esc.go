@@ -15,7 +15,7 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 		appStatus string
 	)
 	return func() {
-		appStatus = b.store.Get(constants.KeyAppStatus)
+		appStatus = b.store.App.GetStatus()
 
 		switch appStatus {
 		case constants.ValueAppStatusNone, constants.ValueAppStatusMenuMain:
@@ -36,7 +36,7 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 
 // btnEscNone clears rendered data and updates app-status in storage to none.
 func (b *Buttons) btnEscNone() error {
-	b.store.Set(constants.KeyAppStatus, constants.ValueAppStatusNone)
+	b.store.App.SetStatus(constants.ValueAppStatusNone)
 	// update render according to new app-status
 	b.render <- struct{}{}
 

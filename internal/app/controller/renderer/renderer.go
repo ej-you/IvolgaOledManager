@@ -9,21 +9,21 @@ import (
 	"time"
 
 	"sschmc/internal/app/constants"
+	"sschmc/internal/app/repo/storage"
 	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/ssd1306"
-	"sschmc/internal/pkg/storage"
 )
 
 type Renderer struct {
-	device           *ssd1306.SSD1306
-	greetingsImgPath string
-	needUpdate       <-chan struct{}
-	updateDuration   time.Duration
-	store            storage.Storage
+	device             *ssd1306.SSD1306
+	greetingsImgPath   string
+	needUpdate         <-chan struct{}
+	menuUpdateDuration time.Duration
+	store              storage.StorageManager
 }
 
-func New(bus, greetingsImgPath string,
-	needUpdate <-chan struct{}, store storage.Storage) (*Renderer, error) {
+func New(bus, greetingsImgPath string, menuUpdateDuration time.Duration,
+	needUpdate <-chan struct{}, store storage.StorageManager) (*Renderer, error) {
 
 	oled, err := ssd1306.NewSSD1306(bus)
 	if err != nil {
@@ -31,11 +31,11 @@ func New(bus, greetingsImgPath string,
 	}
 
 	return &Renderer{
-		device:           oled,
-		greetingsImgPath: greetingsImgPath,
-		needUpdate:       needUpdate,
-		updateDuration:   time.Second,
-		store:            store,
+		device:             oled,
+		greetingsImgPath:   greetingsImgPath,
+		needUpdate:         needUpdate,
+		menuUpdateDuration: menuUpdateDuration,
+		store:              store,
 	}, nil
 }
 
@@ -60,22 +60,27 @@ func (r *Renderer) start(ctx context.Context) {
 		err       error
 		appStatus string
 	)
-	ticker := time.NewTicker(r.updateDuration)
+	ticker := time.NewTicker(r.menuUpdateDuration)
+	defer ticker.Stop()
+	ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			ticker.Stop()
 			return
 		case <-ticker.C:
 			fmt.Println("Ticker")
-			appStatus = r.store.Get(constants.KeyAppStatus)
+			appStatus = r.store.App.GetStatus()
 			err = r.update(appStatus)
 		case <-r.needUpdate:
 			fmt.Println("Update")
-			appStatus = r.store.Get(constants.KeyAppStatus)
+			appStatus = r.store.App.GetStatus()
 			err = r.update(appStatus)
-			ticker.Reset(r.updateDuration)
+			if r.store.App.StatusIsMenu() {
+				ticker.Reset(r.menuUpdateDuration)
+			} else {
+				ticker.Stop()
+			}
 		}
 		if err != nil {
 			errlog.Print(err)

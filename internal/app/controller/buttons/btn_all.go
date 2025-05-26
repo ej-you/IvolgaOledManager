@@ -6,7 +6,7 @@ import (
 
 // btnAllGreetings renders greetings and updates app-status in storage.
 func (b *Buttons) btnAllGreetings() error {
-	b.store.Set(constants.KeyAppStatus, constants.ValueAppStatusGreetings)
+	b.store.App.SetStatus(constants.ValueAppStatusGreetings)
 	// update render according to new app-status
 	b.render <- struct{}{}
 

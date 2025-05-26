@@ -15,7 +15,13 @@ import (
 	"sschmc/config"
 	"sschmc/internal/app/controller/buttons"
 	"sschmc/internal/app/controller/renderer"
+	storagerepo "sschmc/internal/app/repo/storage"
 	"sschmc/internal/pkg/storage"
+)
+
+const (
+	_menuUpdateDuration = 500 * time.Millisecond // duration for update menu output to display
+	_checkAliveTimeout  = time.Second            // duration for checking button is alive
 )
 
 var _ App = (*app)(nil)
@@ -27,7 +33,7 @@ type App interface {
 // App implementation.
 type app struct {
 	cfg   *config.Config
-	store storage.Storage
+	store storagerepo.StorageManager
 }
 
 // New returns App interface.
@@ -38,7 +44,7 @@ func New(cfg *config.Config) (App, error) {
 	}
 	return &app{
 		cfg:   cfg,
-		store: storage.NewMap(),
+		store: *storagerepo.NewStorageManager(storage.NewMap()),
 	}, nil
 }
 
@@ -67,7 +73,7 @@ func (a app) Run() error {
 
 	// init display
 	render, err := renderer.New(a.cfg.Hardware.Oled.Bus, a.cfg.App.GreetingsImgPath,
-		updateDisplay, a.store)
+		_menuUpdateDuration, updateDisplay, a.store)
 	if err != nil {
 		return fmt.Errorf("init display: %w", err)
 	}
@@ -78,7 +84,7 @@ func (a app) Run() error {
 		a.cfg.Hardware.Buttons.Up,
 		a.cfg.Hardware.Buttons.Down,
 		a.cfg.Hardware.Buttons.Enter,
-		time.Second,
+		_checkAliveTimeout,
 		a.store,
 		updateDisplay,
 	)
