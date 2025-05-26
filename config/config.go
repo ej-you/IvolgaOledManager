@@ -10,13 +10,29 @@ import (
 
 type (
 	Config struct {
-		App `yaml:"app"`
-		DB  `yaml:"db"`
+		App      `yaml:"app"`
+		Hardware `yaml:"hardware"`
+		DB       `yaml:"db"`
 	}
 
 	App struct {
-		OledBus          string `yaml:"oled_bus"`
 		GreetingsImgPath string `yaml:"greetings_img_path"`
+	}
+
+	Hardware struct {
+		Oled    `yaml:"oled"`
+		Buttons `yaml:"buttons"`
+	}
+
+	Oled struct {
+		Bus string `yaml:"bus"`
+	}
+
+	Buttons struct {
+		Up     string `yaml:"up"`
+		Down   string `yaml:"down"`
+		Escape string `yaml:"escape"`
+		Enter  string `yaml:"enter"`
 	}
 
 	DB struct {

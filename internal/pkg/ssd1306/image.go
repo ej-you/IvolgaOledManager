@@ -19,9 +19,8 @@ func (s SSD1306) DisplayImage(imagePath string, x, y int) error {
 	if err != nil {
 		return fmt.Errorf("decode image to bytes: %w", err)
 	}
-	if err := s.device.Draw(s.device.Bounds(), img, image.Pt(x, y)); err != nil {
+	if err := s.device.Draw(s.device.Bounds(), img, image.Pt(-x, -y)); err != nil {
 		return fmt.Errorf("draw image: %w", err)
 	}
-
 	return nil
 }

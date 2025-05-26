@@ -4,9 +4,9 @@ package ssd1306
 import (
 	"fmt"
 
+	"github.com/pkg/errors"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/devices/v3/ssd1306"
-	"periph.io/x/host/v3"
 )
 
 type SSD1306 struct {
@@ -15,11 +15,6 @@ type SSD1306 struct {
 }
 
 func NewSSD1306(bus string) (*SSD1306, error) {
-	// initialise all relevant drivers
-	if _, err := host.Init(); err != nil {
-		return nil, fmt.Errorf("init drivers: %w", err)
-	}
-
 	busCloser, err := i2creg.Open(bus)
 	if err != nil {
 		return nil, fmt.Errorf("open bus: %w", err)
@@ -35,7 +30,10 @@ func NewSSD1306(bus string) (*SSD1306, error) {
 	}, nil
 }
 
-// Close closes OLED bus.
+// Close clears OLED display (turn off all pixels) and closes OLED bus.
 func (s SSD1306) Close() error {
-	return s.busCloser()
+	if err := s.device.Halt(); err != nil {
+		return fmt.Errorf("clear ssd1306 oled: %w", err)
+	}
+	return errors.Wrap(s.busCloser(), "close ssd1306 oled")
 }

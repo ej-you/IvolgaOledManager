@@ -2,10 +2,9 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"sschmc/config"
-	"sschmc/internal/display"
+	"sschmc/internal/app"
 )
 
 func main() {
@@ -21,20 +20,14 @@ func startApp() error {
 		return err
 	}
 
-	// init display
-	oled, err := display.New(cfg.App.OledBus, cfg.App.GreetingsImgPath)
+	// init app
+	app, err := app.New(cfg)
 	if err != nil {
 		return err
 	}
-	defer oled.Close()
-
-	if err := oled.Greetings(); err != nil {
+	// run app
+	if err := app.Run(); err != nil {
 		return err
 	}
-	time.Sleep(5 * time.Second)
-	if err := oled.Clear(); err != nil {
-		return err
-	}
-
 	return nil
 }

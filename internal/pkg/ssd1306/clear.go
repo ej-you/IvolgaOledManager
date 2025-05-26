@@ -2,11 +2,15 @@ package ssd1306
 
 import (
 	"fmt"
+	"image"
+
+	"periph.io/x/devices/v3/ssd1306/image1bit"
 )
 
-// DisplayClear clears OLED display (turn off all pixels).
+// DisplayClear clears OLED display.
 func (s SSD1306) DisplayClear() error {
-	if err := s.device.Halt(); err != nil {
+	black := image1bit.NewVerticalLSB(image.Rect(0, 0, 128, 64))
+	if err := s.device.Draw(s.device.Bounds(), black, image.Pt(0, 0)); err != nil {
 		return fmt.Errorf("clear display: %w", err)
 	}
 	return nil
