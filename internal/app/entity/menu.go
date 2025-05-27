@@ -1,8 +1,8 @@
 package entity
 
 const (
-	DefaultPrefix  = "  "
-	SelectedPrefix = "> "
+	DefaultPrefix  = "  " // menu item prefix for default item
+	SelectedPrefix = "> " // menu item prefix for selected item
 
 	_maxItemLen = 16 // max item value len
 	_maxLines   = 4  // max lines amount for display (ssc-hmc/internal/pkg/ssd1306/text_drawer.go)
