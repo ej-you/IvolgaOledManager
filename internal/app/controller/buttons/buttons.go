@@ -8,16 +8,17 @@ import (
 	"time"
 
 	"sschmc/internal/app/repo/storage"
+	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/gpiobutton"
 )
 
 type Buttons struct {
-	store   storage.StorageManager
-	render  chan<- struct{}
 	btnEsc  gpiobutton.GPIOButton
 	btnUp   gpiobutton.GPIOButton
 	btnDown gpiobutton.GPIOButton
 	btnEnt  gpiobutton.GPIOButton
+	store   storage.RepoStorageManager
+	render  chan<- struct{}
 }
 
 // NewButtons returns new Buttons struct pointer.
@@ -26,7 +27,7 @@ type Buttons struct {
 // The store param is an app key-value storage.
 // The render param is a renderer for output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
-	store storage.StorageManager, render chan<- struct{}) (*Buttons, error) {
+	store storage.RepoStorageManager, render chan<- struct{}) (*Buttons, error) {
 
 	var err error
 	buttons := &Buttons{
@@ -65,19 +66,31 @@ func (b *Buttons) HandleAll(ctx context.Context) {
 	wg.Add(4)
 	go func() {
 		defer wg.Done()
-		b.btnEsc.HandleWithShutdown(ctx, b.BtnEscRisingHandler(), func() {})
+		err := b.btnEsc.HandleWithShutdown(ctx, b.BtnEscRisingHandler(), func() {})
+		if err != nil {
+			errlog.Print(err)
+		}
 	}()
 	go func() {
 		defer wg.Done()
-		b.btnUp.HandleWithShutdown(ctx, b.BtnUpRisingHandler(), func() {})
+		err := b.btnUp.HandleWithShutdown(ctx, b.BtnUpRisingHandler(), func() {})
+		if err != nil {
+			errlog.Print(err)
+		}
 	}()
 	go func() {
 		defer wg.Done()
-		b.btnDown.HandleWithShutdown(ctx, b.BtnDownRisingHandler(), func() {})
+		err := b.btnDown.HandleWithShutdown(ctx, b.BtnDownRisingHandler(), func() {})
+		if err != nil {
+			errlog.Print(err)
+		}
 	}()
 	go func() {
 		defer wg.Done()
-		b.btnEnt.HandleWithShutdown(ctx, b.BtnEntRisingHandler(), func() {})
+		err := b.btnEnt.HandleWithShutdown(ctx, b.BtnEntRisingHandler(), func() {})
+		if err != nil {
+			errlog.Print(err)
+		}
 	}()
 
 	// wait until all gpio are closed

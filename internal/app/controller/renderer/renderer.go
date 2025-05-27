@@ -8,7 +8,6 @@ import (
 	"log"
 	"time"
 
-	"sschmc/internal/app/constants"
 	"sschmc/internal/app/repo/storage"
 	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/ssd1306"
@@ -17,13 +16,13 @@ import (
 type Renderer struct {
 	device             *ssd1306.SSD1306
 	greetingsImgPath   string
-	needUpdate         <-chan struct{}
 	menuUpdateDuration time.Duration
-	store              storage.StorageManager
+	store              storage.RepoStorageManager
+	needUpdate         <-chan struct{}
 }
 
 func New(bus, greetingsImgPath string, menuUpdateDuration time.Duration,
-	needUpdate <-chan struct{}, store storage.StorageManager) (*Renderer, error) {
+	store storage.RepoStorageManager, needUpdate <-chan struct{}) (*Renderer, error) {
 
 	oled, err := ssd1306.NewSSD1306(bus)
 	if err != nil {
@@ -56,27 +55,26 @@ func (r *Renderer) StartWithShutdown(ctx context.Context) {
 }
 
 func (r *Renderer) start(ctx context.Context) {
-	var (
-		err       error
-		appStatus string
-	)
+	// init ticker for menus periodically updates
 	ticker := time.NewTicker(r.menuUpdateDuration)
 	defer ticker.Stop()
 	ticker.Stop()
 
+	var err error
 	for {
 		select {
 		case <-ctx.Done():
 			return
+
 		case <-ticker.C:
 			fmt.Println("Ticker")
-			appStatus = r.store.App.GetStatus()
-			err = r.update(appStatus)
+			err = r.update()
+
 		case <-r.needUpdate:
 			fmt.Println("Update")
-			appStatus = r.store.App.GetStatus()
-			err = r.update(appStatus)
-			if r.store.App.StatusIsMenu() {
+			err = r.update()
+			// reset ticker for menus
+			if r.store.App.IsMenuAny() {
 				ticker.Reset(r.menuUpdateDuration)
 			} else {
 				ticker.Stop()
@@ -102,18 +100,17 @@ func (r *Renderer) close() error {
 }
 
 // update updates image according to app-status.
-func (r *Renderer) update(appStatus string) error {
-	fmt.Println("update render")
-	switch appStatus {
-	case constants.ValueAppStatusNone:
+func (r *Renderer) update() error {
+	switch {
+	case r.store.App.IsNone():
 		log.Println("*** clear rendered ***")
 		return r.clear()
-	case constants.ValueAppStatusGreetings:
+	case r.store.App.IsGreetings():
 		log.Println("*** render greetings ***")
 		return r.greetings()
-	case constants.ValueAppStatusMenuMain:
+	case r.store.App.IsMenuMain():
 		log.Println("*** render main menu ***")
-		return r.menu()
+		return r.menu(r.store.Menu.GetMenuMain())
 	default:
 		log.Println("*** no one render rule found ***")
 	}

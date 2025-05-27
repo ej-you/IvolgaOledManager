@@ -3,45 +3,44 @@ package buttons
 import (
 	"log"
 
-	"sschmc/internal/app/constants"
-	"sschmc/internal/pkg/errlog"
+	"sschmc/internal/app/entity"
 	"sschmc/internal/pkg/gpiobutton"
 )
 
 // BtnEntRisingHandler handles all cases of ENT button rising.
 func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
-	var (
-		err       error
-		appStatus string
-	)
 	return func() {
-		appStatus = b.store.App.GetStatus()
-
-		switch appStatus {
-		case constants.ValueAppStatusNone:
+		switch {
+		case b.store.App.IsNone():
 			log.Println("*** ENTER none ***")
-			err = b.btnAllGreetings()
-		case constants.ValueAppStatusGreetings:
+			b.btnAllGreetings()
+		case b.store.App.IsGreetings():
 			log.Println("*** ENTER greetings ***")
-			err = b.btnEntMainMenu()
+			b.btnEntMenuMain()
 		default:
 			log.Println("*** ENTER pressed ***")
-		}
-
-		if err != nil {
-			errlog.Print(err)
 		}
 	}
 }
 
 // btnEscNone clears rendered data and updates app-status in storage to none.
-func (b *Buttons) btnEntMainMenu() error {
-	b.store.App.SetStatus(constants.ValueAppStatusMenuMain)
+func (b *Buttons) btnEntMenuMain() {
+	// create main menu and save it to storage
+	mainMenu := &entity.Menu{
+		Title: "Main menu",
+		Items: []*entity.MenuItem{
+			{Title: "hello"},
+			{Title: "What a hell are you doing?"},
+			{Title: "Golang"},
+			{Title: "func{}"},
+			{Title: "sample"},
+			{Title: "B A A A A A A A C"},
+		},
+		SelectedItem: 1,
+	}
+	b.store.Menu.SetMenuMain(mainMenu)
+
+	b.store.App.SetMenuMain()
 	// update render according to new app-status
 	b.render <- struct{}{}
-
-	// if err := b.render.Menu(); err != nil {
-	// 	return fmt.Errorf("render menu: %w", err)
-	// }
-	return nil
 }

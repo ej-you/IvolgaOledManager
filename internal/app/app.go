@@ -33,7 +33,7 @@ type App interface {
 // App implementation.
 type app struct {
 	cfg   *config.Config
-	store storagerepo.StorageManager
+	store storagerepo.RepoStorageManager
 }
 
 // New returns App interface.
@@ -44,7 +44,7 @@ func New(cfg *config.Config) (App, error) {
 	}
 	return &app{
 		cfg:   cfg,
-		store: *storagerepo.NewStorageManager(storage.NewMap()),
+		store: *storagerepo.NewRepoStorageManager(storage.NewMap()),
 	}, nil
 }
 
@@ -52,7 +52,7 @@ func New(cfg *config.Config) (App, error) {
 func (a app) Run() error {
 	// ctx for app
 	appContext, appCancel := context.WithCancel(context.Background())
-	// channel for display updates
+	// channel to update display
 	updateDisplay := make(chan struct{})
 
 	// handle shutdown process signals
@@ -63,7 +63,6 @@ func (a app) Run() error {
 		syscall.SIGTERM,
 		syscall.SIGQUIT,
 	)
-
 	// create gracefully shutdown task
 	go func() {
 		defer appCancel()
@@ -71,11 +70,16 @@ func (a app) Run() error {
 		log.Printf("Get %q signal. Shutdown app...", handledSignal.String())
 	}()
 
-	// init display
-	render, err := renderer.New(a.cfg.Hardware.Oled.Bus, a.cfg.App.GreetingsImgPath,
-		_menuUpdateDuration, updateDisplay, a.store)
+	// init renderer
+	render, err := renderer.New(
+		a.cfg.Hardware.Oled.Bus,
+		a.cfg.App.GreetingsImgPath,
+		_menuUpdateDuration,
+		a.store,
+		updateDisplay,
+	)
 	if err != nil {
-		return fmt.Errorf("init display: %w", err)
+		return fmt.Errorf("init renderer: %w", err)
 	}
 
 	// init buttons

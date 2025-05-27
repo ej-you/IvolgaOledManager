@@ -17,11 +17,14 @@ const (
 
 var _ TextDrawer = (*textDrawer)(nil)
 
+// Interface for draw text lines.
 type TextDrawer interface {
 	AddLine(prefix, msg string)
+	FillEmpty()
 	Draw() error
 }
 
+// textLine is one text line to output on display.
 type textLine struct {
 	borders image.Rectangle
 	text    *image1bit.VerticalLSB
@@ -34,6 +37,7 @@ type textDrawer struct {
 	lines    []textLine
 }
 
+// NewTextDrawer returns TextDrawer for text lines output.
 func (s *SSD1306) NewTextDrawer() TextDrawer {
 	// set up font for text
 	fontFace := basicfont.Face7x13
@@ -42,10 +46,11 @@ func (s *SSD1306) NewTextDrawer() TextDrawer {
 	return &textDrawer{
 		ssd1306:  s,
 		fontFace: fontFace,
-		lines:    make([]textLine, 0),
+		lines:    make([]textLine, 0, _maxLines),
 	}
 }
 
+// AddLine add new line with prefix and text message to slice to draw.
 func (d *textDrawer) AddLine(prefix, msg string) {
 	// lines amount
 	lines := len(d.lines)
@@ -64,7 +69,9 @@ func (d *textDrawer) AddLine(prefix, msg string) {
 	}
 
 	// draw text on line
-	drawer.DrawString(prefix + msg)
+	// drawer.DrawString(prefix + msg)
+	drawer.DrawString(prefix)
+	drawer.DrawString(msg)
 	// create new textLine instance and append it to slice
 	newTextLine := textLine{
 		borders: image.Rect(0, lines*_lineHeight, _displayWidth, (lines+1)*_lineHeight),
@@ -73,6 +80,19 @@ func (d *textDrawer) AddLine(prefix, msg string) {
 	d.lines = append(d.lines, newTextLine)
 }
 
+// FillEmpty fills empty lines in black color.
+func (d *textDrawer) FillEmpty() {
+	// lines amount
+	lines := len(d.lines)
+	if lines == _maxLines {
+		return
+	}
+	for i := 0; i < _maxLines-lines; i++ {
+		d.AddLine("", "")
+	}
+}
+
+// Draw draws every text line in lines slice.
 func (d *textDrawer) Draw() error {
 	var err error
 	for _, line := range d.lines {

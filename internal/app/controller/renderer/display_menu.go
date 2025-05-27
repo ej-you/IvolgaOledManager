@@ -2,27 +2,40 @@ package renderer
 
 import (
 	"fmt"
+	"sschmc/internal/app/entity"
 )
 
-const (
-	_valueAppStatusMenuMain = "menu-main"
-	_defaultPrefix          = "  "
-	_selectedPrefix         = "> "
-)
+// // menuMain renders menu-main.
+// func (r *Renderer) menuMain() error {
+
+// }
 
 // menu renders menu.
-func (r *Renderer) menu() error {
-	// menu := r.store.Menu.Get(_valueAppStatusMenuMain)
-
-	// if err := r.device.DisplayText("Line0 []\nLine1 {}\nLine2 ()\nLine3 $\nTgoogle1hello2wordNEW LINE!!!", 0, 0); err != nil {
-	// 	return fmt.Errorf("display image: %w", err)
-	// }
-
+func (r *Renderer) menu(menu *entity.Menu) error {
 	drawer := r.device.NewTextDrawer()
-	drawer.AddLine(_defaultPrefix, "hello")
-	drawer.AddLine(_defaultPrefix, "{}[]()")
-	drawer.AddLine(_selectedPrefix, "join")
-	drawer.AddLine(_defaultPrefix, "google")
+
+	fmt.Println("menu.FirstItem:", menu.FirstItem)
+	fmt.Println("menu.SelectedItem:", menu.SelectedItem)
+
+	for idx, menuItem := range menu.Items {
+		// skip items before first visible item
+		if idx < menu.FirstItem {
+			continue
+		}
+		// add line in current state to drawer
+		if idx == menu.SelectedItem {
+			drawer.AddLine(entity.SelectedPrefix, menuItem.Title[menuItem.FirstSymbol:])
+			// scroll item if need
+			menuItem.Scroll()
+		} else {
+			drawer.AddLine(entity.DefaultPrefix, menuItem.Title[menuItem.FirstSymbol:])
+		}
+	}
+	drawer.FillEmpty()
+	// drawer.AddLine(_defaultPrefix, "hello")
+	// drawer.AddLine(_defaultPrefix, "{}[]()")
+	// drawer.AddLine(_selectedPrefix, "join")
+	// drawer.AddLine(_defaultPrefix, "google")
 	if err := drawer.Draw(); err != nil {
 		return fmt.Errorf("display text lines: %w", err)
 	}

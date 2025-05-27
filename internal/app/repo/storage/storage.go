@@ -7,26 +7,41 @@ import (
 	"sschmc/internal/pkg/storage"
 )
 
-// AppStorage contains general storage methods.
-type AppStorage interface {
-	GetStatus() string
-	SetStatus(string)
-	StatusIsMenu() bool
+const (
+	_keyAppStatus   = "app-status" // key for app status
+	_valueNone      = ""           // value for app status
+	_valueGreetings = "greetings"  // value for app status
+	_valueMenuMain  = "menu-main"  // value for app status and key for main menu struct
+)
+
+// AppRepoStorage contains general storage methods for app status.
+type AppRepoStorage interface {
+	SetNone()
+	IsNone() bool
+
+	SetGreetings()
+	IsGreetings() bool
+
+	SetMenuMain()
+	IsMenuMain() bool
+
+	IsMenuAny() bool
 }
 
-// MenuStorage contains menu entity methods.
-type MenuStorage interface {
-	Get(key string) *entity.Menu
-	Set(key string, value *entity.Menu)
+// MenuRepoStorage contains menu entity methods.
+type MenuRepoStorage interface {
+	GetMenuMain() *entity.Menu
+	SetMenuMain(value *entity.Menu)
 }
 
-type StorageManager struct {
-	App  AppStorage
-	Menu MenuStorage
+// RepoStorageManager contains all storage repos.
+type RepoStorageManager struct {
+	App  AppRepoStorage
+	Menu MenuRepoStorage
 }
 
-func NewStorageManager(store storage.Storage) *StorageManager {
-	return &StorageManager{
+func NewRepoStorageManager(store storage.Storage) *RepoStorageManager {
+	return &RepoStorageManager{
 		App:  NewAppStorage(store),
 		Menu: NewMenuStorage(store),
 	}

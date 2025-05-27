@@ -3,29 +3,29 @@ package buttons
 import (
 	"log"
 
-	"sschmc/internal/app/constants"
-	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/gpiobutton"
 )
 
 // BtnDownRisingHandler handles all cases of DOWN button rising.
 func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
-	var (
-		err       error
-		appStatus string
-	)
 	return func() {
-		appStatus = b.store.App.GetStatus()
-
-		switch appStatus {
-		case constants.ValueAppStatusNone:
-			err = b.btnAllGreetings()
+		switch {
+		case b.store.App.IsNone():
+			b.btnAllGreetings()
+		case b.store.App.IsMenuMain():
+			log.Println("*** DOWN menu ***")
+			b.btnDownMenuMain()
 		default:
 			log.Println("*** DOWN pressed ***")
 		}
-
-		if err != nil {
-			errlog.Print(err)
-		}
 	}
+}
+
+// btnEscNone clears rendered data and updates app-status in storage to none.
+func (b *Buttons) btnDownMenuMain() {
+	// scroll down menu
+	menu := b.store.Menu.GetMenuMain()
+	menu.SelectNext()
+	// update render with new menu view
+	b.render <- struct{}{}
 }

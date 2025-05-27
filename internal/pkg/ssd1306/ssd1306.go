@@ -9,7 +9,10 @@ import (
 	"periph.io/x/devices/v3/ssd1306"
 )
 
-const _displayWidth = 128 // oled width
+const (
+	_displayWidth  = 128 // oled width
+	_displayHeight = 64  // oled height
+)
 
 type SSD1306 struct {
 	device    *ssd1306.Dev
