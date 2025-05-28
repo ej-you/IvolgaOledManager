@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	_maxDisplayedLines = 4  // max lines amount that can be displayed simultaneously
-	_maxLineLen        = 18 // max len of line
+	MaxDisplayedLines = 4 // max lines amount that can be displayed simultaneously
+
+	_maxLineLen = 18 // max len of line
 )
 
 // Log message model.
@@ -41,7 +42,7 @@ func (m *Message) ScrollUp() {
 // ScrollDown updates message FirstLine for scrolling down imitation.
 func (m *Message) ScrollDown() {
 	// extreme down position
-	if m.FirstLine >= len(m.Lines)-_maxDisplayedLines {
+	if m.FirstLine >= len(m.Lines)-MaxDisplayedLines {
 		return
 	}
 	m.FirstLine++
