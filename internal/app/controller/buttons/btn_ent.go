@@ -17,13 +17,16 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 		case b.store.App.IsGreetings():
 			log.Println("*** ENTER greetings ***")
 			b.btnEntMenuMain()
+		case b.store.App.IsMenuMain():
+			log.Println("*** ENTER menu-main ***")
+			b.btnEntMessage()
 		default:
 			log.Println("*** ENTER pressed ***")
 		}
 	}
 }
 
-// btnEscNone clears rendered data and updates app-status in storage to none.
+// btnEscNone update status to menu-main and creates render task.
 func (b *Buttons) btnEntMenuMain() {
 	// create main menu and save it to storage
 	mainMenu := &entity.Menu{
@@ -36,11 +39,38 @@ func (b *Buttons) btnEntMenuMain() {
 			{Title: "sample"},
 			{Title: "B A A A A A A A C"},
 		},
-		SelectedItem: 1,
 	}
-	b.store.Menu.SetMenuMain(mainMenu)
+	b.store.Menu.SetMain(mainMenu)
 
 	b.store.App.SetMenuMain()
+	// update render according to new app-status
+	b.render <- struct{}{}
+}
+
+// btnEntMessage clears rendered data and updates app-status in storage to none.
+func (b *Buttons) btnEntMessage() {
+	menu := b.store.Menu.GetMain()
+
+	var text string
+	if menu.SelectedItem <= 1 {
+		text = "This is a very short message"
+	} else {
+		text = `The quick brown fox jumped over the lazy dog.
+
+		This is electromagnetically!
+		A big crocodile died empty-fanged, gulping horribly in jerking kicking little
+		motions. Nonchalant old Peter Quinn ruthlessly shot the under-water vermin with
+		Xavier yelling Zap!`
+	}
+
+	// create main menu and save it to storage
+	msg := &entity.Message{
+		Text: text,
+	}
+	msg.Format()
+	b.store.Message.Set(msg)
+
+	b.store.App.SetMessage()
 	// update render according to new app-status
 	b.render <- struct{}{}
 }

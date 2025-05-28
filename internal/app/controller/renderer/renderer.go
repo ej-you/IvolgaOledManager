@@ -110,7 +110,10 @@ func (r *Renderer) update() error {
 		return r.greetings()
 	case r.store.App.IsMenuMain():
 		log.Println("*** render main menu ***")
-		return r.menu(r.store.Menu.GetMenuMain())
+		return r.menu(r.store.Menu.GetMain())
+	case r.store.App.IsMessage():
+		log.Println("*** render message ***")
+		return r.message(r.store.Message.Get())
 	default:
 		log.Println("*** no one render rule found ***")
 	}

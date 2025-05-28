@@ -15,17 +15,29 @@ func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
 		case b.store.App.IsMenuMain():
 			log.Println("*** DOWN menu ***")
 			b.btnDownMenuMain()
+		case b.store.App.IsMessage():
+			log.Println("*** DOWN message ***")
+			b.btnDownMessage()
 		default:
 			log.Println("*** DOWN pressed ***")
 		}
 	}
 }
 
-// btnEscNone clears rendered data and updates app-status in storage to none.
+// btnDownMenuMain select the next item in menu.
 func (b *Buttons) btnDownMenuMain() {
 	// scroll down menu
-	menu := b.store.Menu.GetMenuMain()
+	menu := b.store.Menu.GetMain()
 	menu.SelectNext()
 	// update render with new menu view
+	b.render <- struct{}{}
+}
+
+// btnDownMessage scroll message text down for one line.
+func (b *Buttons) btnDownMessage() {
+	// scroll down message
+	msg := b.store.Message.Get()
+	msg.ScrollDown()
+	// update render with new message view
 	b.render <- struct{}{}
 }

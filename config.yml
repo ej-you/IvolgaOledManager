@@ -4,7 +4,7 @@ hardware:
   oled:
     bus: "2" # i2c bus of ssd1306 oled display
   buttons:
-    up: "GPIO40" # gpio name for up button
+    up: "GPIO50" # gpio name for up button
     down: "GPIO51" # gpio name for down button
     escape: "GPIO60" # gpio name for escape button
     enter: "GPIO48" # gpio name for enter button

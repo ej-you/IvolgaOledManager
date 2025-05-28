@@ -14,6 +14,9 @@ type appRepoStorage struct {
 }
 
 func NewAppStorage(store storage.Storage) AppRepoStorage {
+	// set none status to avoid error
+	store.Set(_keyAppStatus, "")
+
 	return &appRepoStorage{
 		store: store,
 	}
@@ -47,6 +50,16 @@ func (s *appRepoStorage) SetMenuMain() {
 // StatusIsMenuMain checks if the current app-status is menu-main.
 func (s *appRepoStorage) IsMenuMain() bool {
 	return s.getStatus() == _valueMenuMain
+}
+
+// SetMessage sets current app-status to message.
+func (s *appRepoStorage) SetMessage() {
+	s.setStatus(_valueMessage)
+}
+
+// IsMessage checks if the current app-status is message.
+func (s *appRepoStorage) IsMessage() bool {
+	return s.getStatus() == _valueMessage
 }
 
 // StatusIsMenu checks if the current app-status is any menu.

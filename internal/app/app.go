@@ -3,6 +3,7 @@ package app
 
 import (
 	"context"
+	// "database/sql"
 	"fmt"
 	"log"
 	"os"
@@ -10,12 +11,16 @@ import (
 	"syscall"
 	"time"
 
+	// "gorm.io/gorm"
 	"periph.io/x/host/v3"
 
 	"sschmc/config"
 	"sschmc/internal/app/controller/buttons"
 	"sschmc/internal/app/controller/renderer"
 	storagerepo "sschmc/internal/app/repo/storage"
+
+	// "sschmc/internal/pkg/db"
+	// "sschmc/internal/pkg/database"
 	"sschmc/internal/pkg/storage"
 )
 
@@ -34,10 +39,27 @@ type App interface {
 type app struct {
 	cfg   *config.Config
 	store storagerepo.RepoStorageManager
+	// dbStorage *gorm.DB
+	// dbStorage *sql.DB
 }
 
 // New returns App interface.
 func New(cfg *config.Config) (App, error) {
+	// connect to DB
+	// fmt.Println("AAAAAAAAA")
+	// fmt.Println("cfg:", cfg)
+	// dbStorage, err := db.New(cfg.DB.DSN,
+	// 	db.WithTranslateError(),
+	// 	db.WithDisableColorful())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// dbStorage, err := database.New(cfg.DB.DSN)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// fmt.Println("BBBBBBB")
+
 	// initialise all relevant drivers
 	if _, err := host.Init(); err != nil {
 		return nil, fmt.Errorf("init drivers: %w", err)
@@ -45,11 +67,14 @@ func New(cfg *config.Config) (App, error) {
 	return &app{
 		cfg:   cfg,
 		store: *storagerepo.NewRepoStorageManager(storage.NewMap()),
+		// dbStorage: dbStorage,
 	}, nil
 }
 
 // Run starts full application.
 func (a app) Run() error {
+	// fmt.Println(a.dbStorage)
+
 	// ctx for app
 	appContext, appCancel := context.WithCancel(context.Background())
 	// channel to update display

@@ -2,13 +2,9 @@ package renderer
 
 import (
 	"fmt"
+
 	"sschmc/internal/app/entity"
 )
-
-// // menuMain renders menu-main.
-// func (r *Renderer) menuMain() error {
-
-// }
 
 // menu renders menu.
 func (r *Renderer) menu(menu *entity.Menu) error {

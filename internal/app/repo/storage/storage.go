@@ -12,6 +12,7 @@ const (
 	_valueNone      = ""           // value for app status
 	_valueGreetings = "greetings"  // value for app status
 	_valueMenuMain  = "menu-main"  // value for app status and key for main menu struct
+	_valueMessage   = "message"    // value for app status and key for message struct
 )
 
 // AppRepoStorage contains general storage methods for app status.
@@ -25,24 +26,35 @@ type AppRepoStorage interface {
 	SetMenuMain()
 	IsMenuMain() bool
 
+	SetMessage()
+	IsMessage() bool
+
 	IsMenuAny() bool
 }
 
 // MenuRepoStorage contains menu entity methods.
 type MenuRepoStorage interface {
-	GetMenuMain() *entity.Menu
-	SetMenuMain(value *entity.Menu)
+	GetMain() *entity.Menu
+	SetMain(value *entity.Menu)
+}
+
+// MessageRepoStorage contains message entity methods.
+type MessageRepoStorage interface {
+	Get() *entity.Message
+	Set(value *entity.Message)
 }
 
 // RepoStorageManager contains all storage repos.
 type RepoStorageManager struct {
-	App  AppRepoStorage
-	Menu MenuRepoStorage
+	App     AppRepoStorage
+	Menu    MenuRepoStorage
+	Message MessageRepoStorage
 }
 
 func NewRepoStorageManager(store storage.Storage) *RepoStorageManager {
 	return &RepoStorageManager{
-		App:  NewAppStorage(store),
-		Menu: NewMenuStorage(store),
+		App:     NewAppStorage(store),
+		Menu:    NewMenuStorage(store),
+		Message: NewMessageStorage(store),
 	}
 }

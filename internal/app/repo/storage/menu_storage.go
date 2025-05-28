@@ -21,17 +21,17 @@ func NewMenuStorage(store storage.Storage) MenuRepoStorage {
 	}
 }
 
-// GetMenuMain gets menu-main struct from storage.
-func (s *menuRepoStorage) GetMenuMain() *entity.Menu {
+// GetMain gets menu-main struct from storage.
+func (s *menuRepoStorage) GetMain() *entity.Menu {
 	return s.get(_valueMenuMain)
 }
 
-// SetMenuMain sets menu-main struct to storage.
-func (s *menuRepoStorage) SetMenuMain(value *entity.Menu) {
+// SetMain sets menu-main struct to storage.
+func (s *menuRepoStorage) SetMain(value *entity.Menu) {
 	s.set(_valueMenuMain, value)
 }
 
-// set gets menu struct from storage.
+// get gets menu struct from storage.
 func (s *menuRepoStorage) get(key string) *entity.Menu {
 	menu, ok := s.store.Get(key).(*entity.Menu)
 	if !ok {
