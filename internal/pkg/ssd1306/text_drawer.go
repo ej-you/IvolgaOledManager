@@ -5,14 +5,16 @@ import (
 	"image"
 
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/basicfont"
 	"golang.org/x/image/math/fixed"
 	"periph.io/x/devices/v3/ssd1306/image1bit"
+
+	"sschmc/internal/pkg/text"
 )
 
 const (
-	_lineHeight = 16 // height for one text line on display
-	_maxLines   = 4  // max lines amount for display
+	_fontAscent = 11   // for correct text output
+	_lineHeight = 16.0 // height for one text line on display
+	_maxLines   = 4    // max lines amount for display
 )
 
 var _ TextDrawer = (*textDrawer)(nil)
@@ -33,21 +35,23 @@ type textLine struct {
 // TextDrawer implementation.
 type textDrawer struct {
 	ssd1306  *SSD1306
-	fontFace *basicfont.Face
+	fontFace font.Face
 	lines    []textLine
 }
 
 // NewTextDrawer returns TextDrawer for text lines output.
-func (s *SSD1306) NewTextDrawer() TextDrawer {
+func (s *SSD1306) NewTextDrawer() (TextDrawer, error) {
 	// set up font for text
-	fontFace := basicfont.Face7x13
-	fontFace.Height = _lineHeight
+	fontFace, err := text.NewRussianFont(_lineHeight)
+	if err != nil {
+		return nil, fmt.Errorf("font face: %w", err)
+	}
 
 	return &textDrawer{
 		ssd1306:  s,
 		fontFace: fontFace,
 		lines:    make([]textLine, 0, _maxLines),
-	}
+	}, nil
 }
 
 // AddLine add new line with prefix and text message to slice to draw.
@@ -65,11 +69,10 @@ func (d *textDrawer) AddLine(prefix, msg string) {
 		Dst:  img,
 		Src:  image.White,
 		Face: d.fontFace,
-		Dot:  fixed.P(0, d.fontFace.Ascent),
+		Dot:  fixed.P(0, _fontAscent),
 	}
 
 	// draw text on line
-	// drawer.DrawString(prefix + msg)
 	drawer.DrawString(prefix)
 	drawer.DrawString(msg)
 	// create new textLine instance and append it to slice
@@ -87,7 +90,7 @@ func (d *textDrawer) FillEmpty() {
 	if lines == _maxLines {
 		return
 	}
-	for i := 0; i < _maxLines-lines; i++ {
+	for range _maxLines - lines {
 		d.AddLine("", "")
 	}
 }

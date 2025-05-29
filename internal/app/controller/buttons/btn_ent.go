@@ -32,12 +32,12 @@ func (b *Buttons) btnEntMenuMain() {
 	mainMenu := &entity.Menu{
 		Title: "Main menu",
 		Items: []*entity.MenuItem{
-			{Title: "hello"},
-			{Title: "What a hell are you doing?"},
-			{Title: "Golang"},
-			{Title: "func{}"},
-			{Title: "sample"},
-			{Title: "B A A A A A A A C"},
+			entity.NewMenuItem("Привет, мир", ""),
+			entity.NewMenuItem("Какого чёрта ты делаешь, чувак?", ""),
+			entity.NewMenuItem("Golang", ""),
+			entity.NewMenuItem("func{}", ""),
+			entity.NewMenuItem("sample", ""),
+			entity.NewMenuItem("Как good оно работает!", ""),
 		},
 	}
 	b.store.Menu.SetMain(mainMenu)
@@ -56,7 +56,7 @@ func (b *Buttons) btnEntMessage() {
 		text = "This is a very short message"
 	} else {
 		text = `The quick brown fox jumped over the lazy dog.
-
+		Какого чёрта ты делаешь, чувак?
 		This is electromagnetically!
 		A big crocodile died empty-fanged, gulping horribly in jerking kicking little
 		motions. Nonchalant old Peter Quinn ruthlessly shot the under-water vermin with
@@ -65,7 +65,7 @@ func (b *Buttons) btnEntMessage() {
 
 	// create main menu and save it to storage
 	msg := &entity.Message{
-		Text: text,
+		Content: text,
 	}
 	msg.Format()
 	b.store.Message.Set(msg)

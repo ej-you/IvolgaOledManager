@@ -8,7 +8,10 @@ import (
 
 // message renders log message.
 func (r *Renderer) message(msg *entity.Message) error {
-	drawer := r.device.NewTextDrawer()
+	drawer, err := r.device.NewTextDrawer()
+	if err != nil {
+		return fmt.Errorf("create text drawer: %w", err)
+	}
 
 	// count limit lines amount
 	limit := min(entity.MaxDisplayedLines, len(msg.Lines[msg.FirstLine:]))

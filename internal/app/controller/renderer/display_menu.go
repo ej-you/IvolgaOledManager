@@ -8,7 +8,10 @@ import (
 
 // menu renders menu.
 func (r *Renderer) menu(menu *entity.Menu) error {
-	drawer := r.device.NewTextDrawer()
+	drawer, err := r.device.NewTextDrawer()
+	if err != nil {
+		return fmt.Errorf("create text drawer: %w", err)
+	}
 
 	fmt.Println("menu.FirstItem:", menu.FirstItem)
 	fmt.Println("menu.SelectedItem:", menu.SelectedItem)
@@ -20,11 +23,11 @@ func (r *Renderer) menu(menu *entity.Menu) error {
 		}
 		// add line in current state to drawer
 		if idx == menu.SelectedItem {
-			drawer.AddLine(entity.SelectedPrefix, menuItem.Title[menuItem.FirstSymbol:])
+			drawer.AddLine(entity.SelectedPrefix, menuItem.FormattedTitle())
 			// scroll item if need
 			menuItem.Scroll()
 		} else {
-			drawer.AddLine(entity.DefaultPrefix, menuItem.Title[menuItem.FirstSymbol:])
+			drawer.AddLine(entity.DefaultPrefix, menuItem.FormattedTitle())
 		}
 	}
 	drawer.FillEmpty()

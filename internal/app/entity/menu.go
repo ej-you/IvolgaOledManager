@@ -1,46 +1,11 @@
 package entity
 
 const (
-	DefaultPrefix  = "  " // menu item prefix for default item
-	SelectedPrefix = "> " // menu item prefix for selected item
+	DefaultPrefix  = "   " // menu item prefix for default item
+	SelectedPrefix = "> "  // menu item prefix for selected item
 
-	_maxItemLen = 16 // max item value len
-	_maxLines   = 4  // max lines amount for display (ssc-hmc/internal/pkg/ssd1306/text_drawer.go)
+	_maxLines = 4 // max lines amount for display (ssc-hmc/internal/pkg/ssd1306/text_drawer.go)
 )
-
-// Menu item
-type MenuItem struct {
-	Title        string // item title
-	FirstSymbol  int    // idx of first displayed symbol of the item (default: 0)
-	ScrollToLeft bool   // true if item text must be scrolled back to left (default: false)
-}
-
-// Scroll updates item state for running line imitation
-// if its value len is more than _maxItemLen.
-func (i *MenuItem) Scroll() {
-	// skip for items with short value len
-	if len(i.Title) <= _maxItemLen {
-		return
-	}
-	// extreme right position
-	if !i.ScrollToLeft && (_maxItemLen+i.FirstSymbol == len(i.Title)) {
-		i.ScrollToLeft = !i.ScrollToLeft
-		i.FirstSymbol--
-		return
-	}
-	// extreme left position
-	if i.ScrollToLeft && (i.FirstSymbol == 0) {
-		i.ScrollToLeft = !i.ScrollToLeft
-		i.FirstSymbol++
-		return
-	}
-	// scroll to right
-	if i.ScrollToLeft {
-		i.FirstSymbol--
-	} else {
-		i.FirstSymbol++
-	}
-}
 
 // Menu model.
 type Menu struct {

@@ -17,17 +17,21 @@ const (
 type Message struct {
 	ID        string    `gorm:"primaryKey;autoIncrement;type:INT"`
 	Level     string    `gorm:"not null;size:1"`
-	Header    string    `gorm:"not null;size:50"`
-	Text      string    `gorm:"not null;size:255"`
+	Header    string    `gorm:"not null;size:30"`
+	Content   string    `gorm:"not null;size:255"`
 	CreatedAt time.Time `gorm:"not null;type:TIMESTAMP"`
 
 	FirstLine int      `gorm:"-"` // idx of first displayed line on the device (default: 0)
 	Lines     []string `gorm:"-"` // a slice of lines formatted for display
 }
 
+func (Message) TableName() string {
+	return "storage"
+}
+
 // Format create lines slice of message Text to display it on device as text lines.
 func (m *Message) Format() {
-	m.Lines = text.Normalize(m.Text, _maxLineLen)
+	m.Lines = text.Normalize(m.Content, _maxLineLen)
 }
 
 // ScrollUp updates message FirstLine for scrolling up imitation.
@@ -46,4 +50,16 @@ func (m *Message) ScrollDown() {
 		return
 	}
 	m.FirstLine++
+}
+
+// MessageLevelCount is a subset of Message model fields for "levels count" query.
+type MessageLevelCount struct {
+	Level string
+	Count int
+}
+
+// MessageWithLevel is a subset of Message model fields for "messages with level" query.
+type MessageWithLevel struct {
+	ID        string
+	CreatedAt time.Time
 }
