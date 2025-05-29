@@ -36,11 +36,11 @@ DB_NAME="example"
 
 DB contains one table with another app logs.
 
-ID - id of log record
-Level - log level (see table `Log levels` below)
-Header - short log title
-Content - log description
-CreatedAt - datetime tag of log record
+- ID - id of log record.
+- Level - log level (see table `Log levels` below).
+- Header - short log title.
+- Content - log description.
+- CreatedAt - datetime tag of log record.
 
 ### Log levels
 
