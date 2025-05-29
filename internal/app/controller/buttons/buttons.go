@@ -7,18 +7,20 @@ import (
 	"sync"
 	"time"
 
+	"sschmc/internal/app/repo/db"
 	"sschmc/internal/app/repo/storage"
 	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/gpiobutton"
 )
 
 type Buttons struct {
-	btnEsc  gpiobutton.GPIOButton
-	btnUp   gpiobutton.GPIOButton
-	btnDown gpiobutton.GPIOButton
-	btnEnt  gpiobutton.GPIOButton
-	store   storage.RepoStorageManager
-	render  chan<- struct{}
+	btnEsc    gpiobutton.GPIOButton
+	btnUp     gpiobutton.GPIOButton
+	btnDown   gpiobutton.GPIOButton
+	btnEnt    gpiobutton.GPIOButton
+	dbStorage db.MessageRepoDB
+	store     *storage.RepoStorageManager
+	render    chan<- struct{}
 }
 
 // NewButtons returns new Buttons struct pointer.
@@ -27,12 +29,14 @@ type Buttons struct {
 // The store param is an app key-value storage.
 // The render param is a renderer for output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
-	store storage.RepoStorageManager, render chan<- struct{}) (*Buttons, error) {
+	dbStorage db.MessageRepoDB, store *storage.RepoStorageManager,
+	render chan<- struct{}) (*Buttons, error) {
 
 	var err error
 	buttons := &Buttons{
-		store:  store,
-		render: render,
+		dbStorage: dbStorage,
+		store:     store,
+		render:    render,
 	}
 
 	// init all buttons

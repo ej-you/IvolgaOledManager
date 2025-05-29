@@ -17,12 +17,12 @@ type Renderer struct {
 	device             *ssd1306.SSD1306
 	greetingsImgPath   string
 	menuUpdateDuration time.Duration
-	store              storage.RepoStorageManager
+	store              *storage.RepoStorageManager
 	needUpdate         <-chan struct{}
 }
 
 func New(bus, greetingsImgPath string, menuUpdateDuration time.Duration,
-	store storage.RepoStorageManager, needUpdate <-chan struct{}) (*Renderer, error) {
+	store *storage.RepoStorageManager, needUpdate <-chan struct{}) (*Renderer, error) {
 
 	oled, err := ssd1306.NewSSD1306(bus)
 	if err != nil {

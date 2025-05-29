@@ -1,6 +1,9 @@
 # compiled binaries
 /bin
 
+# ENV
+.env
+
 # local
 /.vscode
 notes.txt
