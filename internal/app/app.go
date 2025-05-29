@@ -136,15 +136,13 @@ func (a app) Run() error {
 		return err
 	}
 
-	go render.StartWithShutdown(appContext)
-	btns.HandleAll(appContext)
-
-	// startControllers(appContext, btns, render)
+	startControllers(appContext, btns, render)
 	log.Println("App shutdown successfully!")
 	return nil
 }
 
 // startControllers starts buttons and renderer in separately goroutines.
+// This function is blocking. Context are used to stop controllers.
 func startControllers(ctx context.Context, btns *buttons.Buttons, render *renderer.Renderer) {
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -158,4 +156,5 @@ func startControllers(ctx context.Context, btns *buttons.Buttons, render *render
 		defer wg.Done()
 		btns.HandleAll(ctx)
 	}()
+	wg.Wait()
 }
