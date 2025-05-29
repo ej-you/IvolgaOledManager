@@ -12,13 +12,12 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
 		switch {
 		case b.store.App.IsNone():
-			log.Println("*** ENTER none ***")
 			b.btnAllGreetings()
 		case b.store.App.IsGreetings():
-			log.Println("*** ENTER greetings ***")
 			b.btnEntMenuMain()
 		case b.store.App.IsMenuMain():
-			log.Println("*** ENTER menu-main ***")
+			b.btnEntMenuLevel()
+		case b.store.App.IsMenuLevel():
 			b.btnEntMessage()
 		default:
 			log.Println("*** ENTER pressed ***")
@@ -26,7 +25,7 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 	}
 }
 
-// btnEscNone update status to menu-main and creates render task.
+// btnEntMenuMain update status to menu-main and creates render task.
 func (b *Buttons) btnEntMenuMain() {
 	// create main menu and save it to storage
 	mainMenu := &entity.Menu{
@@ -47,12 +46,29 @@ func (b *Buttons) btnEntMenuMain() {
 	b.render <- struct{}{}
 }
 
+// btnEntMenuLevel update status to menu-level and creates render task.
+func (b *Buttons) btnEntMenuLevel() {
+	// create level menu and save it to storage
+	levelMenu := &entity.Menu{
+		Title: "Level menu",
+		Items: []*entity.MenuItem{
+			entity.NewMenuItem("menu 2", ""),
+			entity.NewMenuItem("ну и ещё пункт для приличия", ""),
+		},
+	}
+	b.store.Menu.SetLevel(levelMenu)
+
+	b.store.App.SetMenuLevel()
+	// update render according to new app-status
+	b.render <- struct{}{}
+}
+
 // btnEntMessage clears rendered data and updates app-status in storage to none.
 func (b *Buttons) btnEntMessage() {
-	menu := b.store.Menu.GetMain()
+	menu := b.store.Menu.GetLevel()
 
 	var text string
-	if menu.SelectedItem <= 1 {
+	if menu.SelectedItem == 0 {
 		text = "This is a very short message"
 	} else {
 		text = `The quick brown fox jumped over the lazy dog.

@@ -31,6 +31,16 @@ func (s *menuRepoStorage) SetMain(value *entity.Menu) {
 	s.set(_valueMenuMain, value)
 }
 
+// GetLevel gets menu-level struct from storage.
+func (s *menuRepoStorage) GetLevel() *entity.Menu {
+	return s.get(_valueMenuLevel)
+}
+
+// SetLevel sets menu-level struct to storage.
+func (s *menuRepoStorage) SetLevel(value *entity.Menu) {
+	s.set(_valueMenuLevel, value)
+}
+
 // get gets menu struct from storage.
 func (s *menuRepoStorage) get(key string) *entity.Menu {
 	menu, ok := s.store.Get(key).(*entity.Menu)

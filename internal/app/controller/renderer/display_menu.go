@@ -13,9 +13,6 @@ func (r *Renderer) menu(menu *entity.Menu) error {
 		return fmt.Errorf("create text drawer: %w", err)
 	}
 
-	fmt.Println("menu.FirstItem:", menu.FirstItem)
-	fmt.Println("menu.SelectedItem:", menu.SelectedItem)
-
 	for idx, menuItem := range menu.Items {
 		// skip items before first visible item
 		if idx < menu.FirstItem {
@@ -31,10 +28,6 @@ func (r *Renderer) menu(menu *entity.Menu) error {
 		}
 	}
 	drawer.FillEmpty()
-	// drawer.AddLine(_defaultPrefix, "hello")
-	// drawer.AddLine(_defaultPrefix, "{}[]()")
-	// drawer.AddLine(_selectedPrefix, "join")
-	// drawer.AddLine(_defaultPrefix, "google")
 	if err := drawer.Draw(); err != nil {
 		return fmt.Errorf("display text lines: %w", err)
 	}

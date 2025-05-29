@@ -12,6 +12,7 @@ const (
 	_valueNone      = ""           // value for app status
 	_valueGreetings = "greetings"  // value for app status
 	_valueMenuMain  = "menu-main"  // value for app status and key for main menu struct
+	_valueMenuLevel = "menu-level" // value for app status and key for level menu struct
 	_valueMessage   = "message"    // value for app status and key for message struct
 )
 
@@ -26,6 +27,9 @@ type AppRepoStorage interface {
 	SetMenuMain()
 	IsMenuMain() bool
 
+	SetMenuLevel()
+	IsMenuLevel() bool
+
 	SetMessage()
 	IsMessage() bool
 
@@ -36,6 +40,8 @@ type AppRepoStorage interface {
 type MenuRepoStorage interface {
 	GetMain() *entity.Menu
 	SetMain(value *entity.Menu)
+	GetLevel() *entity.Menu
+	SetLevel(value *entity.Menu)
 }
 
 // MessageRepoStorage contains message entity methods.

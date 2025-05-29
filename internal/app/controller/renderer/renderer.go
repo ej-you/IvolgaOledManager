@@ -67,11 +67,11 @@ func (r *Renderer) start(ctx context.Context) {
 			return
 
 		case <-ticker.C:
-			fmt.Println("Ticker")
+			fmt.Print("tick ")
 			err = r.update()
 
 		case <-r.needUpdate:
-			fmt.Println("Update")
+			fmt.Println("UPDATE")
 			err = r.update()
 			// reset ticker for menus
 			if r.store.App.IsMenuAny() {
@@ -103,19 +103,17 @@ func (r *Renderer) close() error {
 func (r *Renderer) update() error {
 	switch {
 	case r.store.App.IsNone():
-		log.Println("*** clear rendered ***")
 		return r.clear()
 	case r.store.App.IsGreetings():
-		log.Println("*** render greetings ***")
 		return r.greetings()
 	case r.store.App.IsMenuMain():
-		log.Println("*** render main menu ***")
 		return r.menu(r.store.Menu.GetMain())
+	case r.store.App.IsMenuLevel():
+		return r.menu(r.store.Menu.GetLevel())
 	case r.store.App.IsMessage():
-		log.Println("*** render message ***")
 		return r.message(r.store.Message.Get())
 	default:
-		log.Println("*** no one render rule found ***")
+		log.Println("WARNING: no one render rule found")
 	}
 
 	return nil

@@ -12,10 +12,10 @@ func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 		case b.store.App.IsNone():
 			b.btnAllGreetings()
 		case b.store.App.IsMenuMain():
-			log.Println("*** UP menu ***")
 			b.btnUpMenuMain()
+		case b.store.App.IsMenuLevel():
+			b.btnUpMenuLevel()
 		case b.store.App.IsMessage():
-			log.Println("*** UP message ***")
 			b.btnUpMessage()
 		default:
 			log.Println("*** UP pressed ***")
@@ -27,6 +27,15 @@ func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 func (b *Buttons) btnUpMenuMain() {
 	// scroll down menu
 	menu := b.store.Menu.GetMain()
+	menu.SelectPrevious()
+	// update render with new menu view
+	b.render <- struct{}{}
+}
+
+// btnUpMenuMain select the previous item in menu.
+func (b *Buttons) btnUpMenuLevel() {
+	// scroll down menu
+	menu := b.store.Menu.GetLevel()
 	menu.SelectPrevious()
 	// update render with new menu view
 	b.render <- struct{}{}

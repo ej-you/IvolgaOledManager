@@ -27,7 +27,7 @@ func (s *appRepoStorage) SetNone() {
 	s.setStatus(_valueNone)
 }
 
-// StatusIsNone checks if the current app-status is none.
+// IsNone checks if the current app-status is none.
 func (s *appRepoStorage) IsNone() bool {
 	return s.getStatus() == _valueNone
 }
@@ -37,7 +37,7 @@ func (s *appRepoStorage) SetGreetings() {
 	s.setStatus(_valueGreetings)
 }
 
-// StatusIsGreetings checks if the current app-status is greetings.
+// IsGreetings checks if the current app-status is greetings.
 func (s *appRepoStorage) IsGreetings() bool {
 	return s.getStatus() == _valueGreetings
 }
@@ -47,9 +47,19 @@ func (s *appRepoStorage) SetMenuMain() {
 	s.setStatus(_valueMenuMain)
 }
 
-// StatusIsMenuMain checks if the current app-status is menu-main.
+// IsMenuMain checks if the current app-status is menu-main.
 func (s *appRepoStorage) IsMenuMain() bool {
 	return s.getStatus() == _valueMenuMain
+}
+
+// SetMenuLevel sets current app-status to menu-level.
+func (s *appRepoStorage) SetMenuLevel() {
+	s.setStatus(_valueMenuLevel)
+}
+
+// IsMenuLevel checks if the current app-status is menu-level.
+func (s *appRepoStorage) IsMenuLevel() bool {
+	return s.getStatus() == _valueMenuLevel
 }
 
 // SetMessage sets current app-status to message.
@@ -62,11 +72,11 @@ func (s *appRepoStorage) IsMessage() bool {
 	return s.getStatus() == _valueMessage
 }
 
-// StatusIsMenu checks if the current app-status is any menu.
+// IsMenuAny checks if the current app-status is any menu.
 func (s *appRepoStorage) IsMenuAny() bool {
 	status := s.getStatus()
 	switch status {
-	case _valueMenuMain:
+	case _valueMenuMain, _valueMenuLevel:
 		return true
 	default:
 		return false
