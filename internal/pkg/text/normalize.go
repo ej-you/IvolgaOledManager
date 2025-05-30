@@ -11,7 +11,5 @@ import (
 // Used to display it on device as text lines.
 func Normalize(msg string, lineLen int) []string {
 	linesString := text.WrapSoft(msg, lineLen)
-	// lines := make([]string, 0)
-
 	return strings.Split(linesString, "\n")
 }

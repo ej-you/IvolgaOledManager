@@ -24,4 +24,19 @@ VALUES (
         2,
         "new data",
         "humidity sensor data was received"
+    ),
+    (
+        4,
+        "ошибка соединения",
+        "не удалось установить соединение с датчиком влажности"
+    ),
+    (
+        4,
+        "обработка данных",
+        "ошибка при расчёте pH"
+    ),
+    (
+        3,
+        "Lorem",
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     );

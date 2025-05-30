@@ -9,7 +9,7 @@ const _maxItemLen = 15 // max item value len
 // Menu item
 type MenuItem struct {
 	Title string // item title
-	Value string // item value is used for DB
+	Value any    // item value is used for DB
 
 	firstSymbol  int  // idx of first displayed symbol of the item (default: 0)
 	lastSymbol   int  // idx of last displayed symbol of the item (use NewMenuItem to set up)
@@ -17,8 +17,8 @@ type MenuItem struct {
 	skipScroll   bool // true if length of item title is less than _maxItemLen (default: false)
 }
 
-// NewMenuItem returns new prepared menu item. It's not recomended to init menu item directly.
-func NewMenuItem(title, value string) *MenuItem {
+// NewMenuItem returns new prepared menu item. It's not recommended to init menu item directly.
+func NewMenuItem(title string, value any) *MenuItem {
 	menuItem := &MenuItem{
 		Title: title,
 		Value: value,

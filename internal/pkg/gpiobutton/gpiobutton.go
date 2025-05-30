@@ -58,7 +58,7 @@ func (b *gpioButton) HandleWithShutdown(ctx context.Context,
 		case <-ctx.Done():
 			return b.shutdown()
 		default:
-			if !b.edgeOccured() {
+			if !b.edgeOccurred() {
 				continue
 			}
 		}
@@ -71,8 +71,8 @@ func (b *gpioButton) HandleWithShutdown(ctx context.Context,
 	}
 }
 
-// edgeOccured returns true if real edge is occured, not timeout wait.
-func (b *gpioButton) edgeOccured() bool {
+// edgeOccurred returns true if real edge is occurred, not timeout wait.
+func (b *gpioButton) edgeOccurred() bool {
 	// wait for rising up or falling down of button and
 	// check the button every checkAliveTimeout duration to see if it alive
 	b.gpioPin.WaitForEdge(b.checkAliveTimeout)

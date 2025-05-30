@@ -74,6 +74,13 @@ linters:
           - varnamelen
         path: internal/pkg/ssd1306/image\.go
         text: "parameter name '[xy]' is too short for the scope of its usage"
+      - linters:
+          - varnamelen
+        text: variable name 'wg' is too short for the scope of its usage
+      - linters:
+          - mnd
+        path: internal/app/(controller/buttons/buttons|app)\.go
+        text: "Magic number: [42], in <argument> detected"
     paths:
       - bin
 

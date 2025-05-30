@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	_menuUpdateDuration = 300 * time.Millisecond // duration for update menu output to display
+	_menuUpdateDuration = 600 * time.Millisecond // duration for update menu output to display
 	_checkAliveTimeout  = time.Second            // duration for checking button is alive
 )
 
@@ -44,10 +44,10 @@ type app struct {
 // New returns App interface.
 func New(cfg *config.Config) (App, error) {
 	// connect to DB
-	fmt.Println("cfg:", cfg)
 	dbStorage, err := db.New(cfg.DB.DSN,
 		db.WithTranslateError(),
-		db.WithDisableColorful())
+		db.WithDisableColorful(),
+		db.WithWarnLogLevel())
 	if err != nil {
 		return nil, err
 	}
@@ -65,26 +65,6 @@ func New(cfg *config.Config) (App, error) {
 
 // Run starts full application.
 func (a app) Run() error {
-	fmt.Println("db:", a.dbStorage)
-	// db, err := database.New(a.cfg.DB.DSN)
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println("db:", db)
-	// rows, err := db.QueryContext(context.TODO(), `SELECT * FROM storage`)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer rows.Close()
-	// var id int
-	// var level, header, content, createdAt string
-	// for rows.Next() {
-	// 	rows.Scan(&id, &level, &header, &content, &createdAt)
-	// 	fmt.Println(id, level, header, content, createdAt)
-	// }
-
-	// return nil
-
 	// ctx for app
 	appContext, appCancel := context.WithCancel(context.Background())
 	// channel to update display

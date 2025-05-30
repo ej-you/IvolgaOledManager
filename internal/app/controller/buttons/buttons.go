@@ -18,7 +18,7 @@ type Buttons struct {
 	btnUp     gpiobutton.GPIOButton
 	btnDown   gpiobutton.GPIOButton
 	btnEnt    gpiobutton.GPIOButton
-	dbStorage db.MessageRepoDB
+	msgRepoDB db.MessageRepoDB
 	store     *storage.RepoStorageManager
 	render    chan<- struct{}
 }
@@ -34,7 +34,7 @@ func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeou
 
 	var err error
 	buttons := &Buttons{
-		dbStorage: dbStorage,
+		msgRepoDB: dbStorage,
 		store:     store,
 		render:    render,
 	}

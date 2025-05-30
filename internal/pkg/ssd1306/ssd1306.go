@@ -29,10 +29,15 @@ func NewSSD1306(bus string) (*SSD1306, error) {
 		return nil, fmt.Errorf("open device: %w", err)
 	}
 
-	return &SSD1306{
+	instance := &SSD1306{
 		device:    device,
 		busCloser: busCloser.Close,
-	}, nil
+	}
+	if err := instance.DisplayClear(); err != nil {
+		return nil, fmt.Errorf("clear device on startapp: %w", err)
+	}
+
+	return instance, nil
 }
 
 // Close clears OLED display (turn off all pixels) and closes OLED bus.

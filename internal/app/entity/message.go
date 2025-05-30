@@ -10,7 +10,8 @@ import (
 const (
 	MaxDisplayedLines = 4 // max lines amount that can be displayed simultaneously
 
-	_maxLineLen = 18 // max len of line
+	_maxLineLen   = 16 // max len of line
+	_separatorLen = 8  // len of separator between message header and content
 )
 
 // Log message model.
@@ -31,7 +32,9 @@ func (Message) TableName() string {
 
 // Format create lines slice of message Text to display it on device as text lines.
 func (m *Message) Format() {
-	m.Lines = text.Normalize(m.Content, _maxLineLen)
+	// join header and content to a single string
+	fullText := m.Header + "\n\n" + m.Content
+	m.Lines = text.Normalize(fullText, _maxLineLen)
 }
 
 // ScrollUp updates message FirstLine for scrolling up imitation.
@@ -54,7 +57,7 @@ func (m *Message) ScrollDown() {
 
 // MessageLevelCount is a subset of Message model fields for "levels count" query.
 type MessageLevelCount struct {
-	Level string
+	Level int
 	Count int
 }
 

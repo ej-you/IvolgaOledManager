@@ -1,10 +1,28 @@
 package buttons
 
 import (
+	"errors"
+	"fmt"
 	"log"
+	"strconv"
 
 	"sschmc/internal/app/entity"
+	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/gpiobutton"
+)
+
+const _datetimeFormat = "02.01.2006 15:04:05"
+
+var (
+	_levelsAmount = 6
+	_levelName    = map[int]string{
+		0: "trace",
+		1: "debug",
+		2: "info",
+		3: "warn",
+		4: "error",
+		5: "fatal",
+	}
 )
 
 // BtnEntRisingHandler handles all cases of ENT button rising.
@@ -27,20 +45,37 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 
 // btnEntMenuMain update status to menu-main and creates render task.
 func (b *Buttons) btnEntMenuMain() {
-	// create main menu and save it to storage
+	// get levels count from DB
+	levelsCount, err := b.msgRepoDB.GetLevelsCount()
+	if err != nil {
+		errlog.Print(err)
+		return
+	}
+
+	// create slice for all levels count and fill it with zeros
+	allLevels := make([]entity.MessageLevelCount, _levelsAmount)
+	for idx := range allLevels {
+		allLevels[idx].Level = idx
+	}
+	// update level count values according to gotten DB data
+	for _, levelCount := range levelsCount {
+		allLevels[levelCount.Level].Count = levelCount.Count
+	}
+
+	// create empty menu and append menu items
 	mainMenu := &entity.Menu{
 		Title: "Main menu",
-		Items: []*entity.MenuItem{
-			entity.NewMenuItem("Привет, мир", ""),
-			entity.NewMenuItem("Какого чёрта ты делаешь, чувак?", ""),
-			entity.NewMenuItem("Golang", ""),
-			entity.NewMenuItem("func{}", ""),
-			entity.NewMenuItem("sample", ""),
-			entity.NewMenuItem("Как good оно работает!", ""),
-		},
+		Items: make([]*entity.MenuItem, 0, len(_levelName)),
 	}
-	b.store.Menu.SetMain(mainMenu)
 
+	var name string
+	for _, levelCount := range allLevels {
+		name = fmt.Sprintf("%s (%d)", _levelName[levelCount.Level], levelCount.Count)
+		mainMenu.Items = append(mainMenu.Items, entity.NewMenuItem(name, levelCount))
+	}
+
+	// save menu to storage
+	b.store.Menu.SetMain(mainMenu)
 	b.store.App.SetMenuMain()
 	// update render according to new app-status
 	b.render <- struct{}{}
@@ -48,16 +83,37 @@ func (b *Buttons) btnEntMenuMain() {
 
 // btnEntMenuLevel update status to menu-level and creates render task.
 func (b *Buttons) btnEntMenuLevel() {
-	// create level menu and save it to storage
+	// get selected level from main menu
+	mainMenu := b.store.Menu.GetMain()
+	selectedItem, ok := mainMenu.Items[mainMenu.SelectedItem].Value.(entity.MessageLevelCount)
+	if !ok {
+		errlog.Print(errors.New("menu item is not entity.MessageLevelCount"))
+		return
+	}
+	// skip button handling if messages amount with selected level is zero.
+	if selectedItem.Count == 0 {
+		return
+	}
+
+	// get messages with selected level from DB
+	levelMessages, err := b.msgRepoDB.GetWithLevel(strconv.Itoa(selectedItem.Level))
+	if err != nil {
+		errlog.Print(err)
+		return
+	}
+	// create level menu
 	levelMenu := &entity.Menu{
 		Title: "Level menu",
-		Items: []*entity.MenuItem{
-			entity.NewMenuItem("menu 2", ""),
-			entity.NewMenuItem("ну и ещё пункт для приличия", ""),
-		},
+		Items: make([]*entity.MenuItem, 0, len(levelMessages)),
 	}
-	b.store.Menu.SetLevel(levelMenu)
+	// append menu items
+	var datetime string
+	for _, msg := range levelMessages {
+		datetime = msg.CreatedAt.Format(_datetimeFormat)
+		levelMenu.Items = append(levelMenu.Items, entity.NewMenuItem(datetime, msg.ID))
+	}
 
+	b.store.Menu.SetLevel(levelMenu)
 	b.store.App.SetMenuLevel()
 	// update render according to new app-status
 	b.render <- struct{}{}
@@ -65,27 +121,27 @@ func (b *Buttons) btnEntMenuLevel() {
 
 // btnEntMessage clears rendered data and updates app-status in storage to none.
 func (b *Buttons) btnEntMessage() {
-	menu := b.store.Menu.GetLevel()
-
-	var text string
-	if menu.SelectedItem == 0 {
-		text = "This is a very short message"
-	} else {
-		text = `The quick brown fox jumped over the lazy dog.
-		Какого чёрта ты делаешь, чувак?
-		This is electromagnetically!
-		A big crocodile died empty-fanged, gulping horribly in jerking kicking little
-		motions. Nonchalant old Peter Quinn ruthlessly shot the under-water vermin with
-		Xavier yelling Zap!`
+	// get selected message ID from level menu
+	levelMenu := b.store.Menu.GetLevel()
+	selectedMsgID, ok := levelMenu.Items[levelMenu.SelectedItem].Value.(string)
+	if !ok {
+		errlog.Print(errors.New("message id is not string"))
+		return
 	}
 
-	// create main menu and save it to storage
 	msg := &entity.Message{
-		Content: text,
+		ID: selectedMsgID,
 	}
+
+	// get message by ID
+	err := b.msgRepoDB.GetByID(msg)
+	if err != nil {
+		errlog.Print(err)
+		return
+	}
+
 	msg.Format()
 	b.store.Message.Set(msg)
-
 	b.store.App.SetMessage()
 	// update render according to new app-status
 	b.render <- struct{}{}

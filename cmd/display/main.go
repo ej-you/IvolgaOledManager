@@ -9,7 +9,7 @@ import (
 
 func main() {
 	if err := startApp(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("ERROR: %v", err)
 	}
 }
 
@@ -21,12 +21,12 @@ func startApp() error {
 	}
 
 	// init app
-	app, err := app.New(cfg)
+	application, err := app.New(cfg)
 	if err != nil {
 		return err
 	}
 	// run app
-	if err := app.Run(); err != nil {
+	if err := application.Run(); err != nil {
 		return err
 	}
 	return nil

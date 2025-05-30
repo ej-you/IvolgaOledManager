@@ -8,6 +8,8 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
+const _fontDPI = 63 // dots per inch resolution for font
+
 // NewRussianFont returns font face with Cyrillic support.
 func NewRussianFont(height float64) (font.Face, error) {
 	// load font with Cyrillic support
@@ -18,7 +20,7 @@ func NewRussianFont(height float64) (font.Face, error) {
 	// crearte font face
 	fontFace, err := opentype.NewFace(ttf, &opentype.FaceOptions{
 		Size:    height,
-		DPI:     63,
+		DPI:     _fontDPI,
 		Hinting: font.HintingFull,
 	})
 	if err != nil {

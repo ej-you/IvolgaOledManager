@@ -42,6 +42,7 @@ func (r *repoDB) GetWithLevel(level string) ([]entity.MessageWithLevel, error) {
 	err := r.dbStorage.
 		Model(&entity.Message{}).
 		Where("level = ?", level).
+		Order("created_at DESC").
 		Find(&results).Error
 	if err != nil {
 		return nil, fmt.Errorf("get with level: %w", err)
