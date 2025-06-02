@@ -39,4 +39,14 @@ VALUES (
         3,
         "Lorem",
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    ),
+    (
+        4,
+        "интернет соединение",
+        "какой-то текст"
+    ),
+    (
+        4,
+        "соединение с устройством",
+        "Порт занят, невозможно установить соединение с датчиком"
     );

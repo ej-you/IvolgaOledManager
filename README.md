@@ -34,7 +34,7 @@ DB_NAME="example"
 
 ## DB
 
-DB contains one table with another app logs.
+DB contains one table with logs from another app.
 
 - ID - id of log record.
 - Level - log level (see table `Log levels` below).
