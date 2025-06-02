@@ -9,4 +9,7 @@ type MessageRepoDB interface {
 	GetLevelsCount() ([]entity.MessageLevelCount, error)
 	GetWithLevel(level string) ([]entity.MessageWithLevel, error)
 	GetByID(msg *entity.Message) error
+
+	DeleteByID(msg *entity.Message) error
+	DeleteAllWithLevel(level string) error
 }

@@ -58,7 +58,28 @@ func (r *repoDB) GetByID(msg *entity.Message) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		msg.Header = "db error"
 		msg.Content = "log message not found"
-		return fmt.Errorf("get with level: %w", err)
 	}
-	return err // err or nil
+	if err != nil {
+		return fmt.Errorf("get by id: %w", err)
+	}
+	return nil
+}
+
+// DeleteByID deletes message record by its ID.
+// ID field must be presented.
+func (r *repoDB) DeleteByID(msg *entity.Message) error {
+	err := r.dbStorage.Delete(&entity.Message{}, msg.ID).Error
+	if err != nil {
+		return fmt.Errorf("delete by id: %w", err)
+	}
+	return nil
+}
+
+// DeleteAllWithLevel deletes all message records with given level.
+func (r *repoDB) DeleteAllWithLevel(level string) error {
+	err := r.dbStorage.Delete(&entity.Message{}, "level = ?", level).Error
+	if err != nil {
+		return fmt.Errorf("delete with level: %w", err)
+	}
+	return nil
 }

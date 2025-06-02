@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	_level   = "5"
-	_id      = "1"
+	_level   = "1"
+	_id      = "6"
 	_testDSN = "test_user:test_password@tcp(127.0.0.1:3306)/test_db?parseTime=true&timeout=10s"
 )
 
@@ -52,12 +52,26 @@ func TestGetWithLevel(t *testing.T) {
 func TestGetByID(t *testing.T) {
 	t.Log("Get message by ID")
 
-	msg := &entity.Message{
-		ID: _id,
-	}
+	msg := &entity.Message{ID: _id}
 
 	err := _repo.GetByID(msg)
 	require.NoError(t, err, "get message by id")
 
 	t.Logf("msg: %+v", msg)
+}
+
+func TestDeleteByID(t *testing.T) {
+	t.Log("Delete message by ID")
+
+	msg := &entity.Message{ID: _id}
+
+	err := _repo.DeleteByID(msg)
+	require.NoError(t, err, "delete message by id")
+}
+
+func TestDeleteWithLevel(t *testing.T) {
+	t.Log("Delete all messages with given level")
+
+	err := _repo.DeleteAllWithLevel(_level)
+	require.NoError(t, err, "delete messages with level")
 }
