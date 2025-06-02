@@ -14,8 +14,9 @@ func (r *Renderer) message(msg *entity.Message) error {
 	}
 
 	// count limit lines amount
-	limit := min(entity.MaxDisplayedLines, len(msg.Lines[msg.FirstLine:]))
+	limit := min(entity.MaxDisplayedItems, len(msg.Lines[msg.FirstLine:]))
 
+	drawer.AddLine("", msg.Datetime())
 	for _, line := range msg.Lines[msg.FirstLine : msg.FirstLine+limit] {
 		drawer.AddLine("", line)
 	}

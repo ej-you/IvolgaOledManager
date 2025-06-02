@@ -8,14 +8,30 @@ import (
 )
 
 const (
-	MaxDisplayedLines = 4 // max lines amount that can be displayed simultaneously
+	MaxDisplayedItems = 3 // max menu items (message lines) amount that can be displayed.
+
+	_datetimeFormat = "02.01.06 15:04:05" // datetime format for createdAt message field
 
 	_maxLineLen   = 16 // max len of line
 	_separatorLen = 8  // len of separator between message header and content
 )
 
+// MessageLevelCount is a subset of Message model fields for "levels count" query.
+type MessageLevelCount struct {
+	Level int
+	Count int
+}
+
+// MessageWithLevel is a subset of Message model fields for "messages with level" query.
+type MessageWithLevel struct {
+	ID     string
+	Header string
+}
+
 // Log message model.
 type Message struct {
+	MessageWithLevel // for Datetime method inheritance
+
 	ID        string    `gorm:"primaryKey;autoIncrement;type:INT"`
 	Level     string    `gorm:"not null;size:1"`
 	Header    string    `gorm:"not null;size:30"`
@@ -30,7 +46,12 @@ func (Message) TableName() string {
 	return "storage"
 }
 
-// Format create lines slice of message Text to display it on device as text lines.
+// Datetime returns formated createdAt message field.
+func (m *Message) Datetime() string {
+	return m.CreatedAt.Format(_datetimeFormat)
+}
+
+// Format creates lines slice of message Text to display it on device as text lines.
 func (m *Message) Format() {
 	// join header and content to a single string
 	fullText := m.Header + "\n\n" + m.Content
@@ -49,20 +70,8 @@ func (m *Message) ScrollUp() {
 // ScrollDown updates message FirstLine for scrolling down imitation.
 func (m *Message) ScrollDown() {
 	// extreme down position
-	if m.FirstLine >= len(m.Lines)-MaxDisplayedLines {
+	if m.FirstLine >= len(m.Lines)-MaxDisplayedItems {
 		return
 	}
 	m.FirstLine++
-}
-
-// MessageLevelCount is a subset of Message model fields for "levels count" query.
-type MessageLevelCount struct {
-	Level int
-	Count int
-}
-
-// MessageWithLevel is a subset of Message model fields for "messages with level" query.
-type MessageWithLevel struct {
-	ID        string
-	CreatedAt time.Time
 }

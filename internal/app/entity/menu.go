@@ -4,7 +4,7 @@ const (
 	DefaultPrefix  = "   " // menu item prefix for default item
 	SelectedPrefix = "> "  // menu item prefix for selected item
 
-	_maxLines = 4 // max lines amount for display (ssc-hmc/internal/pkg/ssd1306/text_drawer.go)
+	// _maxLines = 4 // max lines amount for display (ssc-hmc/internal/pkg/ssd1306/text_drawer.go)
 )
 
 // Menu model.
@@ -20,7 +20,7 @@ func (m *Menu) SelectPrevious() {
 	// extreme up position
 	if m.SelectedItem == 0 {
 		m.SelectedItem = len(m.Items) - 1
-		m.FirstItem = max(len(m.Items)-_maxLines, 0)
+		m.FirstItem = max(len(m.Items)-MaxDisplayedItems, 0)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (m *Menu) SelectNext() {
 
 	m.SelectedItem++
 	// if selected item after update will not be visible
-	if m.SelectedItem >= m.FirstItem+_maxLines {
+	if m.SelectedItem >= m.FirstItem+MaxDisplayedItems {
 		m.FirstItem++
 	}
 }

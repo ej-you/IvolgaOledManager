@@ -13,6 +13,7 @@ func (r *Renderer) menu(menu *entity.Menu) error {
 		return fmt.Errorf("create text drawer: %w", err)
 	}
 
+	drawer.AddLine("", menu.Title)
 	for idx, menuItem := range menu.Items {
 		// skip items before first visible item
 		if idx < menu.FirstItem {

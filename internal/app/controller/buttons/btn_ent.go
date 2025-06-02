@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"sschmc/internal/app/entity"
 	"sschmc/internal/pkg/errlog"
 	"sschmc/internal/pkg/gpiobutton"
 )
-
-const _datetimeFormat = "02.01.2006 15:04:05"
 
 var (
 	_levelsAmount = 6
@@ -101,16 +100,20 @@ func (b *Buttons) btnEntMenuLevel() {
 		errlog.Print(err)
 		return
 	}
+
+	// create title for level menu
+	levelLower := _levelName[selectedItem.Level]
+	title := strings.ToTitle(levelLower[0:1]) + levelLower[1:] + " messages"
 	// create level menu
 	levelMenu := &entity.Menu{
-		Title: "Level menu",
+		Title: title,
 		Items: make([]*entity.MenuItem, 0, len(levelMessages)),
 	}
 	// append menu items
-	var datetime string
+	var header string
 	for _, msg := range levelMessages {
-		datetime = msg.CreatedAt.Format(_datetimeFormat)
-		levelMenu.Items = append(levelMenu.Items, entity.NewMenuItem(datetime, msg.ID))
+		header = msg.Header
+		levelMenu.Items = append(levelMenu.Items, entity.NewMenuItem(header, msg.ID))
 	}
 
 	b.store.Menu.SetLevel(levelMenu)
