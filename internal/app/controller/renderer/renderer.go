@@ -67,11 +67,9 @@ func (r *Renderer) start(ctx context.Context) {
 			return
 
 		case <-ticker.C:
-			fmt.Print("tick ")
 			err = r.update()
 
 		case <-r.needUpdate:
-			fmt.Println("UPDATE")
 			err = r.update()
 			// reset ticker for menus
 			if r.store.App.IsMenuAny() {

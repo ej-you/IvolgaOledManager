@@ -16,22 +16,8 @@ const (
 	_separatorLen = 8  // len of separator between message header and content
 )
 
-// MessageLevelCount is a subset of Message model fields for "levels count" query.
-type MessageLevelCount struct {
-	Level int
-	Count int
-}
-
-// MessageWithLevel is a subset of Message model fields for "messages with level" query.
-type MessageWithLevel struct {
-	ID     string
-	Header string
-}
-
 // Log message model.
 type Message struct {
-	MessageWithLevel // for Datetime method inheritance
-
 	ID        string    `gorm:"primaryKey;autoIncrement;type:INT"`
 	Level     string    `gorm:"not null;size:1"`
 	Header    string    `gorm:"not null;size:30"`
@@ -74,4 +60,16 @@ func (m *Message) ScrollDown() {
 		return
 	}
 	m.FirstLine++
+}
+
+// MessageLevelCount is a subset of Message model fields for "levels count" query.
+type MessageLevelCount struct {
+	Level int
+	Count int
+}
+
+// MessageWithLevel is a subset of Message model fields for "messages with level" query.
+type MessageWithLevel struct {
+	ID     string
+	Header string
 }

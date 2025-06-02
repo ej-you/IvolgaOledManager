@@ -27,7 +27,7 @@ type Buttons struct {
 // First four params are names for GPIO buttons.
 // The checkAliveTimeout param is a duration to see if button alive.
 // The store param is an app key-value storage.
-// The render param is a renderer for output data.
+// The render param is a chan to send tasks for renderer to output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
 	dbStorage db.MessageRepoDB, store *storage.RepoStorageManager,
 	render chan<- struct{}) (*Buttons, error) {

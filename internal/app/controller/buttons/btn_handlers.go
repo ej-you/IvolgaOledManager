@@ -3,13 +3,11 @@ package buttons
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
 	"sschmc/internal/app/entity"
 	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/gpiobutton"
 )
 
 var (
@@ -24,26 +22,14 @@ var (
 	}
 )
 
-// BtnEntRisingHandler handles all cases of ENT button rising.
-func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
-	return func() {
-		switch {
-		case b.store.App.IsNone():
-			b.btnAllGreetings()
-		case b.store.App.IsGreetings():
-			b.btnEntMenuMain()
-		case b.store.App.IsMenuMain():
-			b.btnEntMenuLevel()
-		case b.store.App.IsMenuLevel():
-			b.btnEntMessage()
-		default:
-			log.Println("*** ENTER pressed ***")
-		}
-	}
+// toGreetings sets "greetings" app-status and update render.
+func (b *Buttons) toGreetings() {
+	b.store.App.SetGreetings()
+	b.render <- struct{}{}
 }
 
-// btnEntMenuMain update status to menu-main and creates render task.
-func (b *Buttons) btnEntMenuMain() {
+// toMenuMain sets "menu-main" app-status and update render.
+func (b *Buttons) toMenuMain() {
 	// get levels count from DB
 	levelsCount, err := b.msgRepoDB.GetLevelsCount()
 	if err != nil {
@@ -73,15 +59,13 @@ func (b *Buttons) btnEntMenuMain() {
 		mainMenu.Items = append(mainMenu.Items, entity.NewMenuItem(name, levelCount))
 	}
 
-	// save menu to storage
 	b.store.Menu.SetMain(mainMenu)
 	b.store.App.SetMenuMain()
-	// update render according to new app-status
 	b.render <- struct{}{}
 }
 
-// btnEntMenuLevel update status to menu-level and creates render task.
-func (b *Buttons) btnEntMenuLevel() {
+// toMenuLevel sets "menu-level" app-status and update render.
+func (b *Buttons) toMenuLevel() {
 	// get selected level from main menu
 	mainMenu := b.store.Menu.GetMain()
 	selectedItem, ok := mainMenu.Items[mainMenu.SelectedItem].Value.(entity.MessageLevelCount)
@@ -118,12 +102,11 @@ func (b *Buttons) btnEntMenuLevel() {
 
 	b.store.Menu.SetLevel(levelMenu)
 	b.store.App.SetMenuLevel()
-	// update render according to new app-status
 	b.render <- struct{}{}
 }
 
-// btnEntMessage clears rendered data and updates app-status in storage to none.
-func (b *Buttons) btnEntMessage() {
+// toMessage sets "message" app-status and update render.
+func (b *Buttons) toMessage() {
 	// get selected message ID from level menu
 	levelMenu := b.store.Menu.GetLevel()
 	selectedMsgID, ok := levelMenu.Items[levelMenu.SelectedItem].Value.(string)
@@ -132,10 +115,7 @@ func (b *Buttons) btnEntMessage() {
 		return
 	}
 
-	msg := &entity.Message{
-		ID: selectedMsgID,
-	}
-
+	msg := &entity.Message{ID: selectedMsgID}
 	// get message by ID
 	err := b.msgRepoDB.GetByID(msg)
 	if err != nil {
@@ -146,6 +126,55 @@ func (b *Buttons) btnEntMessage() {
 	msg.Format()
 	b.store.Message.Set(msg)
 	b.store.App.SetMessage()
-	// update render according to new app-status
+	b.render <- struct{}{}
+}
+
+// backToNone sets "none" app-status and update render.
+func (b *Buttons) backToNone() {
+	b.store.App.SetNone()
+	b.render <- struct{}{}
+}
+
+// btnEscMenuMain sets "menu-main" app-status and update render.
+func (b *Buttons) backToMenuMain() {
+	b.store.App.SetMenuMain()
+	b.render <- struct{}{}
+}
+
+// backToMenuLevel sets "menu-level" app-status and update render.
+func (b *Buttons) backToMenuLevel() {
+	b.store.App.SetMenuLevel()
+	b.render <- struct{}{}
+}
+
+// menuScrollUp selects the previous item in given menu.
+func (b *Buttons) menuScrollUp(menu *entity.Menu) {
+	// scroll down menu
+	menu.SelectPrevious()
+	// update render with new menu view
+	b.render <- struct{}{}
+}
+
+// btnDownMessage scrolls message text up for one line.
+func (b *Buttons) messageScrollUp(msg *entity.Message) {
+	// scroll up message
+	msg.ScrollUp()
+	// update render with new message view
+	b.render <- struct{}{}
+}
+
+// menuScrollDown selects the next item in given menu.
+func (b *Buttons) menuScrollDown(menu *entity.Menu) {
+	// scroll down menu
+	menu.SelectNext()
+	// update render with new menu view
+	b.render <- struct{}{}
+}
+
+// messageScrollDown scrolls message text down for one line.
+func (b *Buttons) messageScrollDown(msg *entity.Message) {
+	// scroll up message
+	msg.ScrollDown()
+	// update render with new message view
 	b.render <- struct{}{}
 }
