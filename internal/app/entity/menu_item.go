@@ -4,7 +4,11 @@ import (
 	"unicode/utf8"
 )
 
-const _maxItemLen = 15 // max item value len
+const (
+	_maxItemLen = 15 // max item value len
+
+	_menuItemDeleteButtonText = "УДАЛИТЬ ВСЕ"
+)
 
 // Menu item
 type MenuItem struct {
@@ -15,6 +19,7 @@ type MenuItem struct {
 	lastSymbol   int  // idx of last displayed symbol of the item (use NewMenuItem to set up)
 	scrollToLeft bool // true if item text must be scrolled back to left (default: false)
 	skipScroll   bool // true if length of item title is less than _maxItemLen (default: false)
+	deleteButton bool // true if item is deleteWithLevel button (default: false)
 }
 
 // NewMenuItem returns new prepared menu item. It's not recommended to init menu item directly.
@@ -86,4 +91,20 @@ func (i *MenuItem) Scroll() {
 // according to the current item scroll status.
 func (i *MenuItem) FormattedTitle() string {
 	return i.Title[i.firstSymbol:i.lastSymbol]
+}
+
+// IsDeleteButton returns deleteButton value.
+func (i *MenuItem) IsDeleteButton() bool {
+	return i.deleteButton
+}
+
+// NewMenuItemDeleteButton returns menu item for button with any delete functionality meaning.
+func NewMenuItemDeleteButton(value any) *MenuItem {
+	menuItem := &MenuItem{
+		Title:        _menuItemDeleteButtonText,
+		Value:        value,
+		deleteButton: true,
+	}
+	menuItem.setLastSymbol()
+	return menuItem
 }

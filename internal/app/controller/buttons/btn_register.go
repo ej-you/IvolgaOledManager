@@ -9,13 +9,15 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
 		switch {
 		case b.store.App.IsNone():
-			b.toGreetings()
+			b.screenGreetings()
 		case b.store.App.IsGreetings():
-			b.toMenuMain()
+			b.screenMenuMain()
 		case b.store.App.IsMenuMain():
-			b.toMenuLevel()
+			b.screenMenuLevel()
 		case b.store.App.IsMenuLevel():
-			b.toMessage()
+			b.screenMessage()
+		case b.store.App.IsMessage():
+			b.deleteMessage()
 		}
 	}
 }
@@ -25,13 +27,13 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
 		switch {
 		case b.store.App.IsNone(), b.store.App.IsMenuMain():
-			b.toGreetings()
+			b.screenGreetings()
 		case b.store.App.IsGreetings():
-			b.backToNone()
+			b.screenNone()
 		case b.store.App.IsMenuLevel():
-			b.backToMenuMain()
+			b.screenMenuMain()
 		case b.store.App.IsMessage():
-			b.backToMenuLevel()
+			b.screenMenuLevel()
 		}
 	}
 }
@@ -41,7 +43,7 @@ func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
 		switch {
 		case b.store.App.IsNone():
-			b.toGreetings()
+			b.screenGreetings()
 		case b.store.App.IsMenuMain():
 			b.menuScrollUp(b.store.Menu.GetMain())
 		case b.store.App.IsMenuLevel():
@@ -57,7 +59,7 @@ func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
 		switch {
 		case b.store.App.IsNone():
-			b.toGreetings()
+			b.screenGreetings()
 		case b.store.App.IsMenuMain():
 			b.menuScrollDown(b.store.Menu.GetMain())
 		case b.store.App.IsMenuLevel():

@@ -2,6 +2,7 @@
 package entity
 
 import (
+	"strings"
 	"time"
 
 	"sschmc/internal/pkg/text"
@@ -10,7 +11,8 @@ import (
 const (
 	MaxDisplayedItems = 3 // max menu items (message lines) amount that can be displayed.
 
-	_datetimeFormat = "02.01.06 15:04:05" // datetime format for createdAt message field
+	_datetimeFormat          = "02.01.06 15:04:05" // datetime format for createdAt message field
+	_messageDeleteButtonText = "* УДАЛИТЬ ЛОГ *"
 
 	_maxLineLen   = 16 // max len of line
 	_separatorLen = 8  // len of separator between message header and content
@@ -39,8 +41,8 @@ func (m *Message) Datetime() string {
 
 // Format creates lines slice of message Text to display it on device as text lines.
 func (m *Message) Format() {
-	// join header and content to a single string
-	fullText := m.Header + "\n\n" + m.Content
+	// join header, content and delete button text to a single string
+	fullText := strings.Join([]string{m.Header, m.Content, _messageDeleteButtonText}, "\n\n")
 	m.Lines = text.Normalize(fullText, _maxLineLen)
 }
 
@@ -60,6 +62,11 @@ func (m *Message) ScrollDown() {
 		return
 	}
 	m.FirstLine++
+}
+
+// IsDeleteButton returns true if delete button text is visible.
+func (m *Message) IsDeleteButton() bool {
+	return m.FirstLine >= len(m.Lines)-MaxDisplayedItems
 }
 
 // MessageLevelCount is a subset of Message model fields for "levels count" query.
