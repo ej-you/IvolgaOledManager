@@ -54,12 +54,12 @@ func (b *Buttons) screenMenuMain() {
 		allLevels[levelCount.Level].Count = levelCount.Count
 	}
 
-	// create empty menu and append menu items
+	// create empty menu
 	mainMenu := &entity.Menu{
 		Title: "Main menu",
 		Items: make([]*entity.MenuItem, 0, len(_levelName)),
 	}
-
+	// append menu items
 	var name string
 	for _, levelCount := range allLevels {
 		name = fmt.Sprintf("%s (%d)", _levelName[levelCount.Level], levelCount.Count)
