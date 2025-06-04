@@ -64,8 +64,10 @@ func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeou
 // Given context is used for all buttons.
 // This function is blocking.
 func (b *Buttons) HandleAll(ctx context.Context) {
-	var wg sync.WaitGroup
+	// Set greetings on startup
+	b.screenGreetings()
 
+	var wg sync.WaitGroup
 	// start handlers for every button in a separate goroutines simultaneously
 	wg.Add(4)
 	go func() {

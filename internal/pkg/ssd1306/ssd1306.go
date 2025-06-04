@@ -34,7 +34,7 @@ func NewSSD1306(bus string) (*SSD1306, error) {
 		busCloser: busCloser.Close,
 	}
 	if err := instance.DisplayClear(); err != nil {
-		return nil, fmt.Errorf("clear device on startapp: %w", err)
+		return nil, fmt.Errorf("clear device on startup: %w", err)
 	}
 
 	return instance, nil
