@@ -22,15 +22,31 @@ Config file must be named `config.yml` and located in the same directory as the 
 
 ### Secret
 
-DB connection settings used via ENV-variables. Use the next manual:
+DB connection settings used via ENV-variables.
+By default app using tcp connection. Set DB_USE_SOCKET="false" and
+specify DB_SOCKET to use unix-socket for connection.
+
+For all DB env-variables use the next manual:
 
 ```env
 DB_USER="db_user"
 DB_PASSWORD="cool-password"
+DB_NAME="example"
+
 DB_HOST="127.0.0.1"
 DB_PORT="3306"
-DB_NAME="example"
+
+DB_SOCKET="/var/run/mysqld/mysqld.sock"
+DB_USE_SOCKET="false"
 ```
+
+### Assets
+
+Assets directory contains greetings image (path to it must be changed via `config.yml`)
+
+### Service
+
+Example of linux service for the program can be found in the `/build` directory
 
 ## DB
 
