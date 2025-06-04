@@ -1,0 +1,14 @@
+[Unit]
+Description=SSC HMS Display Service
+After=network.target mysql.service
+
+[Service]
+Type=simple
+Restart=always
+User=root
+EnvironmentFile=/root/ssc_hms/env
+WorkingDirectory=/root/ssc_hms
+ExecStart=/root/ssc_hms/ssc_hms_display
+
+[Install]
+WantedBy=multi-user.target
