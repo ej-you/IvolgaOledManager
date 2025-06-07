@@ -8,3 +8,7 @@ hardware:
     down: "GPIO51" # gpio name for down button
     escape: "GPIO60" # gpio name for escape button
     enter: "GPIO48" # gpio name for enter button
+other:
+  station:
+    service_name: "test_web_page.service" # service of station for collecting data from sensors
+    config_path: "./ssc-station.conf" # path to config file for station service

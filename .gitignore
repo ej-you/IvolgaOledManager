@@ -1,8 +1,9 @@
 # compiled binaries
 /bin
 
-# ENV
+# configs
 .env
+ssc-station.conf*
 
 # local
 /.vscode

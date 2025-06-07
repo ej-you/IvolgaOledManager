@@ -1,6 +1,6 @@
 # Russian southern scientific center project
 
-## Program for managing OS of hydro-meteorological center with OLED display and buttons
+## Program for managing OS of hydro-meteorological station with OLED display and buttons
 
 ## Hardware
 
@@ -13,7 +13,7 @@
 ### Compile
 
 ```shell
-GOOS=linux GOARCH=arm GOARM=7 go build -o ./ssc_hmc_display ./cmd/ssc_hmc_display/main.go
+GOOS=linux GOARCH=arm GOARM=7 go build -o ./ssc_hms_display ./cmd/display/main.go
 ```
 
 ### Config

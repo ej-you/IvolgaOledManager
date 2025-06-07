@@ -12,6 +12,7 @@ type (
 	Config struct {
 		App      `yaml:"app"`
 		Hardware `yaml:"hardware"`
+		Other    `yaml:"other"`
 		DB
 	}
 
@@ -33,6 +34,15 @@ type (
 		Down   string `yaml:"down"`
 		Escape string `yaml:"escape"`
 		Enter  string `yaml:"enter"`
+	}
+
+	Other struct {
+		Station `yaml:"station"`
+	}
+
+	Station struct {
+		ServiceName string `yaml:"service_name"`
+		ConfigPath  string `yaml:"config_path"`
 	}
 
 	DB struct {

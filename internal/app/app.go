@@ -12,15 +12,18 @@ import (
 	"time"
 
 	"gorm.io/gorm"
-	"periph.io/x/host/v3"
+	// "periph.io/x/host/v/3"
 
 	"sschmc/config"
 	"sschmc/internal/app/controller/buttons"
 	"sschmc/internal/app/controller/renderer"
 	repodb "sschmc/internal/app/repo/db"
+	repofile "sschmc/internal/app/repo/file"
 	repostorage "sschmc/internal/app/repo/storage"
-	"sschmc/internal/pkg/db"
+
+	// "sschmc/internal/pkg/db"
 	"sschmc/internal/pkg/storage"
+	"sschmc/internal/pkg/system"
 )
 
 const (
@@ -43,28 +46,47 @@ type app struct {
 
 // New returns App interface.
 func New(cfg *config.Config) (App, error) {
-	// connect to DB
-	dbStorage, err := db.New(cfg.DB.DSN,
-		db.WithTranslateError(),
-		db.WithDisableColorful(),
-		db.WithWarnLogLevel())
-	if err != nil {
-		return nil, err
-	}
+	// // connect to DB
+	// dbStorage, err := db.New(cfg.DB.DSN,
+	// 	db.WithTranslateError(),
+	// 	db.WithDisableColorful(),
+	// 	db.WithWarnLogLevel())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// initialise all relevant drivers
-	if _, err := host.Init(); err != nil {
-		return nil, fmt.Errorf("init drivers: %w", err)
-	}
+	// // initialise all relevant drivers
+	// if _, err := host.Init(); err != nil {
+	// 	return nil, fmt.Errorf("init drivers: %w", err)
+	// }
 	return &app{
-		cfg:       cfg,
-		store:     storage.NewMap(),
-		dbStorage: dbStorage,
+		cfg:   cfg,
+		store: storage.NewMap(),
+		// dbStorage: dbStorage,
 	}, nil
 }
 
 // Run starts full application.
 func (a app) Run() error {
+	err := system.RestartService(a.cfg.Other.Station.ServiceName)
+	return err
+
+	stationRepoFile, err := repofile.NewStationRepoFile(a.cfg.Other.Station.ConfigPath)
+	if err != nil {
+		return err
+	}
+	sensors, err := stationRepoFile.ParseSensors()
+	if err != nil {
+		return err
+	}
+	for _, sensor := range sensors {
+		sensor.ChangeActive()
+	}
+	if err := stationRepoFile.UpdateSensors(sensors); err != nil {
+		return err
+	}
+	return nil
+
 	// ctx for app
 	appContext, appCancel := context.WithCancel(context.Background())
 	// channel to update display
