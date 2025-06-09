@@ -67,25 +67,6 @@ func New(cfg *config.Config) (App, error) {
 
 // Run starts full application.
 func (a app) Run() error {
-	// err := system.RestartService(a.cfg.Other.Station.ServiceName)
-	// return err
-
-	// stationRepoFile, err := repofile.NewStationRepoFile(a.cfg.Other.Station.ConfigPath)
-	// if err != nil {
-	// 	return err
-	// }
-	// sensors, err := stationRepoFile.ParseSensors()
-	// if err != nil {
-	// 	return err
-	// }
-	// for _, sensor := range sensors {
-	// 	sensor.ChangeActive()
-	// }
-	// if err := stationRepoFile.UpdateSensors(sensors); err != nil {
-	// 	return err
-	// }
-	// return nil
-
 	// ctx for app
 	appContext, appCancel := context.WithCancel(context.Background())
 	// channel to update display

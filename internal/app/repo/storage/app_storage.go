@@ -65,7 +65,6 @@ func (s *appRepoStorage) IsMenuStation() bool {
 // SetSensor sets current app-status to sensor.
 func (s *appRepoStorage) SetSensor() {
 	s.setStatus(_valueSensor)
-
 }
 
 // IsMenuLogs checks if the current app-status is sensor.

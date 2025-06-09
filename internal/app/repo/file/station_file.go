@@ -35,7 +35,7 @@ func NewStationRepoFile(configPath string) (StationRepoFile, error) {
 		return nil, fmt.Errorf("get config file info: %w", err)
 	}
 	// to parse sensor name from sensor line
-	sensorNameRegexp := regexp.MustCompile(`.+\/(.+?)\.conf`)
+	sensorNameRegexp := regexp.MustCompile(`.+/(.+?)\.conf`)
 	// to parse full sensors settings block [use (?s) for single-line mode]
 	sensorsSettingsRegexp := regexp.MustCompile(`(?s)(^.*sensors:\s{)(.*?)(\s}.*$)`)
 	return &repoFile{

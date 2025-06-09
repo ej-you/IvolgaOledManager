@@ -13,7 +13,6 @@ import (
 )
 
 var (
-	_mainMenuItems          = 2               // amount of main menu items
 	_mainMenuItemLogsIdx    = 0               // first item index
 	_mainMenuItemLogs       = "Log messages"  // first item title
 	_mainMenuItemStationIdx = 1               // second item index

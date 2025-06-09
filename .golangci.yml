@@ -81,6 +81,9 @@ linters:
           - mnd
         path: internal/app/(controller/buttons/buttons|app)\.go
         text: "Magic number: [42], in <argument> detected"
+      - linters:
+          - lll
+        path: config/config\.go
     paths:
       - bin
 
