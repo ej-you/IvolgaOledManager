@@ -61,6 +61,7 @@ func (r *repoFile) ParseSensors() (entity.StationSensors, error) {
 
 	var line string
 	var start bool
+	var idx int
 	// read file line by line
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -75,7 +76,8 @@ func (r *repoFile) ParseSensors() (entity.StationSensors, error) {
 		}
 		// parse line
 		if start {
-			sensors = append(sensors, r.createSensor(line))
+			sensors = append(sensors, r.createSensor(idx, line))
+			idx++
 			continue
 		}
 		// start
@@ -108,8 +110,9 @@ func (r *repoFile) UpdateSensors(sensors entity.StationSensors) error {
 }
 
 // createSensor creates StationSensor instance from raw config line.
-func (r *repoFile) createSensor(rawConfigLine string) *entity.StationSensor {
+func (r *repoFile) createSensor(idx int, rawConfigLine string) *entity.StationSensor {
 	sensor := &entity.StationSensor{
+		Idx:    idx,
 		Line:   rawConfigLine,
 		Active: !strings.HasPrefix(rawConfigLine, "#"),
 	}

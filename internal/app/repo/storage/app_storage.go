@@ -52,6 +52,37 @@ func (s *appRepoStorage) IsMenuMain() bool {
 	return s.getStatus() == _valueMenuMain
 }
 
+// SetMenuStation sets current app-status to menu-station.
+func (s *appRepoStorage) SetMenuStation() {
+	s.setStatus(_valueMenuStation)
+}
+
+// IsMenuLogs checks if the current app-status is menu-station.
+func (s *appRepoStorage) IsMenuStation() bool {
+	return s.getStatus() == _valueMenuStation
+}
+
+// SetSensor sets current app-status to sensor.
+func (s *appRepoStorage) SetSensor() {
+	s.setStatus(_valueSensor)
+
+}
+
+// IsMenuLogs checks if the current app-status is sensor.
+func (s *appRepoStorage) IsSensor() bool {
+	return s.getStatus() == _valueSensor
+}
+
+// SetMenuLogs sets current app-status to menu-logs.
+func (s *appRepoStorage) SetMenuLogs() {
+	s.setStatus(_valueMenuLogs)
+}
+
+// IsMenuLogs checks if the current app-status is menu-logs.
+func (s *appRepoStorage) IsMenuLogs() bool {
+	return s.getStatus() == _valueMenuLogs
+}
+
 // SetMenuLevel sets current app-status to menu-level.
 func (s *appRepoStorage) SetMenuLevel() {
 	s.setStatus(_valueMenuLevel)

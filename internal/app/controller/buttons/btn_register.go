@@ -12,12 +12,20 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 			b.screenGreetings()
 		case b.store.App.IsGreetings():
 			b.screenMenuMain()
+		// first main menu branch
 		case b.store.App.IsMenuMain():
+			b.screenMenuLogsOrStation()
+		case b.store.App.IsMenuLogs():
 			b.screenMenuLevel()
 		case b.store.App.IsMenuLevel():
 			b.screenMessage()
 		case b.store.App.IsMessage():
 			b.deleteMessage()
+		// second main menu branch
+		case b.store.App.IsMenuStation():
+			b.screenSensor()
+		case b.store.App.IsSensor():
+			b.updateStation()
 		}
 	}
 }
@@ -30,10 +38,18 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 			b.screenGreetings()
 		case b.store.App.IsGreetings():
 			b.screenNone()
-		case b.store.App.IsMenuLevel():
+		// first main menu branch
+		case b.store.App.IsMenuLogs():
 			b.screenMenuMain()
+		case b.store.App.IsMenuLevel():
+			b.screenMenuLogs()
 		case b.store.App.IsMessage():
 			b.screenMenuLevel()
+		// second main menu branch
+		case b.store.App.IsMenuStation():
+			b.screenMenuMain()
+		case b.store.App.IsSensor():
+			b.screenMenuStation()
 		}
 	}
 }
@@ -46,10 +62,16 @@ func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 			b.screenGreetings()
 		case b.store.App.IsMenuMain():
 			b.menuScrollUp(b.store.Menu.GetMain())
+		// first main menu branch
+		case b.store.App.IsMenuLogs():
+			b.menuScrollUp(b.store.Menu.GetLogs())
 		case b.store.App.IsMenuLevel():
 			b.menuScrollUp(b.store.Menu.GetLevel())
 		case b.store.App.IsMessage():
 			b.messageScrollUp(b.store.Message.Get())
+		// second main menu branch
+		case b.store.App.IsMenuStation():
+			b.menuScrollUp(b.store.Menu.GetStation())
 		}
 	}
 }
@@ -62,10 +84,16 @@ func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
 			b.screenGreetings()
 		case b.store.App.IsMenuMain():
 			b.menuScrollDown(b.store.Menu.GetMain())
+		// first main menu branch
+		case b.store.App.IsMenuLogs():
+			b.menuScrollDown(b.store.Menu.GetLogs())
 		case b.store.App.IsMenuLevel():
 			b.menuScrollDown(b.store.Menu.GetLevel())
 		case b.store.App.IsMessage():
 			b.messageScrollDown(b.store.Message.Get())
+		// second main menu branch
+		case b.store.App.IsMenuStation():
+			b.menuScrollDown(b.store.Menu.GetStation())
 		}
 	}
 }

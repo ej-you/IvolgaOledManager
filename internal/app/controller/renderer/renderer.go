@@ -106,13 +106,20 @@ func (r *Renderer) update() error {
 		return r.greetings()
 	case r.store.App.IsMenuMain():
 		return r.menu(r.store.Menu.GetMain())
+	// first main menu branch
+	case r.store.App.IsMenuLogs():
+		return r.menu(r.store.Menu.GetLogs())
 	case r.store.App.IsMenuLevel():
 		return r.menu(r.store.Menu.GetLevel())
 	case r.store.App.IsMessage():
 		return r.message(r.store.Message.Get())
+	// second main menu branch
+	case r.store.App.IsMenuStation():
+		return r.menu(r.store.Menu.GetStation())
+	case r.store.App.IsSensor():
+		return r.sensor(r.store.Sensor.Get())
 	default:
 		log.Println("WARNING: no one render rule found")
 	}
-
 	return nil
 }

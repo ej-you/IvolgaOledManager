@@ -31,6 +31,16 @@ func (s *menuRepoStorage) SetMain(value *entity.Menu) {
 	s.set(_valueMenuMain, value)
 }
 
+// GetLogs gets menu-logs struct from storage.
+func (s *menuRepoStorage) GetLogs() *entity.Menu {
+	return s.get(_valueMenuLogs)
+}
+
+// SetLogs sets menu-logs struct to storage.
+func (s *menuRepoStorage) SetLogs(value *entity.Menu) {
+	s.set(_valueMenuLogs, value)
+}
+
 // GetLevel gets menu-level struct from storage.
 func (s *menuRepoStorage) GetLevel() *entity.Menu {
 	return s.get(_valueMenuLevel)
@@ -39,6 +49,16 @@ func (s *menuRepoStorage) GetLevel() *entity.Menu {
 // SetLevel sets menu-level struct to storage.
 func (s *menuRepoStorage) SetLevel(value *entity.Menu) {
 	s.set(_valueMenuLevel, value)
+}
+
+// GetStation gets menu-station struct from storage.
+func (s *menuRepoStorage) GetStation() *entity.Menu {
+	return s.get(_valueMenuStation)
+}
+
+// SetStation sets menu-station struct to storage.
+func (s *menuRepoStorage) SetStation(value *entity.Menu) {
+	s.set(_valueMenuStation, value)
 }
 
 // get gets menu struct from storage.

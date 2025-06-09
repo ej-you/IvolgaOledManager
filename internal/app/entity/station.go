@@ -8,6 +8,8 @@ const _inactivePrefix = "#" // prefix for inactive sensor line
 // The line looks like `@include "/etc/ssc-station.d/GPS.conf"` for active sensor or
 // `# @include "/etc/ssc-station.d/GPS.conf"` for inactive sensor.
 type StationSensor struct {
+	// index of sensor
+	Idx int
 	// config line (e.g. @include "/etc/ssc-station.d/GPS.conf")
 	Line string
 	// sensor name (filename of sensor config file without extension, e.g. GPS)
