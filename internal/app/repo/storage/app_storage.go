@@ -106,7 +106,7 @@ func (s *appRepoStorage) IsMessage() bool {
 func (s *appRepoStorage) IsMenuAny() bool {
 	status := s.getStatus()
 	switch status {
-	case _valueMenuMain, _valueMenuLevel:
+	case _valueMenuMain, _valueMenuLogs, _valueMenuLevel, _valueMenuStation:
 		return true
 	default:
 		return false
