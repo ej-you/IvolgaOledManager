@@ -23,6 +23,7 @@ type GPIOButton interface {
 	HandleWithShutdown(ctx context.Context, risingHandler, fallingHandler HandlerFunc) error
 }
 
+// GPIOButton implementation.
 type gpioButton struct {
 	gpioPin           gpio.PinIO
 	checkAliveTimeout time.Duration
