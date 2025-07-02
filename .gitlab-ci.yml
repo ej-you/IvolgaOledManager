@@ -11,6 +11,7 @@ lint-job:
   script:
     - mkdir -p /app/src
     - cp -r $CI_PROJECT_DIR /app/src
+    - ls -la /app/src
     - echo "Linting code..."
     - golangci-lint run -c /app/src/.golangci.yml /app/src/...
 
