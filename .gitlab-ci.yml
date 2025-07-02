@@ -13,7 +13,7 @@ lint-job:
     - cp -r $CI_PROJECT_DIR /app/src
     - ls -la /app/src
     - echo "Linting code..."
-    - golangci-lint run -c /app/src/.golangci.yml /app/src/...
+    - golangci-lint run -c /app/src/IvolgaOledManager/.golangci.yml /app/src/IvolgaOledManager/...
 
 build-job:
   stage: build
@@ -25,4 +25,4 @@ build-job:
     - mkdir -p /app/src
     - cp -r $CI_PROJECT_DIR /app/src
     - echo "Compile project..."
-    - GOOS=linux GOARCH=arm GOARM=7 go build -o /app/src/bin/ssc_hms_display /app/src/cmd/display/main.go
+    - GOOS=linux GOARCH=arm GOARM=7 go build -o /app/src/IvolgaOledManager/bin/ssc_hms_display /app/src/IvolgaOledManager/cmd/display/main.go
