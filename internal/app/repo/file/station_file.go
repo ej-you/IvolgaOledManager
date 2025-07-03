@@ -1,12 +1,12 @@
 package file
 
 import (
+	"IvolgaOledManager/internal/app/entity"
 	"bufio"
 	"fmt"
 	"io/fs"
 	"os"
 	"regexp"
-	"sschmc/internal/app/entity"
 	"strings"
 )
 

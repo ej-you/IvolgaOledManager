@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 
-	"sschmc/internal/app/entity"
-	"sschmc/internal/pkg/errlog"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/errlog"
 )
 
 // screenMessage sets "message" app-status and update render.

@@ -3,7 +3,7 @@ package renderer
 import (
 	"fmt"
 
-	"sschmc/internal/app/entity"
+	"IvolgaOledManager/internal/app/entity"
 )
 
 // message renders log message.

@@ -2,7 +2,7 @@
 package db
 
 import (
-	"sschmc/internal/app/entity"
+	"IvolgaOledManager/internal/app/entity"
 )
 
 type MessageRepoDB interface {

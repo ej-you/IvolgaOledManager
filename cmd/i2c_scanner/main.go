@@ -10,7 +10,7 @@ import (
 	"log"
 	"os"
 
-	"sschmc/internal/pkg/i2c"
+	"IvolgaOledManager/internal/pkg/i2c"
 )
 
 func main() {

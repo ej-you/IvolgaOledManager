@@ -1,4 +1,4 @@
-module sschmc
+module IvolgaOledManager
 
 go 1.24.2
 

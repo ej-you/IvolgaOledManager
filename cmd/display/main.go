@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"sschmc/config"
-	"sschmc/internal/app"
+	"IvolgaOledManager/config"
+	"IvolgaOledManager/internal/app"
 )
 
 func main() {
