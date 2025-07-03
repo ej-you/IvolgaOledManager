@@ -20,7 +20,7 @@ lint-job:
     - cp golangci-lint-2.2.1-linux-amd64/golangci-lint /usr/local/bin/
     - golangci-lint --version
     - echo "Lint code..."
-    - ./bin/golangci-lint run -c /IvolgaOledManager/.golangci.yml /IvolgaOledManager/...
+    - golangci-lint run -c /IvolgaOledManager/.golangci.yml /IvolgaOledManager/...
 
 build-job:
   stage: build
