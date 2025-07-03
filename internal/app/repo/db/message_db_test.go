@@ -11,16 +11,22 @@ import (
 )
 
 const (
-	_level   = "1"
-	_id      = "6"
-	_testDSN = "test_user:test_password@tcp(127.0.0.1:3306)/test_db?parseTime=true&timeout=10s"
+	_level          = "1"
+	_id             = "6"
+	_defaultTestDSN = "test_user:test_password@tcp(127.0.0.1:3306)/test_db?parseTime=true&timeout=10s"
 )
 
 var _repo MessageRepoDB
 
 func TestMain(m *testing.M) {
+	// use TEST_DB_DSN env variable if it exists
+	dsn, ok := os.LookupEnv("TEST_DB_DSN")
+	if !ok {
+		dsn = _defaultTestDSN
+	}
+
 	// create repo
-	dbStorage, err := db.New(_testDSN,
+	dbStorage, err := db.New(dsn,
 		db.WithTranslateError(),
 		db.WithDisableColorful())
 	if err != nil {
