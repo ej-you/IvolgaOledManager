@@ -2,6 +2,9 @@ stages:
   - test
   - build
 
+variables:
+  DOCKER_DNS: "8.8.8.8" # for DNS resolving
+
 lint-job:
   stage: test
   tags:
