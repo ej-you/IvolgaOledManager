@@ -40,7 +40,7 @@ db-tests-job:
   before_script:
     - echo "Waiting for MySQL..."
     - apk add --no-cache wait4x
-    - wait4x -t 60s mysql "$TEST_DB_DSN"
+    - wait4x -t 180s -i 20s mysql "$TEST_DB_DSN"
   script:
     - apk add --no-cache mysql-client
     - TEST_DB_DSN="$TEST_DB_DSN" go test -v -cover ./internal/app/repo/...
