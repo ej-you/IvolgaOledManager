@@ -31,6 +31,6 @@ build-job:
     - echo "COmpress binary..."
     - gzip -9 ./bin/ivolga_oled_manager
     - ls -lAh ./bin/
-  artifacts:
-    paths:
-      - ./bin/ivolga_oled_manager.gz
+  # artifacts:
+  #   paths:
+  #     - ./bin/ivolga_oled_manager.gz
