@@ -2,19 +2,22 @@ stages:
   - test
   - build
 
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+default:
+  image: golang:1.24.4-alpine3.22
+  tags:
+    - docker
+
 lint-job:
   stage: test
-  tags:
-   - docker
-  image:
-   name: golang:1.24.4-alpine3.22
   script:
     - echo "Clone repo..."
     - cp -r $CI_PROJECT_DIR /
     - ls -lA /
     - echo "Install linter..."
-    # - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.2.1
-    # - ./bin/golangci-lint --version
     - go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.2.1
     - golangci-lint --version
     - echo "Lint code..."
@@ -23,12 +26,11 @@ lint-job:
 
 build-job:
   stage: build
-  tags:
-   - docker
-  image:
-   name: golang:1.24.4-alpine3.22
   script:
     - cp -r $CI_PROJECT_DIR /
     - echo "Compile project..."
     - cd /IvolgaOledManager
     - GOOS=linux GOARCH=arm GOARM=7 go build -o ./bin/ivolga_oled_manager ./cmd/display/main.go
+  artifacts:
+    paths:
+      - /IvolgaOledManager/bin/ivolga_oled_manager
