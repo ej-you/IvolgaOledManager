@@ -10,7 +10,7 @@ lint-job:
   tags:
    - docker
   image:
-   name: ubuntu:3.22
+   name: alpine:3.22
   script:
     - echo "Clone repo..."
     - cp -r $CI_PROJECT_DIR /
