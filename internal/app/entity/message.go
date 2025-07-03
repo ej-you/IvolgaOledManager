@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"sschmc/internal/pkg/text"
+	"IvolgaOledManager/internal/pkg/text"
 )
 
 const (

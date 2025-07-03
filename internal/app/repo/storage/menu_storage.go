@@ -3,9 +3,9 @@ package storage
 import (
 	"errors"
 
-	"sschmc/internal/app/entity"
-	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/storage"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/errlog"
+	"IvolgaOledManager/internal/pkg/storage"
 )
 
 var _ MenuRepoStorage = (*menuRepoStorage)(nil)

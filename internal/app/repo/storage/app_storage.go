@@ -1,9 +1,9 @@
 package storage
 
 import (
+	"IvolgaOledManager/internal/pkg/errlog"
+	"IvolgaOledManager/internal/pkg/storage"
 	"errors"
-	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/storage"
 )
 
 var _ AppRepoStorage = (*appRepoStorage)(nil)
