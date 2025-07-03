@@ -16,6 +16,7 @@ lint-job:
     # - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.2.1
     # - ./bin/golangci-lint --version
     - for i in {1..5}; do
+        echo "Attempt $i..."
         wget https://github.com/golangci/golangci-lint/releases/download/v2.2.1/golangci-lint-2.2.1-linux-amd64.tar.gz && break || sleep 5;
       done
     - tar -xzf golangci-lint-2.2.1-linux-amd64.tar.gz
