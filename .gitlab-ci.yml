@@ -17,6 +17,7 @@ lint-job:
    name: alpine:3.22
   script:
     - echo "Clone repo..."
+    - git --version
     - cp -r $CI_PROJECT_DIR /
     - ls -lA /
     - echo "Install linter..."
