@@ -2,13 +2,6 @@ stages:
   - test
   - build
 
-variables:
-  DOCKER_DNS: "1.1.1.1" # for DNS resolving
-
-before_script:
-  - cat /etc/resolv.conf  # Проверить, какие DNS использует контейнер
-  - ping -c 4 8.8.8.8
-
 lint-job:
   stage: test
   tags:
@@ -17,7 +10,6 @@ lint-job:
    name: alpine:3.22
   script:
     - echo "Clone repo..."
-    - git --version
     - cp -r $CI_PROJECT_DIR /
     - ls -lA /
     - echo "Install linter..."
