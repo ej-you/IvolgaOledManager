@@ -3,7 +3,7 @@ package renderer
 import (
 	"fmt"
 
-	"sschmc/internal/app/entity"
+	"IvolgaOledManager/internal/app/entity"
 )
 
 // menu renders menu.

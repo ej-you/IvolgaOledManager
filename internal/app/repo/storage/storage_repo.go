@@ -3,8 +3,8 @@
 package storage
 
 import (
-	"sschmc/internal/app/entity"
-	"sschmc/internal/pkg/storage"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/storage"
 )
 
 const (

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"sschmc/internal/app/entity"
-	"sschmc/internal/pkg/db"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/db"
 )
 
 const (

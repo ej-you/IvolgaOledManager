@@ -8,9 +8,9 @@ import (
 	"log"
 	"time"
 
-	"sschmc/internal/app/repo/storage"
-	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/ssd1306"
+	"IvolgaOledManager/internal/app/repo/storage"
+	"IvolgaOledManager/internal/pkg/errlog"
+	"IvolgaOledManager/internal/pkg/ssd1306"
 )
 
 type Renderer struct {

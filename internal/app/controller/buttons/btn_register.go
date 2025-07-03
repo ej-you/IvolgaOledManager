@@ -1,7 +1,7 @@
 package buttons
 
 import (
-	"sschmc/internal/pkg/gpiobutton"
+	"IvolgaOledManager/internal/pkg/gpiobutton"
 )
 
 // BtnEntRisingHandler handles all cases of ENT button rising.

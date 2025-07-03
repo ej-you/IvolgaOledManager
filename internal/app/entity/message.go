@@ -4,7 +4,7 @@ package entity
 import (
 	"time"
 
-	"sschmc/internal/pkg/text"
+	"IvolgaOledManager/internal/pkg/text"
 )
 
 const (

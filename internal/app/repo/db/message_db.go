@@ -6,7 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"sschmc/internal/app/entity"
+	"IvolgaOledManager/internal/app/entity"
 )
 
 var _ MessageRepoDB = (*repoDB)(nil)

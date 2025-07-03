@@ -8,7 +8,7 @@ import (
 	"golang.org/x/image/math/fixed"
 	"periph.io/x/devices/v3/ssd1306/image1bit"
 
-	"sschmc/internal/pkg/text"
+	"IvolgaOledManager/internal/pkg/text"
 )
 
 const (

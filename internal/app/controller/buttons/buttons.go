@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"sschmc/internal/app/repo/db"
-	"sschmc/internal/app/repo/storage"
-	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/gpiobutton"
+	"IvolgaOledManager/internal/app/repo/db"
+	"IvolgaOledManager/internal/app/repo/storage"
+	"IvolgaOledManager/internal/pkg/errlog"
+	"IvolgaOledManager/internal/pkg/gpiobutton"
 )
 
 type Buttons struct {
