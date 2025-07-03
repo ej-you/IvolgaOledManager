@@ -5,6 +5,10 @@ stages:
 variables:
   DOCKER_DNS: "1.1.1.1" # for DNS resolving
 
+before_script:
+  - cat /etc/resolv.conf  # Проверить, какие DNS использует контейнер
+  - ping -c 2 8.8.8.8
+
 lint-job:
   stage: test
   tags:
