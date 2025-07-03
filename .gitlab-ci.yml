@@ -7,22 +7,24 @@ lint-job:
   tags:
    - docker
   image:
-   name: docker/golangci-lint:1.64.8-go1.24.3
+   name: ubuntu:22.04
   script:
-    - mkdir -p /app/src
-    - cp -r $CI_PROJECT_DIR /app/src
-    - ls -la /app/src
+    - echo "Clone repo..."
+    - cp -r $CI_PROJECT_DIR /
+    - ls -lA /
+    - echo "Install linter..."
+    - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.2.1
+    - golangci-lint --version
     - echo "Linting code..."
-    - golangci-lint run -c /app/src/IvolgaOledManager/.golangci.yml /app/src/IvolgaOledManager/...
+    - golangci-lint run -c /IvolgaOledManager/.golangci.yml /IvolgaOledManager/...
 
 build-job:
   stage: build
   tags:
    - docker
   image:
-   name: golang:1.24.4-alpine3.22 # docker/golangci-lint:1.64.8-go1.24.3
+   name: golang:1.24.4-alpine3.22
   script:
-    - mkdir -p /app/src
-    - cp -r $CI_PROJECT_DIR /app/src
+    - cp -r $CI_PROJECT_DIR /
     - echo "Compile project..."
-    - GOOS=linux GOARCH=arm GOARM=7 go build -o /app/src/IvolgaOledManager/bin/ssc_hms_display /app/src/IvolgaOledManager/cmd/display/main.go
+    - GOOS=linux GOARCH=arm GOARM=7 go build -o /IvolgaOledManager/bin/ivolga_oled_manager /IvolgaOledManager/cmd/display/main.go
