@@ -14,9 +14,9 @@ lint-job:
     - ls -lA /
     - echo "Install linter..."
     - wget -O- -nv https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s v2.2.1
-    - /bin/golangci-lint --version
+    - ./bin/golangci-lint --version
     - echo "Lint code..."
-    - /bin/golangci-lint run -c /IvolgaOledManager/.golangci.yml /IvolgaOledManager/...
+    - ./bin/golangci-lint run -c /IvolgaOledManager/.golangci.yml /IvolgaOledManager/...
 
 build-job:
   stage: build
