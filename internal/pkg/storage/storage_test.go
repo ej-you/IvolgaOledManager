@@ -27,3 +27,15 @@ func TestUpdateStorageValue(t *testing.T) {
 	v := store.Get("hello")
 	t.Log("Value:", v)
 }
+
+func TestDeleteStorageValue(t *testing.T) {
+	t.Log("Delete existing value and try to get it")
+
+	store.Delete("hello")
+
+	v := store.Get("hello")
+	if v != nil {
+		t.Error("Unexpected value gotten. Value:", v)
+	}
+	t.Log("No value")
+}
