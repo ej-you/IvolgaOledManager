@@ -27,9 +27,10 @@ build-job:
   script:
     - echo "Compile project..."
     - GOOS=linux GOARCH=arm GOARM=7 go build -o ./bin/ivolga_oled_manager ./cmd/display/main.go
-    - ls -lA ./bin/
+    - ls -lAh ./bin/
     - echo "COmpress binary..."
     - gzip -9 ./bin/ivolga_oled_manager
+    - ls -lAh ./bin/
   artifacts:
     paths:
       - ./bin/ivolga_oled_manager.gz
