@@ -14,15 +14,15 @@ import (
 	"gorm.io/gorm"
 	"periph.io/x/host/v3"
 
-	"sschmc/config"
-	"sschmc/internal/app/controller/buttons"
-	"sschmc/internal/app/controller/renderer"
-	repodb "sschmc/internal/app/repo/db"
-	repofile "sschmc/internal/app/repo/file"
-	repostorage "sschmc/internal/app/repo/storage"
+	"IvolgaOledManager/config"
+	"IvolgaOledManager/internal/app/controller/buttons"
+	"IvolgaOledManager/internal/app/controller/renderer"
+	repodb "IvolgaOledManager/internal/app/repo/db"
+	repofile "IvolgaOledManager/internal/app/repo/file"
+	repostorage "IvolgaOledManager/internal/app/repo/storage"
 
-	"sschmc/internal/pkg/db"
-	"sschmc/internal/pkg/storage"
+	"IvolgaOledManager/internal/pkg/db"
+	"IvolgaOledManager/internal/pkg/storage"
 )
 
 const (

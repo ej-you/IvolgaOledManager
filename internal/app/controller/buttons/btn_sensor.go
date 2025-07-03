@@ -3,9 +3,9 @@ package buttons
 import (
 	"errors"
 
-	"sschmc/internal/app/entity"
-	"sschmc/internal/pkg/errlog"
-	"sschmc/internal/pkg/system"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/errlog"
+	"IvolgaOledManager/internal/pkg/system"
 )
 
 // screenSensor sets "sensor" app-status and update render.
