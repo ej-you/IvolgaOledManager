@@ -34,4 +34,5 @@ build-job:
   script:
     - cp -r $CI_PROJECT_DIR /
     - echo "Compile project..."
-    - GOOS=linux GOARCH=arm GOARM=7 go build -o /IvolgaOledManager/bin/ivolga_oled_manager /IvolgaOledManager/cmd/display/main.go
+    - cd /IvolgaOledManager
+    - GOOS=linux GOARCH=arm GOARM=7 go build -o ./bin/ivolga_oled_manager ./cmd/display/main.go
