@@ -1,47 +1,52 @@
+// Package entity contains all app entities.
 package entity
 
-import "strings"
+import (
+	"unicode/utf8"
 
-const _inactivePrefix = "#" // prefix for inactive sensor line
+	"IvolgaOledManager/internal/pkg/text"
+)
 
-// StationSensor is a model for station sensor config line.
-// The line looks like `@include "/etc/ssc-station.d/GPS.conf"` for active sensor or
-// `# @include "/etc/ssc-station.d/GPS.conf"` for inactive sensor.
-type StationSensor struct {
-	// index of sensor
-	Idx int
-	// config line (e.g. @include "/etc/ssc-station.d/GPS.conf")
-	Line string
-	// sensor name (filename of sensor config file without extension, e.g. GPS)
-	Name string
-	// true if sensor is active
-	Active bool
+const (
+	_defaultResultFontHeight = 16.0 // default height of result text font
+	_maxLineLen              = 16   // max len of line
+
+	MaxDisplayedItems = 3 // max menu items (message lines) amount that can be displayed
+)
+
+type StationResult struct {
+	title            string
+	resultText       string
+	resultFontHeight float64
 }
 
-// ChangeActive sets active to true if Active is false and
-// sets active to false if Active is true.
-// It updates sensor line.
-func (s *StationSensor) ChangeActive() {
-	if s.Active {
-		s.Line = _inactivePrefix + s.Line
+// NewStationResult creates new station result instance.
+func NewStationResult(title, res string) *StationResult {
+	inst := &StationResult{
+		resultFontHeight: _defaultResultFontHeight,
+	}
+
+	// set title
+	if utf8.RuneCountInString(title) > _maxLineLen {
+		inst.title = title[:_maxLineLen-3] + "..."
 	} else {
-		s.Line = s.Line[1:]
+		inst.title = text.StringAlignCenter(title, _maxLineLen)
 	}
-	s.Active = !s.Active
+	// set result text
+	if utf8.RuneCountInString(res) > _maxLineLen {
+		inst.title = res[:_maxLineLen-3] + "..."
+	} else {
+		inst.title = text.StringAlignCenter(res, _maxLineLen)
+	}
+	return inst
 }
 
-// StationSensors contains sensor instances. It's result of config file parsing.
-type StationSensors []*StationSensor
+// Title is a title getter.
+func (s StationResult) Title() string {
+	return s.title
+}
 
-// CollectAll collects all sensor lines to a slice of bytes and returns it.
-func (s StationSensors) CollectAll(prefix, suffix string) []byte {
-	var builder strings.Builder
-	builder.WriteString(prefix)
-	// collect sensor lines
-	for _, sensor := range s {
-		builder.WriteString("\n")
-		builder.WriteString(sensor.Line)
-	}
-	builder.WriteString(suffix)
-	return []byte(builder.String())
+// ResultText is a result text getter.
+func (s StationResult) ResultText() string {
+	return s.resultText
 }

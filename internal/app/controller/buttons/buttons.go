@@ -8,22 +8,20 @@ import (
 	"time"
 
 	"IvolgaOledManager/internal/app/repo/db"
-	"IvolgaOledManager/internal/app/repo/file"
 	"IvolgaOledManager/internal/app/repo/storage"
 	"IvolgaOledManager/internal/pkg/errlog"
 	"IvolgaOledManager/internal/pkg/gpiobutton"
 )
 
 type Buttons struct {
-	btnEsc          gpiobutton.GPIOButton
-	btnUp           gpiobutton.GPIOButton
-	btnDown         gpiobutton.GPIOButton
-	btnEnt          gpiobutton.GPIOButton
-	msgRepoDB       db.MessageRepoDB
-	stationRepoFile file.StationRepoFile
-	store           *storage.RepoStorageManager
-	stationService  string
-	render          chan<- struct{}
+	btnEsc              gpiobutton.GPIOButton
+	btnUp               gpiobutton.GPIOButton
+	btnDown             gpiobutton.GPIOButton
+	btnEnt              gpiobutton.GPIOButton
+	stationResultRepoDB db.StationResultRepoDB
+	store               *storage.RepoStorageManager
+	stationService      string
+	render              chan<- struct{}
 }
 
 // NewButtons returns new Buttons struct pointer.
@@ -32,17 +30,15 @@ type Buttons struct {
 // The store param is an app key-value storage.
 // The render param is a chan to send tasks for renderer to output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
-	dbStorage db.MessageRepoDB, stationRepoFile file.StationRepoFile,
-	store *storage.RepoStorageManager, stationService string,
+	dbStorage db.StationResultRepoDB, store *storage.RepoStorageManager, stationService string,
 	render chan<- struct{}) (*Buttons, error) {
 
 	var err error
 	buttons := &Buttons{
-		msgRepoDB:       dbStorage,
-		stationRepoFile: stationRepoFile,
-		store:           store,
-		stationService:  stationService,
-		render:          render,
+		stationResultRepoDB: dbStorage,
+		store:               store,
+		stationService:      stationService,
+		render:              render,
 	}
 
 	// init all buttons

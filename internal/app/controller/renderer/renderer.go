@@ -55,28 +55,13 @@ func (r *Renderer) StartWithShutdown(ctx context.Context) {
 }
 
 func (r *Renderer) start(ctx context.Context) {
-	// init ticker for menus periodically updates
-	ticker := time.NewTicker(r.menuUpdateDuration)
-	defer ticker.Stop()
-	ticker.Stop()
-
 	var err error
 	for {
 		select {
 		case <-ctx.Done():
 			return
-
-		case <-ticker.C:
-			err = r.update()
-
 		case <-r.needUpdate:
 			err = r.update()
-			// reset ticker for menus
-			if r.store.App.IsMenuAny() {
-				ticker.Reset(r.menuUpdateDuration)
-			} else {
-				ticker.Stop()
-			}
 		}
 		if err != nil {
 			errlog.Print(err)
@@ -104,20 +89,8 @@ func (r *Renderer) update() error {
 		return r.clear()
 	case r.store.App.IsGreetings():
 		return r.greetings()
-	case r.store.App.IsMenuMain():
-		return r.menu(r.store.Menu.GetMain())
-	// first main menu branch
-	case r.store.App.IsMenuLogs():
-		return r.menu(r.store.Menu.GetLogs())
-	case r.store.App.IsMenuLevel():
-		return r.menu(r.store.Menu.GetLevel())
-	case r.store.App.IsMessage():
-		return r.message(r.store.Message.Get())
-	// second main menu branch
-	case r.store.App.IsMenuStation():
-		return r.menu(r.store.Menu.GetStation())
-	case r.store.App.IsSensor():
-		return r.sensor(r.store.Sensor.Get())
+	case r.store.App.IsStationResult():
+		return r.station(r.store.StationResult.Get())
 	default:
 		log.Println("WARNING: no one render rule found")
 	}

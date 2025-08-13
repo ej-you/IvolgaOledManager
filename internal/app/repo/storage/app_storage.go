@@ -42,75 +42,14 @@ func (s *appRepoStorage) IsGreetings() bool {
 	return s.getStatus() == _valueGreetings
 }
 
-// SetMenuMain sets current app-status to menu-main.
-func (s *appRepoStorage) SetMenuMain() {
-	s.setStatus(_valueMenuMain)
+// SetStationResult sets current app-status to station-result.
+func (s *appRepoStorage) SetStationResult() {
+	s.setStatus(_valueStationResult)
 }
 
-// IsMenuMain checks if the current app-status is menu-main.
-func (s *appRepoStorage) IsMenuMain() bool {
-	return s.getStatus() == _valueMenuMain
-}
-
-// SetMenuStation sets current app-status to menu-station.
-func (s *appRepoStorage) SetMenuStation() {
-	s.setStatus(_valueMenuStation)
-}
-
-// IsMenuLogs checks if the current app-status is menu-station.
-func (s *appRepoStorage) IsMenuStation() bool {
-	return s.getStatus() == _valueMenuStation
-}
-
-// SetSensor sets current app-status to sensor.
-func (s *appRepoStorage) SetSensor() {
-	s.setStatus(_valueSensor)
-}
-
-// IsMenuLogs checks if the current app-status is sensor.
-func (s *appRepoStorage) IsSensor() bool {
-	return s.getStatus() == _valueSensor
-}
-
-// SetMenuLogs sets current app-status to menu-logs.
-func (s *appRepoStorage) SetMenuLogs() {
-	s.setStatus(_valueMenuLogs)
-}
-
-// IsMenuLogs checks if the current app-status is menu-logs.
-func (s *appRepoStorage) IsMenuLogs() bool {
-	return s.getStatus() == _valueMenuLogs
-}
-
-// SetMenuLevel sets current app-status to menu-level.
-func (s *appRepoStorage) SetMenuLevel() {
-	s.setStatus(_valueMenuLevel)
-}
-
-// IsMenuLevel checks if the current app-status is menu-level.
-func (s *appRepoStorage) IsMenuLevel() bool {
-	return s.getStatus() == _valueMenuLevel
-}
-
-// SetMessage sets current app-status to message.
-func (s *appRepoStorage) SetMessage() {
-	s.setStatus(_valueMessage)
-}
-
-// IsMessage checks if the current app-status is message.
-func (s *appRepoStorage) IsMessage() bool {
-	return s.getStatus() == _valueMessage
-}
-
-// IsMenuAny checks if the current app-status is any menu.
-func (s *appRepoStorage) IsMenuAny() bool {
-	status := s.getStatus()
-	switch status {
-	case _valueMenuMain, _valueMenuLogs, _valueMenuLevel, _valueMenuStation:
-		return true
-	default:
-		return false
-	}
+// IsStationResult checks if the current app-status is station-result.
+func (s *appRepoStorage) IsStationResult() bool {
+	return s.getStatus() == _valueStationResult
 }
 
 // setStatus gets current app-status.

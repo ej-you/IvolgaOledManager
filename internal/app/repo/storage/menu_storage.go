@@ -8,70 +8,40 @@ import (
 	"IvolgaOledManager/internal/pkg/storage"
 )
 
-var _ MenuRepoStorage = (*menuRepoStorage)(nil)
+var _ StationResultRepoStorage = (*stationResultRepoStorage)(nil)
 
-// MenuStorage implementation.
-type menuRepoStorage struct {
+// StationResultRepoStorage implementation.
+type stationResultRepoStorage struct {
 	store storage.Storage
 }
 
-func NewMenuStorage(store storage.Storage) MenuRepoStorage {
-	return &menuRepoStorage{
+func NewStationResultStorage(store storage.Storage) StationResultRepoStorage {
+	return &stationResultRepoStorage{
 		store: store,
 	}
 }
 
-// GetMain gets menu-main struct from storage.
-func (s *menuRepoStorage) GetMain() *entity.Menu {
-	return s.get(_valueMenuMain)
+// GetMain gets station-result struct from storage.
+func (s *stationResultRepoStorage) Get() *entity.StationResult {
+	return s.get(_valueStationResult)
 }
 
-// SetMain sets menu-main struct to storage.
-func (s *menuRepoStorage) SetMain(value *entity.Menu) {
-	s.set(_valueMenuMain, value)
+// SetMain sets station-result struct to storage.
+func (s *stationResultRepoStorage) Set(value *entity.StationResult) {
+	s.set(_valueStationResult, value)
 }
 
-// GetLogs gets menu-logs struct from storage.
-func (s *menuRepoStorage) GetLogs() *entity.Menu {
-	return s.get(_valueMenuLogs)
-}
-
-// SetLogs sets menu-logs struct to storage.
-func (s *menuRepoStorage) SetLogs(value *entity.Menu) {
-	s.set(_valueMenuLogs, value)
-}
-
-// GetLevel gets menu-level struct from storage.
-func (s *menuRepoStorage) GetLevel() *entity.Menu {
-	return s.get(_valueMenuLevel)
-}
-
-// SetLevel sets menu-level struct to storage.
-func (s *menuRepoStorage) SetLevel(value *entity.Menu) {
-	s.set(_valueMenuLevel, value)
-}
-
-// GetStation gets menu-station struct from storage.
-func (s *menuRepoStorage) GetStation() *entity.Menu {
-	return s.get(_valueMenuStation)
-}
-
-// SetStation sets menu-station struct to storage.
-func (s *menuRepoStorage) SetStation(value *entity.Menu) {
-	s.set(_valueMenuStation, value)
-}
-
-// get gets menu struct from storage.
-func (s *menuRepoStorage) get(key string) *entity.Menu {
-	menu, ok := s.store.Get(key).(*entity.Menu)
+// get gets station-result struct from storage.
+func (s *stationResultRepoStorage) get(key string) *entity.StationResult {
+	menu, ok := s.store.Get(key).(*entity.StationResult)
 	if !ok {
-		errlog.Print(errors.New("menu value is not *entity.Menu"))
-		return &entity.Menu{}
+		errlog.Print(errors.New("menu value is not *entity.StationResult"))
+		return &entity.StationResult{}
 	}
 	return menu
 }
 
-// set sets new menu struct to storage.
-func (s *menuRepoStorage) set(key string, value *entity.Menu) {
+// set sets new station-result struct to storage.
+func (s *stationResultRepoStorage) set(key string, value *entity.StationResult) {
 	s.store.Set(key, value)
 }

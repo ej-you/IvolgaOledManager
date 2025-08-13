@@ -18,7 +18,6 @@ import (
 	"IvolgaOledManager/internal/app/controller/buttons"
 	"IvolgaOledManager/internal/app/controller/renderer"
 	repodb "IvolgaOledManager/internal/app/repo/db"
-	repofile "IvolgaOledManager/internal/app/repo/file"
 	repostorage "IvolgaOledManager/internal/app/repo/storage"
 
 	"IvolgaOledManager/internal/pkg/db"
@@ -89,11 +88,7 @@ func (a app) Run() error {
 
 	// init repos
 	storageManager := repostorage.NewRepoStorageManager(a.store)
-	messageRepoDB := repodb.NewMessageRepoDB(a.dbStorage)
-	stationRepoFile, err := repofile.NewStationRepoFile(a.cfg.Other.Station.ConfigPath)
-	if err != nil {
-		return fmt.Errorf("init station file repo: %w", err)
-	}
+	messageRepoDB := repodb.NewStationResultRepoDB(a.dbStorage)
 
 	// init renderer
 	render, err := renderer.New(
@@ -115,7 +110,6 @@ func (a app) Run() error {
 		a.cfg.Hardware.Buttons.Enter,
 		_checkAliveTimeout,
 		messageRepoDB,
-		stationRepoFile,
 		storageManager,
 		a.cfg.Other.Station.ServiceName,
 		updateDisplay,
