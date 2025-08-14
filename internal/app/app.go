@@ -88,7 +88,8 @@ func (a app) Run() error {
 
 	// init repos
 	storageManager := repostorage.NewRepoStorageManager(a.store)
-	messageRepoDB := repodb.NewStationResultRepoDB(a.dbStorage)
+	// TODO: change mock on normal repo
+	stationResultRepoDB := repodb.NewMockStationResultRepoDB()
 
 	// init renderer
 	render, err := renderer.New(
@@ -109,7 +110,7 @@ func (a app) Run() error {
 		a.cfg.Hardware.Buttons.Down,
 		a.cfg.Hardware.Buttons.Enter,
 		_checkAliveTimeout,
-		messageRepoDB,
+		stationResultRepoDB,
 		storageManager,
 		a.cfg.Other.Station.ServiceName,
 		updateDisplay,

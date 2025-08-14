@@ -18,6 +18,7 @@ func NewStationResultRepoDB(dbStorage *gorm.DB) StationResultRepoDB {
 }
 
 // GetTemperature returns temperature value from DB.
+// TODO: find out DB conn info and rewrite method
 func (r *repoDB) GetTemperature() (float64, error) {
 	panic("not defined")
 	// var results []entity.MessageLevelCount

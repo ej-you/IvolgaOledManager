@@ -10,7 +10,6 @@ import (
 
 // screenStationResult sets "station-result" app-status and update render.
 func (b *Buttons) screenStationResult() {
-	// TODO: get temperature from DB
 	temper, err := b.stationResultRepoDB.GetTemperature()
 	if err != nil {
 		errlog.Print(err)
