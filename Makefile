@@ -1,4 +1,4 @@
-source = ./cmd/display/main.go
+source = ./cmd/presentation/main.go
 arm_v7_dest = ./bin/presentation
 
 dev:

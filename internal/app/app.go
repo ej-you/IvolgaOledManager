@@ -20,7 +20,7 @@ import (
 	repodb "IvolgaOledManager/internal/app/repo/db"
 	repostorage "IvolgaOledManager/internal/app/repo/storage"
 
-	"IvolgaOledManager/internal/pkg/db"
+	// "IvolgaOledManager/internal/pkg/db"
 	"IvolgaOledManager/internal/pkg/storage"
 )
 
@@ -45,13 +45,13 @@ type app struct {
 // New returns App interface.
 func New(cfg *config.Config) (App, error) {
 	// connect to DB
-	dbStorage, err := db.New(cfg.DB.DSN,
-		db.WithTranslateError(),
-		db.WithDisableColorful(),
-		db.WithWarnLogLevel())
-	if err != nil {
-		return nil, err
-	}
+	// dbStorage, err := db.New(cfg.DB.DSN,
+	// 	db.WithTranslateError(),
+	// 	db.WithDisableColorful(),
+	// 	db.WithWarnLogLevel())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// initialise all relevant drivers
 	if _, err := host.Init(); err != nil {
@@ -60,7 +60,7 @@ func New(cfg *config.Config) (App, error) {
 	return &app{
 		cfg:       cfg,
 		store:     storage.NewMap(),
-		dbStorage: dbStorage,
+		dbStorage: nil, // TODO: connect to db and pass dbStorage here
 	}, nil
 }
 
@@ -112,7 +112,6 @@ func (a app) Run() error {
 		_checkAliveTimeout,
 		stationResultRepoDB,
 		storageManager,
-		a.cfg.Other.Station.ServiceName,
 		updateDisplay,
 	)
 	if err != nil {

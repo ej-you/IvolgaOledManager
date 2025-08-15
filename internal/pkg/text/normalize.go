@@ -3,6 +3,7 @@ package text
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"github.com/jedib0t/go-pretty/v6/text"
 )
@@ -17,7 +18,9 @@ func Normalize(msg string, lineLen int) []string {
 // StringAlignCenter aligns given string in the center.
 // It panics if width is more than str.
 func StringAlignCenter(str string, width int) string {
-	spacesLeft := int(float64(width-len(str)) / 2) //nolint:mnd // divide in half
-	spacesRight := width - (spacesLeft + len(str))
+	strLen := utf8.RuneCountInString(str)
+
+	spacesLeft := int(float64(width-strLen) / 2) //nolint:mnd // divide in half
+	spacesRight := width - (spacesLeft + strLen)
 	return strings.Repeat(" ", spacesLeft) + str + strings.Repeat(" ", spacesRight)
 }

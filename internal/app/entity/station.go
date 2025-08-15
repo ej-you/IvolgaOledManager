@@ -3,8 +3,6 @@ package entity
 
 import (
 	"unicode/utf8"
-
-	"IvolgaOledManager/internal/pkg/text"
 )
 
 const (
@@ -30,13 +28,13 @@ func NewStationResult(title, res string) *StationResult {
 	if utf8.RuneCountInString(title) > _maxLineLen {
 		inst.title = title[:_maxLineLen-3] + "..."
 	} else {
-		inst.title = text.StringAlignCenter(title, _maxLineLen)
+		inst.title = title
 	}
 	// set result text
 	if utf8.RuneCountInString(res) > _maxLineLen {
-		inst.title = res[:_maxLineLen-3] + "..."
+		inst.resultText = res[:_maxLineLen-3] + "..."
 	} else {
-		inst.title = text.StringAlignCenter(res, _maxLineLen)
+		inst.resultText = res
 	}
 	return inst
 }

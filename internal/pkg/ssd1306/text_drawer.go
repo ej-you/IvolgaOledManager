@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	_fontAscent = 11   // for correct text output
-	_lineHeight = 16.0 // height for one text line on display
+	_fontAscent = 13   // for correct text output
+	_lineHeight = 20.0 // height for one text line on display
 	_maxLines   = 4    // max lines amount for display
 )
 

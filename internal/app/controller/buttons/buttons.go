@@ -30,14 +30,13 @@ type Buttons struct {
 // The store param is an app key-value storage.
 // The render param is a chan to send tasks for renderer to output data.
 func New(btnEscName, btnUpName, btnDownName, btnEntName string, checkAliveTimeout time.Duration,
-	dbStorage db.StationResultRepoDB, store *storage.RepoStorageManager, stationService string,
+	dbStorage db.StationResultRepoDB, store *storage.RepoStorageManager,
 	render chan<- struct{}) (*Buttons, error) {
 
 	var err error
 	buttons := &Buttons{
 		stationResultRepoDB: dbStorage,
 		store:               store,
-		stationService:      stationService,
 		render:              render,
 	}
 
