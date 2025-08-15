@@ -1,25 +1,27 @@
 package renderer
 
 import (
-	"fmt"
-
 	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/pkg/drawer"
+	"fmt"
 )
 
 // station renders station result.
 func (r *Renderer) station(statRes *entity.StationResult) error {
-	drawer, err := r.device.NewTextDrawer()
+	// collect text screen
+	textScreenBuilder := drawer.NewTextScreenBuilder(r.device.ScreenWidth, r.device.ScreenHeight)
+	textScreen, err := textScreenBuilder.Build(
+		drawer.TextLine{Content: statRes.Title, RelativeSize: 4},
+		drawer.TextLine{Content: "", RelativeSize: 2},
+		drawer.TextLine{Content: statRes.ResultText, RelativeSize: 7},
+		drawer.TextLine{Content: "", RelativeSize: 3},
+	)
 	if err != nil {
-		return fmt.Errorf("create text drawer: %w", err)
+		return fmt.Errorf("create text screen: %w", err)
 	}
-
-	drawer.AddLine("", statRes.Title())
-	drawer.AddLine("", "")
-	drawer.AddLine("", statRes.ResultText())
-	drawer.FillEmpty()
-
-	if err := drawer.Draw(); err != nil {
-		return fmt.Errorf("display text lines: %w", err)
+	// output text screen
+	if err := r.device.DrawTextScreen(textScreen); err != nil {
+		return fmt.Errorf("display text screen: %w", err)
 	}
 	return nil
 }

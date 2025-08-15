@@ -10,7 +10,7 @@ func (b *Buttons) BtnEntRisingHandler() gpiobutton.HandlerFunc {
 		switch {
 		case b.store.App.IsNone():
 			b.screenGreetings()
-		case b.store.App.IsGreetings():
+		case b.store.App.IsGreetings(), b.store.App.IsStationResult():
 			b.screenStationResult()
 		}
 	}

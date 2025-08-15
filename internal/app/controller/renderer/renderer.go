@@ -9,12 +9,17 @@ import (
 	"time"
 
 	"IvolgaOledManager/internal/app/repo/storage"
+	"IvolgaOledManager/internal/pkg/drawer"
 	"IvolgaOledManager/internal/pkg/errlog"
-	"IvolgaOledManager/internal/pkg/ssd1306"
+)
+
+const (
+	_displayWidth  = 128
+	_displayHeight = 64
 )
 
 type Renderer struct {
-	device             *ssd1306.SSD1306
+	device             *drawer.SSD1306
 	greetingsImgPath   string
 	menuUpdateDuration time.Duration
 	store              *storage.RepoStorageManager
@@ -24,13 +29,13 @@ type Renderer struct {
 func New(bus, greetingsImgPath string, menuUpdateDuration time.Duration,
 	store *storage.RepoStorageManager, needUpdate <-chan struct{}) (*Renderer, error) {
 
-	oled, err := ssd1306.NewSSD1306(bus)
+	ssd1306, err := drawer.NewDrawerSSD1306(bus, _displayWidth, _displayHeight)
 	if err != nil {
 		return nil, fmt.Errorf("connect to oled: %w", err)
 	}
 
 	return &Renderer{
-		device:             oled,
+		device:             ssd1306,
 		greetingsImgPath:   greetingsImgPath,
 		needUpdate:         needUpdate,
 		menuUpdateDuration: menuUpdateDuration,

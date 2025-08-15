@@ -20,7 +20,6 @@ type Buttons struct {
 	btnEnt              gpiobutton.GPIOButton
 	stationResultRepoDB db.StationResultRepoDB
 	store               *storage.RepoStorageManager
-	stationService      string
 	render              chan<- struct{}
 }
 
