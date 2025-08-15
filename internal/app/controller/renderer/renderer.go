@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	_displayWidth  = 128
-	_displayHeight = 64
+	_displayWidth  = 128 // oled display width in pixels
+	_displayHeight = 64  // oled display height in pixels
 )
 
 type Renderer struct {

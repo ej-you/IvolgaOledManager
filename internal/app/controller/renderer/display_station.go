@@ -11,10 +11,10 @@ func (r *Renderer) station(statRes *entity.StationResult) error {
 	// collect text screen
 	textScreenBuilder := drawer.NewTextScreenBuilder(r.device.ScreenWidth, r.device.ScreenHeight)
 	textScreen, err := textScreenBuilder.Build(
-		drawer.TextLine{Content: statRes.Title, RelativeSize: 4},
-		drawer.TextLine{Content: "", RelativeSize: 2},
-		drawer.TextLine{Content: statRes.ResultText, RelativeSize: 7},
-		drawer.TextLine{Content: "", RelativeSize: 3},
+		drawer.TextLine{Content: statRes.Title, RelativeSize: 2},
+		drawer.TextLine{Content: "", RelativeSize: 1},
+		drawer.TextLine{Content: statRes.ResultText, RelativeSize: 4},
+		drawer.TextLine{Content: "", RelativeSize: 1},
 	)
 	if err != nil {
 		return fmt.Errorf("create text screen: %w", err)

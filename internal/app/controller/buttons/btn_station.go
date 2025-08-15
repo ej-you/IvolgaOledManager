@@ -18,7 +18,7 @@ func (b *Buttons) screenStationResult() {
 	log.Printf("Gotten temperature: %+v", temper)
 	statRes := &entity.StationResult{
 		Title:      "Температура",
-		ResultText: fmt.Sprintf("%.2f °C", temper),
+		ResultText: fmt.Sprintf("%.2f°C", temper),
 	}
 
 	b.store.StationResult.Set(statRes)
