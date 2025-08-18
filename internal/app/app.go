@@ -19,15 +19,24 @@ import (
 	"IvolgaOledManager/internal/app/controller/renderer"
 	repodb "IvolgaOledManager/internal/app/repo/db"
 	repostorage "IvolgaOledManager/internal/app/repo/storage"
+	"IvolgaOledManager/internal/app/service"
+	"IvolgaOledManager/internal/app/usecase"
 
-	// "IvolgaOledManager/internal/pkg/db"
+	"IvolgaOledManager/internal/pkg/db"
 	"IvolgaOledManager/internal/pkg/storage"
 )
 
 const (
-	_menuUpdateDuration = 600 * time.Millisecond // duration for update menu output to display
-	_checkAliveTimeout  = time.Second            // duration for checking button is alive
+	_renderUpdateDuration = 5 * time.Second // duration for update rendered display output
+	_checkAliveTimeout    = time.Second     // duration for checking button is alive
 )
+
+// var _ Service = (*pricecollector.PriceCollector)(nil)
+
+// App service interface.
+type Service interface {
+	StartWithShutdown(ctx context.Context)
+}
 
 var _ App = (*app)(nil)
 
@@ -45,13 +54,13 @@ type app struct {
 // New returns App interface.
 func New(cfg *config.Config) (App, error) {
 	// connect to DB
-	// dbStorage, err := db.New(cfg.DB.DSN,
-	// 	db.WithTranslateError(),
-	// 	db.WithDisableColorful(),
-	// 	db.WithWarnLogLevel())
-	// if err != nil {
-	// 	return nil, err
-	// }
+	dbStorage, err := db.New(cfg.DB.DSN,
+		db.WithTranslateError(),
+		db.WithDisableColorful(),
+		db.WithWarnLogLevel())
+	if err != nil {
+		return nil, err
+	}
 
 	// initialise all relevant drivers
 	if _, err := host.Init(); err != nil {
@@ -60,7 +69,7 @@ func New(cfg *config.Config) (App, error) {
 	return &app{
 		cfg:       cfg,
 		store:     storage.NewMap(),
-		dbStorage: nil, // TODO: connect to db and pass dbStorage here
+		dbStorage: dbStorage,
 	}, nil
 }
 
@@ -88,14 +97,18 @@ func (a app) Run() error {
 
 	// init repos
 	storageManager := repostorage.NewRepoStorageManager(a.store)
-	// TODO: change mock on normal repo
-	stationResultRepoDB := repodb.NewMockStationResultRepoDB()
+	stationResultRepoDB := repodb.NewStationResultRepoDB(a.dbStorage)
+	// init usecases
+	stationUC := usecase.NewStationResultUsecase(stationResultRepoDB, storageManager.StationResult)
+
+	// init temperature update
+	tempUpdate := service.NewTemperatureUpdate(storageManager, stationUC)
 
 	// init renderer
 	render, err := renderer.New(
 		a.cfg.Hardware.Oled.Bus,
 		a.cfg.App.GreetingsImgPath,
-		_menuUpdateDuration,
+		_renderUpdateDuration,
 		storageManager,
 		updateDisplay,
 	)
@@ -110,7 +123,6 @@ func (a app) Run() error {
 		a.cfg.Hardware.Buttons.Down,
 		a.cfg.Hardware.Buttons.Enter,
 		_checkAliveTimeout,
-		stationResultRepoDB,
 		storageManager,
 		updateDisplay,
 	)
@@ -118,25 +130,23 @@ func (a app) Run() error {
 		return err
 	}
 
-	startControllers(appContext, btns, render)
+	startServices(appContext, btns, render, tempUpdate)
 	log.Println("App shutdown successfully!")
 	return nil
 }
 
-// startControllers starts buttons and renderer in separately goroutines.
-// This function is blocking. Context are used to stop controllers.
-func startControllers(ctx context.Context, btns *buttons.Buttons, render *renderer.Renderer) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	// start renderer
-	go func() {
-		defer wg.Done()
-		render.StartWithShutdown(ctx)
-	}()
-	// start handle buttons rising/falling
-	go func() {
-		defer wg.Done()
-		btns.HandleAll(ctx)
-	}()
+// startServices starts all services in separately goroutines.
+// This function is blocking. Context are used to stop services.
+func startServices(ctx context.Context, services ...Service) {
+	// start all services
+	var wg sync.WaitGroup // nolint:varnamelen // generally accepted name
+	for _, service := range services {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			service.StartWithShutdown(ctx)
+		}()
+	}
+
 	wg.Wait()
 }

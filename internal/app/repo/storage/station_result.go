@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"errors"
+	"fmt"
 
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/pkg/errlog"
@@ -35,7 +35,8 @@ func (s *stationResultRepoStorage) Set(value *entity.StationResult) {
 func (s *stationResultRepoStorage) get(key string) *entity.StationResult {
 	menu, ok := s.store.Get(key).(*entity.StationResult)
 	if !ok {
-		errlog.Print(errors.New("menu value is not *entity.StationResult"))
+		err := fmt.Errorf("station result value type is %T (%#v), not *entity.StationResult", menu, menu)
+		errlog.Print(err)
 		return &entity.StationResult{}
 	}
 	return menu

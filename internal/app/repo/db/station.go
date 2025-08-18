@@ -1,6 +1,8 @@
 package db
 
 import (
+	"fmt"
+
 	"gorm.io/gorm"
 )
 
@@ -18,17 +20,17 @@ func NewStationResultRepoDB(dbStorage *gorm.DB) StationResultRepoDB {
 }
 
 // GetTemperature returns temperature value from DB.
-// TODO: find out DB conn info and rewrite method
 func (r *repoDB) GetTemperature() (float64, error) {
-	panic("not defined")
-	// var results []entity.MessageLevelCount
-	// err := r.dbStorage.
-	// 	Model(&entity.Message{}).
-	// 	Select("level, count(1) as count").
-	// 	Group("level").
-	// 	Find(&results).Error
-	// if err != nil {
-	// 	return nil, fmt.Errorf("get levels count: %w", err)
-	// }
-	// return results, nil
+	var result float64
+	err := r.dbStorage.
+		Table("data").
+		Select("param_value").
+		Where(`table_name="temperatures"`).
+		Order("data_id DESC").
+		Limit(1).
+		Scan(&result).Error
+	if err != nil {
+		return 0.0, fmt.Errorf("from db: %w", err)
+	}
+	return result, nil
 }

@@ -12,7 +12,7 @@ type (
 	Config struct {
 		App      `yaml:"app"`
 		Hardware `yaml:"hardware"`
-		// DB
+		DB
 	}
 
 	App struct {
@@ -60,18 +60,18 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("read yaml config file: %w", err)
 	}
 
-	// var dbConnParams string
-	// if cfg.DB.UseSocket {
-	// 	dbConnParams = fmt.Sprintf("unix(%s)", cfg.DB.Socket)
-	// } else {
-	// 	dbConnParams = fmt.Sprintf("tcp(%s:%s)", cfg.DB.Host, cfg.DB.Port)
-	// }
-	// cfg.DB.DSN = fmt.Sprintf(
-	// 	"%s:%s@%s/%s?parseTime=true&timeout=10s",
-	// 	cfg.DB.User,
-	// 	cfg.DB.Password,
-	// 	dbConnParams,
-	// 	cfg.DB.Name,
-	// )
+	var dbConnParams string
+	if cfg.DB.UseSocket {
+		dbConnParams = fmt.Sprintf("unix(%s)", cfg.DB.Socket)
+	} else {
+		dbConnParams = fmt.Sprintf("tcp(%s:%s)", cfg.DB.Host, cfg.DB.Port)
+	}
+	cfg.DB.DSN = fmt.Sprintf(
+		"%s:%s@%s/%s?parseTime=true&timeout=10s",
+		cfg.DB.User,
+		cfg.DB.Password,
+		dbConnParams,
+		cfg.DB.Name,
+	)
 	return cfg, nil
 }
