@@ -11,6 +11,11 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const (
+	_logLevelError = "error" // error log level tag
+	_logLevelWarn  = "warn"  // warn log level tag
+)
+
 // Internal interface compatible with a logger.Writer.
 // Used to configure a custom DB logger.
 type Logger interface {
@@ -67,7 +72,7 @@ func New(dsn string, options ...Option) (*gorm.DB, error) {
 		return nil, fmt.Errorf("open db connection: %w", err)
 	}
 
-	dbStorage.customLogger.Printf("App successfully connected to DB!")
+	dbStorage.customLogger.Printf("Successfully connected to DB")
 	return gormDB, nil
 }
 
@@ -75,6 +80,22 @@ func New(dsn string, options ...Option) (*gorm.DB, error) {
 func WithLogger(customLogger Logger) Option {
 	return func(d *dbSettings) {
 		d.customLogger = customLogger
+	}
+}
+
+// Set log level for DB. Accepted values: "info", "warn", "error". Optional.
+func WithLogLevel(logLevel string) Option {
+	// default level is info level
+	level := logger.Info
+	switch logLevel {
+	case _logLevelWarn:
+		level = logger.Warn
+	case _logLevelError:
+		level = logger.Error
+	}
+
+	return func(d *dbSettings) {
+		d.logLevel = level
 	}
 }
 
@@ -114,7 +135,7 @@ func WithDisableColorful() Option {
 }
 
 // Set connection for DB. Required.
-// In this case used SQLite as DB.
+// In this case used MyySQL as DB.
 func withConn(dsn string) gorm.Dialector {
 	return mysql.Open(dsn)
 }

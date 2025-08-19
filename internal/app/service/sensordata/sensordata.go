@@ -1,15 +1,14 @@
-package service
+package sensordata
 
 import (
+	"context"
+	"time"
+
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo/storage"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/errlog"
-	"context"
-	"time"
 )
-
-const _updateDuration = 5 * time.Second // duration for temperature updates
 
 type TemperatureUpdate struct {
 	updateDuration time.Duration
@@ -17,11 +16,11 @@ type TemperatureUpdate struct {
 	stationUC      usecase.StationResultUsecase
 }
 
-func NewTemperatureUpdate(store *storage.RepoStorageManager,
+func NewTemperatureUpdate(updateDuration time.Duration, store *storage.RepoStorageManager,
 	stationUC usecase.StationResultUsecase) *TemperatureUpdate {
 
 	return &TemperatureUpdate{
-		updateDuration: _updateDuration,
+		updateDuration: updateDuration,
 		store:          store,
 		stationUC:      stationUC,
 	}

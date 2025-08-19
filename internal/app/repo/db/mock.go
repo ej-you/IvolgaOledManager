@@ -3,21 +3,45 @@ package db
 import "math/rand/v2"
 
 const (
-	_fromRand     = 20 // start random interval
-	_intervalRand = 10 // len of random interval
+	_fromRand = 20 // start random interval
+	_toRand   = 30 // end random interval
 )
 
-var _ StationResultRepoDB = (*mockRepoDB)(nil)
+var _ SensorsRepoDB = (*mockRepoDB)(nil)
 
 // StationResultRepoDB implementation.
 type mockRepoDB struct{}
 
-func NewMockStationResultRepoDB() StationResultRepoDB {
+func NewMockStationResultRepoDB() SensorsRepoDB {
 	return &mockRepoDB{}
 }
 
-// GetTemperature returns random temperature value in the half-open interval [20.0,30.0).
+// GetTemperature returns random temperature value.
 func (r *mockRepoDB) GetTemperature() (float64, error) {
-	temper := rand.Float64()*_intervalRand + _fromRand //nolint:gosec // crypto/rand is excessive
-	return temper, nil
+	return getRandomFloat64(_fromRand, _toRand), nil
+}
+
+// GetHumidity returns random humidity value.
+func (r *mockRepoDB) GetHumidity() (float64, error) {
+	return getRandomFloat64(_fromRand, _toRand), nil
+}
+
+// GetPressure returns random pressure value.
+func (r *mockRepoDB) GetPressure() (int64, error) {
+	return int64(getRandomFloat64(_fromRand, _toRand)), nil
+}
+
+// GetWindSpeed returns random wind speed value.
+func (r *mockRepoDB) GetWindSpeed() (float64, error) {
+	return getRandomFloat64(_fromRand, _toRand), nil
+}
+
+// GetWindDirection returns random wind direction value.
+func (r *mockRepoDB) GetWindDirection() (float64, error) {
+	return getRandomFloat64(_fromRand, _toRand), nil
+}
+
+// getRandomFloat64 returns random float64 in the half open interval [from, to).
+func getRandomFloat64(from, to float64) float64 {
+	return rand.Float64()*(from-to) + from //nolint:gosec // crypto/rand is excessive
 }

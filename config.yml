@@ -1,14 +1,22 @@
 app:
+  log_level: "info" # info/warn/error
+  log_format: "text" # text/json
   greetings_img_path: "./assets/greetings.png" # path to image for greetings output
 hardware:
   oled:
     bus: "2" # i2c bus of ssd1306 oled display
+    width: 128 # display width in pixels
+    height: 64 # display height in pixels
+    updates_duration: "750ms" # duration to regularly updates display screen
   buttons:
     up: "GPIO50" # gpio name for up button
     down: "GPIO51" # gpio name for down button
     escape: "GPIO60" # gpio name for escape button
     enter: "GPIO48" # gpio name for enter button
+    check_alive_timeout: "1s" # timeout to regularly check that button is alive
 other:
   station:
     service_name: "test_web_page.service" # service of station for collecting data from sensors
     config_path: "./ssc-station.conf" # path to config file for station service
+  sensors:
+    data_updates_duration: "1s" # duration to regularly checks new sensors data
