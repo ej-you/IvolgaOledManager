@@ -26,21 +26,21 @@ type AppRepoStorage interface {
 	IsStationResult() bool
 }
 
-// StationResultRepoStorage contains station result entity methods.
-type StationResultRepoStorage interface {
-	Get() *entity.StationResult
-	Set(value *entity.StationResult)
+// StationResultsRepoStorage contains station result entity methods.
+type StationResultsRepoStorage interface {
+	Get() *entity.StationResults
+	Set(value *entity.StationResults)
 }
 
 // RepoStorageManager contains all storage repos.
 type RepoStorageManager struct {
-	App           AppRepoStorage
-	StationResult StationResultRepoStorage
+	App            AppRepoStorage
+	StationResults StationResultsRepoStorage
 }
 
 func NewRepoStorageManager(store storage.Storage) *RepoStorageManager {
 	return &RepoStorageManager{
-		App:           NewAppStorage(store),
-		StationResult: NewStationResultStorage(store),
+		App:            NewAppStorage(store),
+		StationResults: NewStationResultsStorage(store),
 	}
 }

@@ -8,41 +8,41 @@ import (
 	"IvolgaOledManager/internal/pkg/storage"
 )
 
-var _ StationResultRepoStorage = (*stationResultRepoStorage)(nil)
+var _ StationResultsRepoStorage = (*stationResultsRepoStorage)(nil)
 
 // StationResultRepoStorage implementation.
-type stationResultRepoStorage struct {
+type stationResultsRepoStorage struct {
 	store storage.Storage
 }
 
-func NewStationResultStorage(store storage.Storage) StationResultRepoStorage {
-	return &stationResultRepoStorage{
+func NewStationResultsStorage(store storage.Storage) StationResultsRepoStorage {
+	return &stationResultsRepoStorage{
 		store: store,
 	}
 }
 
 // GetMain gets station-result struct from storage.
-func (s *stationResultRepoStorage) Get() *entity.StationResult {
+func (s *stationResultsRepoStorage) Get() *entity.StationResults {
 	return s.get(_valueStationResult)
 }
 
 // SetMain sets station-result struct to storage.
-func (s *stationResultRepoStorage) Set(value *entity.StationResult) {
+func (s *stationResultsRepoStorage) Set(value *entity.StationResults) {
 	s.set(_valueStationResult, value)
 }
 
 // get gets station-result struct from storage.
-func (s *stationResultRepoStorage) get(key string) *entity.StationResult {
-	menu, ok := s.store.Get(key).(*entity.StationResult)
+func (s *stationResultsRepoStorage) get(key string) *entity.StationResults {
+	menu, ok := s.store.Get(key).(*entity.StationResults)
 	if !ok {
-		err := fmt.Errorf("station result value type is %T (%#v), not *entity.StationResult", menu, menu)
+		err := fmt.Errorf("station result value type is %T (%#v), not *entity.StationResults", menu, menu)
 		errlog.Print(err)
-		return &entity.StationResult{}
+		return &entity.StationResults{}
 	}
 	return menu
 }
 
 // set sets new station-result struct to storage.
-func (s *stationResultRepoStorage) set(key string, value *entity.StationResult) {
+func (s *stationResultsRepoStorage) set(key string, value *entity.StationResults) {
 	s.store.Set(key, value)
 }

@@ -31,7 +31,11 @@ const (
 	_checkAliveTimeout    = time.Second     // duration for checking button is alive
 )
 
-// var _ Service = (*pricecollector.PriceCollector)(nil)
+var (
+	_ Service = (*buttons.Buttons)(nil)
+	_ Service = (*renderer.Renderer)(nil)
+	_ Service = (*service.SensorsDataUpdate)(nil)
+)
 
 // App service interface.
 type Service interface {
@@ -97,12 +101,12 @@ func (a app) Run() error {
 
 	// init repos
 	storageManager := repostorage.NewRepoStorageManager(a.store)
-	stationResultRepoDB := repodb.NewStationResultRepoDB(a.dbStorage)
+	stationResultRepoDB := repodb.NewSensorsRepoDB(a.dbStorage)
 	// init usecases
-	stationUC := usecase.NewStationResultUsecase(stationResultRepoDB, storageManager.StationResult)
+	stationUC := usecase.NewStationResultUsecase(stationResultRepoDB, storageManager.StationResults)
 
 	// init temperature update
-	tempUpdate := service.NewTemperatureUpdate(storageManager, stationUC)
+	tempUpdate := service.NewSensorsDataUpdate(storageManager, stationUC, updateDisplay)
 
 	// init renderer
 	render, err := renderer.New(

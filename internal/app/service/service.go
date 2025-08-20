@@ -11,34 +11,42 @@ import (
 
 const _updateDuration = 5 * time.Second // duration for temperature updates
 
-type TemperatureUpdate struct {
+type SensorsDataUpdate struct {
 	updateDuration time.Duration
 	store          *storage.RepoStorageManager
-	stationUC      usecase.StationResultUsecase
+	stationUC      usecase.SensorsUsecase
+	render         chan<- struct{}
 }
 
-func NewTemperatureUpdate(store *storage.RepoStorageManager,
-	stationUC usecase.StationResultUsecase) *TemperatureUpdate {
+func NewSensorsDataUpdate(store *storage.RepoStorageManager,
+	stationUC usecase.SensorsUsecase, render chan<- struct{}) *SensorsDataUpdate {
 
-	return &TemperatureUpdate{
+	return &SensorsDataUpdate{
 		updateDuration: _updateDuration,
 		store:          store,
 		stationUC:      stationUC,
+		render:         render,
 	}
 }
 
-func (t *TemperatureUpdate) StartWithShutdown(ctx context.Context) {
+func (t *SensorsDataUpdate) StartWithShutdown(ctx context.Context) {
 	// set init empty temperature value
-	t.store.StationResult.Set(&entity.StationResult{
-		Title:      "Температура",
-		ResultText: "------",
+	t.store.StationResults.Set(&entity.StationResults{
+		Results: []entity.StationResult{
+			{Title: "Температура", ResultText: "------"},
+			{Title: "Влажность", ResultText: "------"},
+			{Title: "Скорость ветра", ResultText: "------"},
+			{Title: "Направление ветра", ResultText: "------"},
+			{Title: "Давление", ResultText: "------"},
+		},
+		CurrentResult: 0,
 	})
 
 	// init ticker for temperature periodically updates
 	ticker := time.NewTicker(t.updateDuration)
 	defer ticker.Stop()
 
-	var newTemp *entity.StationResult
+	var newResults *entity.StationResults
 	var err error
 	for {
 		select {
@@ -46,12 +54,17 @@ func (t *TemperatureUpdate) StartWithShutdown(ctx context.Context) {
 			return
 
 		case <-ticker.C:
-			newTemp, err = t.stationUC.GetTemperature()
+			newResults, err = t.stationUC.GetAllResults()
 			if err != nil {
 				errlog.Print(err)
 				continue
 			}
-			t.store.StationResult.Set(newTemp)
+			t.store.StationResults.Set(newResults)
+
+			// update render if current screen is temperature result
+			if t.store.App.IsStationResult() {
+				t.render <- struct{}{}
+			}
 		}
 	}
 }

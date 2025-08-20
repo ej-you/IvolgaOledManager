@@ -31,8 +31,11 @@ func (b *Buttons) BtnEscRisingHandler() gpiobutton.HandlerFunc {
 // BtnUpRisingHandler handles all cases of UP button rising.
 func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
-		if b.store.App.IsNone() {
+		switch {
+		case b.store.App.IsNone():
 			b.screenGreetings()
+		case b.store.App.IsStationResult():
+			b.nextStationResult()
 		}
 	}
 }
@@ -40,8 +43,11 @@ func (b *Buttons) BtnUpRisingHandler() gpiobutton.HandlerFunc {
 // BtnDownRisingHandler handles all cases of DOWN button rising.
 func (b *Buttons) BtnDownRisingHandler() gpiobutton.HandlerFunc {
 	return func() {
-		if b.store.App.IsNone() {
+		switch {
+		case b.store.App.IsNone():
 			b.screenGreetings()
+		case b.store.App.IsStationResult():
+			b.previousStationResult()
 		}
 	}
 }

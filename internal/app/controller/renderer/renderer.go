@@ -95,7 +95,7 @@ func (r *Renderer) update() error {
 	case r.store.App.IsGreetings():
 		return r.greetings()
 	case r.store.App.IsStationResult():
-		return r.station(r.store.StationResult.Get())
+		return r.station(r.store.StationResults.Get())
 	default:
 		log.Println("WARNING: no one render rule found")
 	}
