@@ -8,7 +8,7 @@ import (
 // PubSubStorage is a key-value storage with pub/sub supporting.
 // PubSubStorage provides subscription on key.
 // Subscriber receives notify message then the value of key
-// (to which subscriber is subscribed) is updated
+// (to which subscriber is subscribed) is updated.
 type PubSubStorage struct {
 	// map with subscribers' chans for each of published key
 	notifyMap map[string][]chan struct{}
