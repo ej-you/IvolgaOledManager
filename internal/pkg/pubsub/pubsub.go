@@ -3,10 +3,12 @@ package pubsub
 import (
 	"context"
 	"sync"
-
-	"github.com/sirupsen/logrus"
 )
 
+// PubSubStorage is a key-value storage with pub/sub supporting.
+// PubSubStorage provides subscription on key.
+// Subscriber receives notify message then the value of key
+// (to which subscriber is subscribed) is updated
 type PubSubStorage struct {
 	// map with subscribers' chans for each of published key
 	notifyMap map[string][]chan struct{}
@@ -15,6 +17,7 @@ type PubSubStorage struct {
 	mu      sync.RWMutex
 }
 
+// NewPubSubStorage returns new pub/sub storage.
 func NewPubSubStorage() *PubSubStorage {
 	return &PubSubStorage{
 		notifyMap: make(map[string][]chan struct{}),
@@ -30,6 +33,7 @@ func (s *PubSubStorage) Get(key string) any {
 	return s.storage[key]
 }
 
+// Publish saves key-value pair into storage and notify all key subscribers.
 func (s *PubSubStorage) Publish(key string, val any) {
 	// set new value
 	s.mu.Lock()
@@ -42,7 +46,6 @@ func (s *PubSubStorage) Publish(key string, val any) {
 	for _, channel := range s.notifyMap[key] {
 		channel <- struct{}{}
 	}
-	logrus.Infof("Key %q subscribers: %d", key, len(s.notifyMap[key]))
 }
 
 // Subscribe creates and returns notify chan for given key.
@@ -55,9 +58,7 @@ func (s *PubSubStorage) Subscribe(ctx context.Context, key string) <-chan struct
 		defer close(notify)
 		defer s.removeNotifyChanFromMap(key, notify)
 		<-ctx.Done()
-		logrus.Info("AAAAAAAAA")
 	}()
-	logrus.Infof("DDDDDDDDD: %#v", s.notifyMap)
 	return notify
 }
 
@@ -69,7 +70,6 @@ func (s *PubSubStorage) addNotifyChanToMap(key string, notify chan struct{}) {
 	defer s.mu.Unlock()
 
 	s.notifyMap[key] = append(s.notifyMap[key], notify)
-	logrus.Infof("BBBBB: %#v", s.notifyMap)
 }
 
 // removeNotifyChanFromMap removes chan from slice of chans (in map).
@@ -82,11 +82,9 @@ func (s *PubSubStorage) removeNotifyChanFromMap(key string, notify chan struct{}
 		return
 	}
 	for idx := range chanSlice {
-		logrus.Infof("chanSlice[idx]: %+v | notify: %+v", chanSlice[idx], notify)
 		if chanSlice[idx] == notify {
 			s.notifyMap[key] = append(chanSlice[:idx], chanSlice[idx+1:]...)
 			break
 		}
 	}
-	logrus.Infof("CCCCC: %#v", s.notifyMap)
 }
