@@ -6,6 +6,7 @@ package gpiobutton
 import (
 	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -16,11 +17,15 @@ import (
 // Function to handle button rising/falling.
 type HandlerFunc func(ctx context.Context)
 
+// Empty handler func.
+var DefaultHandlerFunc HandlerFunc = func(_ context.Context) {}
+
 type GPIOButton struct {
 	gpioPin           gpio.PinIO
 	checkAliveTimeout time.Duration
 	state             gpio.Level
 
+	mu             sync.Mutex
 	handlersCtx    context.Context
 	risingHandler  HandlerFunc
 	fallingHandler HandlerFunc
@@ -45,19 +50,25 @@ func New(gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) 
 		checkAliveTimeout: checkAliveTimeout,
 		state:             gpio.High,
 		handlersCtx:       context.Background(),
-		risingHandler:     func(_ context.Context) {},
-		fallingHandler:    func(_ context.Context) {},
+		risingHandler:     DefaultHandlerFunc,
+		fallingHandler:    DefaultHandlerFunc,
 	}, nil
 }
 
 // SetRisingHandler sets new handler when the button is rise.
 func (b *GPIOButton) SetRisingHandler(ctx context.Context, handler HandlerFunc) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	b.handlersCtx = ctx
 	b.risingHandler = handler
 }
 
 // SetFallingHandler sets new handler when the button is fall.
 func (b *GPIOButton) SetFallingHandler(ctx context.Context, handler HandlerFunc) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	b.handlersCtx = ctx
 	b.fallingHandler = handler
 }
@@ -75,12 +86,20 @@ func (b *GPIOButton) HandleWithShutdown(ctx context.Context) error {
 				continue
 			}
 		}
-		// handle button falling if level is HIGH else rising
-		if b.state {
-			b.fallingHandler(b.handlersCtx)
-		} else {
-			b.risingHandler(b.handlersCtx)
-		}
+		// handle button pressing
+		b.handle()
+	}
+}
+
+// handle handles button falling if level is HIGH else rising.
+func (b *GPIOButton) handle() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	if b.state {
+		b.fallingHandler(b.handlersCtx)
+	} else {
+		b.risingHandler(b.handlersCtx)
 	}
 }
 
