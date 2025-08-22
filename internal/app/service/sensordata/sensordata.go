@@ -25,6 +25,8 @@ type SensorDataUpdate struct {
 }
 
 func (s *SensorDataUpdate) StartWithShutdown(ctx context.Context) error {
+	logrus.Infof("start %s service...", s.storageKey)
+
 	// init ticker for sensor data periodically updates
 	ticker := time.NewTicker(s.updatesDuration)
 	defer ticker.Stop()

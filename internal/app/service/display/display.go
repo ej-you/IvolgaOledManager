@@ -67,6 +67,8 @@ func (d *Display) SetRenderer(renderer Renderer) {
 // Service will stop when given context will be stopped.
 // This method is blocking.
 func (d *Display) StartWithShutdown(ctx context.Context) error {
+	logrus.Info("start display service...")
+
 	// start display updates loop
 	d.start(ctx)
 	// close display after ctx is done

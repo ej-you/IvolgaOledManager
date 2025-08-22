@@ -8,6 +8,8 @@ import (
 
 	"IvolgaOledManager/config"
 	"IvolgaOledManager/internal/pkg/gpiobutton"
+
+	"github.com/sirupsen/logrus"
 )
 
 const _buttonsAmount = 4 // amount of buttons
@@ -60,6 +62,8 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 
 	// start all buttons
 	for k, v := range *b {
+		logrus.Infof("start %s button service...", k)
+
 		wg.Add(1)
 		go func(btnName string, btn Button) {
 			defer wg.Done()
