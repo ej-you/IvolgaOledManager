@@ -8,23 +8,28 @@ import (
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/app/usecase"
+	"IvolgaOledManager/internal/pkg/pubsub"
 
 	"github.com/sirupsen/logrus"
 )
 
-type SensorDataUpdate struct {
+// getDataFunc is a function to get new sensor data value from usecase.
+type getDataFunc func() (*entity.SensorData, error)
+
+type Updater struct {
 	// time between data update requests
 	updatesDuration time.Duration
 	// function from sensor usecase to get data from specific sensor
-	getData func() (*entity.SensorData, error)
+	getData getDataFunc
 
 	// storage instance
-	store repo.PubSubStorage
+	store pubsub.Storage
 	// storage key for value of specific sensor
-	storageKey repo.PubSubKey
+	storageKey string
 }
 
-func (s *SensorDataUpdate) StartWithShutdown(ctx context.Context) error {
+// StartWithShutdown starts updater loop. It may be stopped by context cancellaiton.
+func (s *Updater) StartWithShutdown(ctx context.Context) error {
 	logrus.Infof("start %s service...", s.storageKey)
 
 	// init ticker for sensor data periodically updates
@@ -52,82 +57,56 @@ func (s *SensorDataUpdate) StartWithShutdown(ctx context.Context) error {
 	}
 }
 
-// NewTemperatureUpdate returns new temperature update service.
-func NewTemperatureUpdate(cfg *config.Config, store repo.PubSubStorage,
-	sensorUC usecase.SensorDataUsecase) *SensorDataUpdate {
+// NewTemperatureUpdater returns new temperature updater service.
+func NewTemperatureUpdater(cfg *config.Config, store pubsub.Storage,
+	sensorUC usecase.SensorDataUsecase) *Updater {
 
-	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{Title: usecase.SensorTitleTemp, Data: "------"}
-	store.Publish(repo.SensorTempKey, emptyData)
-	// return update service
-	return &SensorDataUpdate{
-		updatesDuration: cfg.Other.Sensors.DataUpdatesDuration,
-		getData:         sensorUC.GetTemperature,
-		store:           store,
-		storageKey:      repo.SensorTempKey,
-	}
+	return newUpdater(cfg, store, sensorUC.GetTemperature, repo.SensTempKey)
 }
 
-// NewHumidityUpdate returns new humidity update service.
-func NewHumidityUpdate(cfg *config.Config, store repo.PubSubStorage,
-	sensorUC usecase.SensorDataUsecase) *SensorDataUpdate {
+// NewHumidityUpdater returns new humidity updater service.
+func NewHumidityUpdater(cfg *config.Config, store pubsub.Storage,
+	sensorUC usecase.SensorDataUsecase) *Updater {
 
-	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{Title: usecase.SensorTitleHumid, Data: "------"}
-	store.Publish(repo.SensorHumidKey, emptyData)
-	// return update service
-	return &SensorDataUpdate{
-		updatesDuration: cfg.Hardware.Oled.UpdatesDuration,
-		getData:         sensorUC.GetHumidity,
-		store:           store,
-		storageKey:      repo.SensorHumidKey,
-	}
+	return newUpdater(cfg, store, sensorUC.GetHumidity, repo.SensHumidKey)
 }
 
-// NewPressureUpdate returns new pressure update service.
-func NewPressureUpdate(cfg *config.Config, store repo.PubSubStorage,
-	sensorUC usecase.SensorDataUsecase) *SensorDataUpdate {
+// NewPressureUpdater returns new pressure updater service.
+func NewPressureUpdater(cfg *config.Config, store pubsub.Storage,
+	sensorUC usecase.SensorDataUsecase) *Updater {
 
-	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{Title: usecase.SensorTitlePress, Data: "------"}
-	store.Publish(repo.SensorPressKey, emptyData)
-	// return update service
-	return &SensorDataUpdate{
-		updatesDuration: cfg.Hardware.Oled.UpdatesDuration,
-		getData:         sensorUC.GetPressure,
-		store:           store,
-		storageKey:      repo.SensorPressKey,
-	}
+	return newUpdater(cfg, store, sensorUC.GetPressure, repo.SensPressKey)
 }
 
-// NewWindSpeedUpdate returns new wind speed update service.
-func NewWindSpeedUpdate(cfg *config.Config, store repo.PubSubStorage,
-	sensorUC usecase.SensorDataUsecase) *SensorDataUpdate {
+// NewWindSpeedUpdater returns new wind speed updater service.
+func NewWindSpeedUpdater(cfg *config.Config, store pubsub.Storage,
+	sensorUC usecase.SensorDataUsecase) *Updater {
 
-	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{Title: usecase.SensorTitleWindSpeed, Data: "------"}
-	store.Publish(repo.SensorWindSpeedKey, emptyData)
-	// return update service
-	return &SensorDataUpdate{
-		updatesDuration: cfg.Hardware.Oled.UpdatesDuration,
-		getData:         sensorUC.GetWindSpeed,
-		store:           store,
-		storageKey:      repo.SensorWindSpeedKey,
-	}
+	return newUpdater(cfg, store, sensorUC.GetWindSpeed, repo.SensWindSpeedKey)
 }
 
-// NewWindDirUpdate returns new wind direction update service.
-func NewWindDirUpdate(cfg *config.Config, store repo.PubSubStorage,
-	sensorUC usecase.SensorDataUsecase) *SensorDataUpdate {
+// NewWindDirUpdater returns new wind direction updater service.
+func NewWindDirUpdater(cfg *config.Config, store pubsub.Storage,
+	sensorUC usecase.SensorDataUsecase) *Updater {
+
+	return newUpdater(cfg, store, sensorUC.GetWindDirection, repo.SensWindDirKey)
+}
+
+// newUpdater returns new sensor data updater service.
+func newUpdater(cfg *config.Config, store pubsub.Storage,
+	getData getDataFunc, sensorKey string) *Updater {
 
 	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{Title: usecase.SensorTitleWindDir, Data: "------"}
-	store.Publish(repo.SensorWindDirKey, emptyData)
+	emptyData := &entity.SensorData{
+		Title: usecase.SensorTitleMap[sensorKey],
+		Data:  "------",
+	}
+	store.Publish(sensorKey, emptyData)
 	// return update service
-	return &SensorDataUpdate{
+	return &Updater{
 		updatesDuration: cfg.Hardware.Oled.UpdatesDuration,
-		getData:         sensorUC.GetWindDirection,
+		getData:         getData,
 		store:           store,
-		storageKey:      repo.SensorWindDirKey,
+		storageKey:      sensorKey,
 	}
 }

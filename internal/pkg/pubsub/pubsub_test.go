@@ -8,7 +8,7 @@ import (
 )
 
 func TestPubSubStorage(t *testing.T) {
-	storage := NewPubSubStorage()
+	storage := NewKeyValueStorage()
 
 	// publish data (no subscribers)
 	data1Key := "test"

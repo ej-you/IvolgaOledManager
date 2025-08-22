@@ -1,5 +1,5 @@
-source = ./cmd/presentation/main.go
-arm_v7_dest = ./bin/presentation
+source = ./cmd/display/main.go
+arm_v7_dest = ./bin/display_v2
 
 dev:
 	go run $(source)

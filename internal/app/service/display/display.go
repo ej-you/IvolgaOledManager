@@ -2,14 +2,15 @@
 package display
 
 import (
-	"IvolgaOledManager/config"
-	"IvolgaOledManager/internal/pkg/ssd1306"
 	"context"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
+
+	"IvolgaOledManager/config"
+	"IvolgaOledManager/internal/pkg/ssd1306"
 )
 
 var _ Device = (*ssd1306.SSD1306)(nil)

@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
 	"IvolgaOledManager/config"
 	"IvolgaOledManager/internal/pkg/gpiobutton"
-
-	"github.com/sirupsen/logrus"
 )
 
 const _buttonsAmount = 4 // amount of buttons
@@ -31,21 +31,21 @@ func NewButtons(cfg *config.Config) (*Buttons, error) {
 	var err error
 	btns := make(Buttons, _buttonsAmount)
 
-	btns["up"], err = gpiobutton.New(cfg.Hardware.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns["up"], err = gpiobutton.New(cfg.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, fmt.Errorf("up btn: %w", err)
 	}
-	btns["down"], err = gpiobutton.New(cfg.Hardware.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns["down"], err = gpiobutton.New(cfg.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("up down: %w", err)
+		return nil, fmt.Errorf("down btn: %w", err)
 	}
-	btns["esc"], err = gpiobutton.New(cfg.Hardware.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns["esc"], err = gpiobutton.New(cfg.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("up esc: %w", err)
+		return nil, fmt.Errorf("esc btn: %w", err)
 	}
-	btns["ent"], err = gpiobutton.New(cfg.Hardware.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns["ent"], err = gpiobutton.New(cfg.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("up ent: %w", err)
+		return nil, fmt.Errorf("ent btn: %w", err)
 	}
 	return &btns, nil
 }
@@ -61,8 +61,8 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 	errChan := make(chan error, 1)
 
 	// start all buttons
-	for k, v := range *b {
-		logrus.Infof("start %s button service...", k)
+	for key, val := range *b {
+		logrus.Infof("start button:%s service...", key)
 
 		wg.Add(1)
 		go func(btnName string, btn Button) {
@@ -75,13 +75,13 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 				default:
 				}
 			}
-		}(k, v)
+		}(key, val)
 	}
 	// wait for all buttons
 	wg.Wait()
 
 	select {
-	// return error if was occured
+	// return error if was occurred
 	case err := <-errChan:
 		return err
 	default:

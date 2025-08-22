@@ -10,16 +10,17 @@ import (
 	"syscall"
 
 	"github.com/sirupsen/logrus"
+	"periph.io/x/host/v3"
 
 	"IvolgaOledManager/config"
 	repodb "IvolgaOledManager/internal/app/repo/db"
-	"IvolgaOledManager/internal/app/repo/pubsub"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/display"
 	"IvolgaOledManager/internal/app/service/sensordata"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
 	"IvolgaOledManager/internal/pkg/logger"
+	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
 var _ Service = (*button.Buttons)(nil)
@@ -37,6 +38,11 @@ type App struct {
 
 // New returns new app instance.
 func New() (*App, error) {
+	// initialise all relevant drivers
+	if _, err := host.Init(); err != nil {
+		return nil, fmt.Errorf("init drivers: %w", err)
+	}
+
 	// load config
 	cfg, err := config.New()
 	if err != nil {
@@ -56,14 +62,14 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("db: %w", err)
 	}
 	// create storage
-	storage := pubsub.NewAppPubSub()
+	storage := pubsub.NewKeyValueStorage()
 
 	// init repos
 	sensorRepoDB := repodb.NewMockStationResultRepoDB()
 	// init usecases
 	sensorUC := usecase.NewSensorDataUsecase(sensorRepoDB, storage)
 
-	// init buttons service
+	// init buttons services
 	btns, err := button.NewButtons(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create buttons service: %w", err)
@@ -73,17 +79,17 @@ func New() (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create display service: %w", err)
 	}
-	// init update services
-	tempUpdate := sensordata.NewTemperatureUpdate(cfg, storage, sensorUC)
-	humidUpdate := sensordata.NewHumidityUpdate(cfg, storage, sensorUC)
-	pressUpdate := sensordata.NewPressureUpdate(cfg, storage, sensorUC)
-	windSpeedUpdate := sensordata.NewWindSpeedUpdate(cfg, storage, sensorUC)
-	windDirUpdate := sensordata.NewWindDirUpdate(cfg, storage, sensorUC)
+	// init updater services
+	tempUpdater := sensordata.NewTemperatureUpdater(cfg, storage, sensorUC)
+	humidUpdater := sensordata.NewHumidityUpdater(cfg, storage, sensorUC)
+	pressUpdater := sensordata.NewPressureUpdater(cfg, storage, sensorUC)
+	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensorUC)
+	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensorUC)
 
 	return &App{
 		cfg: cfg,
 		services: []Service{btns, displ,
-			tempUpdate, humidUpdate, pressUpdate, windSpeedUpdate, windDirUpdate},
+			tempUpdater, humidUpdater, pressUpdater, windSpeedUpdater, windDirUpdater},
 	}, nil
 }
 
@@ -118,6 +124,7 @@ func (a *App) Run() error {
 			}
 		}()
 	}
+	logrus.Info("all services were started successfully")
 
 	select {
 	case handledSignal := <-quitSig:

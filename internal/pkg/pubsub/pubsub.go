@@ -1,3 +1,4 @@
+// Package pubsub contains key-value storage with pub/sub funcs.
 package pubsub
 
 import (
@@ -5,11 +6,20 @@ import (
 	"sync"
 )
 
-// PubSubStorage is a key-value storage with pub/sub supporting.
-// PubSubStorage provides subscription on key.
+var _ Storage = (*KeyValueStorage)(nil)
+
+// Storage is aa pub/sub storage interface.
+type Storage interface {
+	Get(key string) any
+	Publish(key string, val any)
+	Subscribe(ctx context.Context, key string) <-chan struct{}
+}
+
+// KeyValueStorage is a key-value storage with pub/sub supporting.
+// KeyValueStorage provides subscription on key.
 // Subscriber receives notify message then the value of key
 // (to which subscriber is subscribed) is updated.
-type PubSubStorage struct {
+type KeyValueStorage struct {
 	// map with subscribers' chans for each of published key
 	notifyMap map[string][]chan struct{}
 	// key-value storage for published data
@@ -17,16 +27,16 @@ type PubSubStorage struct {
 	mu      sync.RWMutex
 }
 
-// NewPubSubStorage returns new pub/sub storage.
-func NewPubSubStorage() *PubSubStorage {
-	return &PubSubStorage{
+// NewKeyValueStorage returns new pub/sub storage.
+func NewKeyValueStorage() *KeyValueStorage {
+	return &KeyValueStorage{
 		notifyMap: make(map[string][]chan struct{}),
 		storage:   make(map[string]any),
 	}
 }
 
 // Get returns value from storage by given key.
-func (s *PubSubStorage) Get(key string) any {
+func (s *KeyValueStorage) Get(key string) any {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -34,7 +44,7 @@ func (s *PubSubStorage) Get(key string) any {
 }
 
 // Publish saves key-value pair into storage and notify all key subscribers.
-func (s *PubSubStorage) Publish(key string, val any) {
+func (s *KeyValueStorage) Publish(key string, val any) {
 	// set new value
 	s.mu.Lock()
 	s.storage[key] = val
@@ -49,7 +59,7 @@ func (s *PubSubStorage) Publish(key string, val any) {
 }
 
 // Subscribe creates and returns notify chan for given key.
-func (s *PubSubStorage) Subscribe(ctx context.Context, key string) <-chan struct{} {
+func (s *KeyValueStorage) Subscribe(ctx context.Context, key string) <-chan struct{} {
 	notify := make(chan struct{}, 1)
 	s.addNotifyChanToMap(key, notify)
 
@@ -65,7 +75,7 @@ func (s *PubSubStorage) Subscribe(ctx context.Context, key string) <-chan struct
 // addNotifyChanToMap adds chan into slice of chans (in map) if
 // slice is already init for given key.
 // Else this method creates new slice of chans for given key and adds it into map.
-func (s *PubSubStorage) addNotifyChanToMap(key string, notify chan struct{}) {
+func (s *KeyValueStorage) addNotifyChanToMap(key string, notify chan struct{}) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -73,7 +83,7 @@ func (s *PubSubStorage) addNotifyChanToMap(key string, notify chan struct{}) {
 }
 
 // removeNotifyChanFromMap removes chan from slice of chans (in map).
-func (s *PubSubStorage) removeNotifyChanFromMap(key string, notify chan struct{}) {
+func (s *KeyValueStorage) removeNotifyChanFromMap(key string, notify chan struct{}) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

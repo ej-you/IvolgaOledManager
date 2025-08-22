@@ -2,7 +2,12 @@
 // like env variables, yaml-files etc.
 package config
 
-import "time"
+import (
+	"fmt"
+	"time"
+
+	"github.com/ilyakaznacheev/cleanenv"
+)
 
 type (
 	Config struct {
@@ -68,27 +73,27 @@ type (
 func New() (*Config, error) {
 	cfg := &Config{}
 
-	// // read ENV variables
-	// if err := cleanenv.ReadEnv(cfg); err != nil {
-	// 	return nil, fmt.Errorf("read env-variables: %w", err)
-	// }
-	// // read YAML config file
-	// if err := cleanenv.ReadConfig("./config.yml", cfg); err != nil {
-	// 	return nil, fmt.Errorf("read yaml config file: %w", err)
-	// }
+	// read ENV variables
+	if err := cleanenv.ReadEnv(cfg); err != nil {
+		return nil, fmt.Errorf("read env-variables: %w", err)
+	}
+	// read YAML config file
+	if err := cleanenv.ReadConfig("./config.yml", cfg); err != nil {
+		return nil, fmt.Errorf("read yaml config file: %w", err)
+	}
 
-	// var dbConnParams string
-	// if cfg.DB.UseSocket {
-	// 	dbConnParams = fmt.Sprintf("unix(%s)", cfg.DB.Socket)
-	// } else {
-	// 	dbConnParams = fmt.Sprintf("tcp(%s:%s)", cfg.DB.Host, cfg.DB.Port)
-	// }
-	// cfg.DB.DSN = fmt.Sprintf(
-	// 	"%s:%s@%s/%s?parseTime=true&timeout=10s",
-	// 	cfg.DB.User,
-	// 	cfg.DB.Password,
-	// 	dbConnParams,
-	// 	cfg.DB.Name,
-	// )
+	var dbConnParams string
+	if cfg.DB.UseSocket {
+		dbConnParams = fmt.Sprintf("unix(%s)", cfg.DB.Socket)
+	} else {
+		dbConnParams = fmt.Sprintf("tcp(%s:%s)", cfg.DB.Host, cfg.DB.Port)
+	}
+	cfg.DB.DSN = fmt.Sprintf(
+		"%s:%s@%s/%s?parseTime=true&timeout=10s",
+		cfg.DB.User,
+		cfg.DB.Password,
+		dbConnParams,
+		cfg.DB.Name,
+	)
 	return cfg, nil
 }

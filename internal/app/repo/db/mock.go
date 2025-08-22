@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	_fromRand = 20 // start random interval
-	_toRand   = 30 // end random interval
+	_fromRand  = 20  // start random interval
+	_toRand    = 30  // end random interval
+	_fromRand2 = 200 // start random interval 2
+	_toRand2   = 300 // end random interval 2
 )
 
 var _ repo.SensorRepoDB = (*SensorsMock)(nil)
@@ -32,7 +34,7 @@ func (r *SensorsMock) GetHumidity() (float64, error) {
 
 // GetPressure returns random pressure value.
 func (r *SensorsMock) GetPressure() (float64, error) {
-	return getRandomFloat64(_fromRand, _toRand), nil
+	return getRandomFloat64(_fromRand2, _toRand2), nil
 }
 
 // GetWindSpeed returns random wind speed value.
@@ -42,7 +44,7 @@ func (r *SensorsMock) GetWindSpeed() (float64, error) {
 
 // GetWindDirection returns random wind direction value.
 func (r *SensorsMock) GetWindDirection() (float64, error) {
-	return getRandomFloat64(_fromRand, _toRand), nil
+	return getRandomFloat64(_fromRand2, _toRand2), nil
 }
 
 // getRandomFloat64 returns random float64 in the half open interval [from, to).

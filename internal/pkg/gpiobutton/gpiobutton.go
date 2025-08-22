@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/conn/v3/gpio/gpioreg"
 )
@@ -44,7 +43,6 @@ func New(gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) 
 		return nil, fmt.Errorf("set up input for gpio button %s: %w", gpioName, err)
 	}
 
-	logrus.Infof("Button %s was initialized successfully", gpioName)
 	return &GPIOButton{
 		gpioPin:           gpioPin,
 		checkAliveTimeout: checkAliveTimeout,
