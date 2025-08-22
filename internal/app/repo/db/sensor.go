@@ -1,52 +1,54 @@
+// Package db contains implementations of DB repository interfaces.
 package db
 
 import (
 	"fmt"
 
 	"gorm.io/gorm"
+
+	"IvolgaOledManager/internal/app/repo"
 )
 
-var _ SensorsRepoDB = (*repoDB)(nil)
+var _ repo.SensorRepoDB = (*SensorsRepo)(nil)
 
-// SensorsRepoDB implementation.
-type repoDB struct {
+// SensorsRepo is a repo.SensorsRepoDB implementation.
+type SensorsRepo struct {
 	dbStorage *gorm.DB
 }
 
-func NewSensorsRepoDB(dbStorage *gorm.DB) SensorsRepoDB {
-	return &repoDB{
+func NewSensorsRepoDB(dbStorage *gorm.DB) *SensorsRepo {
+	return &SensorsRepo{
 		dbStorage: dbStorage,
 	}
 }
 
 // GetTemperature returns temperature value from DB.
-func (r *repoDB) GetTemperature() (float64, error) {
+func (r *SensorsRepo) GetTemperature() (float64, error) {
 	return r.getSensorResult(`table_name="temperatures"`)
 }
 
 // GetHumidity returns humidity value from DB.
-func (r *repoDB) GetHumidity() (float64, error) {
+func (r *SensorsRepo) GetHumidity() (float64, error) {
 	return r.getSensorResult(`table_name="humiditys"`)
 }
 
 // GetPressure returns pressure value from DB.
-func (r *repoDB) GetPressure() (int64, error) {
-	floatValue, err := r.getSensorResult(`table_name="abs_pressures"`)
-	return int64(floatValue), err
+func (r *SensorsRepo) GetPressure() (float64, error) {
+	return r.getSensorResult(`table_name="abs_pressures"`)
 }
 
 // GetWindSpeed returns wind speed value from DB.
-func (r *repoDB) GetWindSpeed() (float64, error) {
+func (r *SensorsRepo) GetWindSpeed() (float64, error) {
 	return r.getSensorResult(`table_name="winds" AND param_name="speed"`)
 }
 
 // GetWindDirection returns wind direction value from DB.
-func (r *repoDB) GetWindDirection() (float64, error) {
+func (r *SensorsRepo) GetWindDirection() (float64, error) {
 	return r.getSensorResult(`table_name="winds" AND param_name="direction"`)
 }
 
-// getSensorResult returns sensor result from DB with given cond.
-func (r *repoDB) getSensorResult(cond string) (float64, error) {
+// getSensorResult returns sensor result from DB with given condition.
+func (r *SensorsRepo) getSensorResult(cond string) (float64, error) {
 	var result float64
 	err := r.dbStorage.
 		Table("data").

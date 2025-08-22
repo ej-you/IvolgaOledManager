@@ -12,8 +12,12 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"IvolgaOledManager/config"
+	repodb "IvolgaOledManager/internal/app/repo/db"
+	"IvolgaOledManager/internal/app/repo/pubsub"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/display"
+	"IvolgaOledManager/internal/app/service/sensordata"
+	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
 	"IvolgaOledManager/internal/pkg/logger"
 )
@@ -42,7 +46,7 @@ func New() (*App, error) {
 	logger.InitLogrus(cfg.App.LogLevel, cfg.App.LogFormat)
 
 	// connect to DB
-	gormDB, err := db.New(cfg.DB.DSN,
+	_, err = db.New(cfg.DB.DSN,
 		db.WithTranslateError(),
 		db.WithIgnoreNotFound(),
 		db.WithDisableColorful(),
@@ -51,6 +55,13 @@ func New() (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("db: %w", err)
 	}
+	// create storage
+	storage := pubsub.NewAppPubSub()
+
+	// init repos
+	sensorRepoDB := repodb.NewMockStationResultRepoDB()
+	// init usecases
+	sensorUC := usecase.NewSensorDataUsecase(sensorRepoDB, storage)
 
 	// init buttons service
 	btns, err := button.NewButtons(cfg)
@@ -62,10 +73,17 @@ func New() (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create display service: %w", err)
 	}
+	// init update services
+	tempUpdate := sensordata.NewTemperatureUpdate(cfg, storage, sensorUC)
+	humidUpdate := sensordata.NewHumidityUpdate(cfg, storage, sensorUC)
+	pressUpdate := sensordata.NewPressureUpdate(cfg, storage, sensorUC)
+	windSpeedUpdate := sensordata.NewWindSpeedUpdate(cfg, storage, sensorUC)
+	windDirUpdate := sensordata.NewWindDirUpdate(cfg, storage, sensorUC)
 
 	return &App{
-		cfg:      cfg,
-		services: []Service{btns, displ},
+		cfg: cfg,
+		services: []Service{btns, displ,
+			tempUpdate, humidUpdate, pressUpdate, windSpeedUpdate, windDirUpdate},
 	}, nil
 }
 
