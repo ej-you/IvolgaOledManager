@@ -51,6 +51,7 @@ func (s *Updater) StartWithShutdown(ctx context.Context) error {
 			}
 			// if data is new
 			if newData != nil {
+				logrus.Infof("new data on %s", s.storageKey)
 				s.store.Publish(s.storageKey, newData)
 			}
 		}
