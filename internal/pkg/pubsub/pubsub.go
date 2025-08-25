@@ -59,6 +59,7 @@ func (s *KeyValueStorage) Publish(key string, val any) {
 }
 
 // Subscribe creates and returns notify chan for given key.
+// Subscriber can unsubscribe with cancelling given context.
 func (s *KeyValueStorage) Subscribe(ctx context.Context, key string) <-chan struct{} {
 	notify := make(chan struct{}, 1)
 	s.addNotifyChanToMap(key, notify)

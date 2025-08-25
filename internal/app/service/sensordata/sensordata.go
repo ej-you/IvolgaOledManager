@@ -105,7 +105,7 @@ func newUpdater(cfg *config.Config, store pubsub.Storage,
 	store.Publish(sensorKey, emptyData)
 	// return update service
 	return &Updater{
-		updatesDuration: cfg.Hardware.Oled.UpdatesDuration,
+		updatesDuration: cfg.Other.Sensors.DataUpdatesDuration,
 		getData:         getData,
 		store:           store,
 		storageKey:      sensorKey,
