@@ -1,7 +1,7 @@
-// Package gpiobutton provides gpio button initialization and setting up
+// Package button provides gpio button initialization and setting up
 // the button rising/pulling handlers. All buttons are with an external pull up resistor,
 // so default button value is HIGH.
-package gpiobutton
+package button
 
 import (
 	"context"
@@ -9,17 +9,30 @@ import (
 	"sync"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/conn/v3/gpio/gpioreg"
 )
 
-// Function to handle button rising/falling.
+// Name represents a name of a button.
+type Name string
+
+var (
+	ButtonEsc  Name = "esc"  // escape button
+	ButtonUp   Name = "up"   // up button
+	ButtonDown Name = "down" // down button
+	ButtonEnt  Name = "ent"  // enter button
+)
+
+// HandlerFunc is a function to handle button rising/falling.
 type HandlerFunc func(ctx context.Context)
 
-// Empty handler func.
+// DefaultHandlerFunc is an empty handler func.
 var DefaultHandlerFunc HandlerFunc = func(_ context.Context) {}
 
+// GPIOButton represents a button based on GPIO.
 type GPIOButton struct {
+	name              Name
 	gpioPin           gpio.PinIO
 	checkAliveTimeout time.Duration
 	state             gpio.Level
@@ -30,20 +43,21 @@ type GPIOButton struct {
 	fallingHandler HandlerFunc
 }
 
-// New sets up new gpio button and returns it. Rising and falling handlers are empty.
+// New sets up new GPIO button and returns it. Rising and falling handlers are empty.
 // Use SetRisingHandler/SetFallingHandler to set up handlers for button.
-func New(gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) {
+func New(name Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) {
 	// get button by GPIO name
 	gpioPin := gpioreg.ByName(gpioName)
 	if gpioPin == nil {
-		return nil, fmt.Errorf("find gpio button by name %s", gpioName)
+		return nil, fmt.Errorf("find button:%s gpio by name %s", name, gpioName)
 	}
 	// set up input for button
 	if err := gpioPin.In(gpio.PullNoChange, gpio.BothEdges); err != nil {
-		return nil, fmt.Errorf("set up input for gpio button %s: %w", gpioName, err)
+		return nil, fmt.Errorf("set up input for gpio button:%s %s: %w", name, gpioName, err)
 	}
 
 	return &GPIOButton{
+		name:              name,
 		gpioPin:           gpioPin,
 		checkAliveTimeout: checkAliveTimeout,
 		state:             gpio.High,
@@ -71,9 +85,10 @@ func (b *GPIOButton) SetFallingHandler(ctx context.Context, handler HandlerFunc)
 	b.fallingHandler = handler
 }
 
-// HandleWithShutdown sets up handlers for button and
-// gracefully shutdown GPIO button after context is done.
-func (b *GPIOButton) HandleWithShutdown(ctx context.Context) error {
+// StartWithShutdown starts GPIO button handling and
+// gracefully shutdown it after context is done.
+func (b *GPIOButton) StartWithShutdown(ctx context.Context) error {
+	logrus.Infof("start button:%s service...", b.name)
 	for {
 		// check context is done
 		select {
@@ -117,7 +132,7 @@ func (b *GPIOButton) edgeOccurred() bool {
 	return true
 }
 
-// shutdown stopped gpio button.
+// shutdown stops gpio button.
 func (b *GPIOButton) shutdown() error {
 	if err := b.gpioPin.Halt(); err != nil {
 		return fmt.Errorf("halt gpio button: %w", err)

@@ -10,7 +10,7 @@ import (
 	"periph.io/x/devices/v3/ssd1306/image1bit"
 )
 
-// TextLine is a one text line.
+// TextLine represents a one text line on display screen.
 type TextLine struct {
 	// text
 	Content string
@@ -18,7 +18,7 @@ type TextLine struct {
 	RelativeSize int
 }
 
-// lineToDraw is a one line of text used to output on display.
+// lineToDraw represents a one line of text used to output on display.
 type lineToDraw struct {
 	borders image.Rectangle
 	text    *image1bit.VerticalLSB
@@ -39,7 +39,7 @@ func (s *SSD1306) DisplayTextLines(lines ...TextLine) error {
 	return nil
 }
 
-// processTextLines prepare text lines for output on display.
+// processTextLines prepares text lines for output on display.
 func (s *SSD1306) processTextLines(lines []TextLine) ([]lineToDraw, error) {
 	linesAmount := len(lines)
 	textLines := make([]lineToDraw, 0, linesAmount)
@@ -74,7 +74,7 @@ func (s *SSD1306) createLineToDraw(heightFrom, heightTo int,
 
 	height := heightTo - heightFrom
 	// set up font for text line
-	fontFace, err := text.NewRussianFont(float64(height))
+	fontFace, err := text.GetRussianFont(float64(height))
 	if err != nil {
 		return nil, fmt.Errorf("font face: %w", err)
 	}

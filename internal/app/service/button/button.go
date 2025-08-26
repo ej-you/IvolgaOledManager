@@ -6,46 +6,39 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/sirupsen/logrus"
-
 	"IvolgaOledManager/config"
-	"IvolgaOledManager/internal/pkg/gpiobutton"
+	"IvolgaOledManager/internal/pkg/button"
 )
 
 const _buttonsAmount = 4 // amount of buttons
 
-var _ Button = (*gpiobutton.GPIOButton)(nil)
+// Buttons is a map of button services.
+type Buttons map[button.Name]*button.GPIOButton
 
-// One button from buttons service.
-type Button interface {
-	HandleWithShutdown(ctx context.Context) error
-	SetRisingHandler(ctx context.Context, handler gpiobutton.HandlerFunc)
-	SetFallingHandler(ctx context.Context, handler gpiobutton.HandlerFunc)
-}
-
-// Buttons service.
-type Buttons map[string]Button
-
-// NewButtons sets up all buttons and returns them as a map.
-func NewButtons(cfg *config.Config) (*Buttons, error) {
+// New sets up all buttons and returns them as a map.
+func New(cfg *config.Config) (*Buttons, error) {
 	var err error
 	btns := make(Buttons, _buttonsAmount)
 
-	btns["up"], err = gpiobutton.New(cfg.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns[button.ButtonEsc], err = button.New(button.ButtonEsc,
+		cfg.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("up btn: %w", err)
+		return nil, err
 	}
-	btns["down"], err = gpiobutton.New(cfg.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns[button.ButtonUp], err = button.New(button.ButtonUp,
+		cfg.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("down btn: %w", err)
+		return nil, err
 	}
-	btns["esc"], err = gpiobutton.New(cfg.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns[button.ButtonDown], err = button.New(button.ButtonDown,
+		cfg.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("esc btn: %w", err)
+		return nil, err
 	}
-	btns["ent"], err = gpiobutton.New(cfg.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
+	btns[button.ButtonEnt], err = button.New(button.ButtonEnt,
+		cfg.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
-		return nil, fmt.Errorf("ent btn: %w", err)
+		return nil, err
 	}
 	return &btns, nil
 }
@@ -62,12 +55,10 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 
 	// start all buttons
 	for key, val := range *b {
-		logrus.Infof("start button:%s service...", key)
-
 		wg.Add(1)
-		go func(btnName string, btn Button) {
+		go func(btnName button.Name, btn *button.GPIOButton) {
 			defer wg.Done()
-			if err := btn.HandleWithShutdown(btnsCtx); err != nil {
+			if err := btn.StartWithShutdown(btnsCtx); err != nil {
 				// use default to prevent goroutine blocking if errChan is filled
 				select {
 				case errChan <- fmt.Errorf("start %s btn: %w", btnName, err):

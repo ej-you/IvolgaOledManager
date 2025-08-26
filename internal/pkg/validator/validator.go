@@ -11,7 +11,8 @@ import (
 	entranslation "github.com/go-playground/validator/v10/translations/en"
 )
 
-var _ Validator = (*valid)(nil)
+// Ensure tags validator implements interface.
+var _ Validator = (*TagsValidator)(nil)
 
 // Validator provides method to validate any struct.
 type Validator interface {
@@ -19,13 +20,13 @@ type Validator interface {
 }
 
 // Validator implementation.
-type valid struct {
+type TagsValidator struct {
 	validatorInstance *govalidator.Validate
 	translator        ut.Translator
 }
 
-// New returns new validator.
-func New() Validator {
+// New returns a new instance of TagsValidator.
+func New() *TagsValidator {
 	enTranslator := en.New()
 	uni := ut.New(enTranslator, enTranslator)
 	trans, _ := uni.GetTranslator("en")
@@ -36,11 +37,11 @@ func New() Validator {
 		panic(err)
 	}
 
-	return &valid{validate, trans}
+	return &TagsValidator{validate, trans}
 }
 
-// Validate validates given struct s (using pointer to this struct).
-func (v valid) Validate(s any) error {
+// Validate validates given struct s by tags (using pointer to this struct).
+func (v TagsValidator) Validate(s any) error {
 	err := v.validatorInstance.Struct(s)
 	if err == nil { // NOT err
 		return nil

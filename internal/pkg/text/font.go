@@ -10,8 +10,8 @@ import (
 
 const _fontDPI = 63 // dots per inch resolution for font
 
-// NewRussianFont returns font face with Cyrillic support.
-func NewRussianFont(height float64) (font.Face, error) {
+// GetRussianFont returns font face with Cyrillic support.
+func GetRussianFont(height float64) (font.Face, error) {
 	// load font with Cyrillic support
 	ttf, err := opentype.Parse(goregular.TTF)
 	if err != nil {

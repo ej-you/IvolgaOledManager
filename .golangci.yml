@@ -72,7 +72,7 @@ linters:
     rules:
       - linters: # more readable
           - varnamelen
-        path: internal/pkg/ssd1306/image\.go
+        path: internal/pkg/display/ssd1306/image\.go
         text: "parameter name '[xy]' is too short for the scope of its usage"
       - linters:
           - varnamelen

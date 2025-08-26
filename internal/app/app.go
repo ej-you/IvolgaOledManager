@@ -15,16 +15,20 @@ import (
 	"IvolgaOledManager/config"
 	repodb "IvolgaOledManager/internal/app/repo/db"
 	"IvolgaOledManager/internal/app/service/button"
-	"IvolgaOledManager/internal/app/service/display"
+	displayservice "IvolgaOledManager/internal/app/service/display"
 	"IvolgaOledManager/internal/app/service/sensordata"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
+	"IvolgaOledManager/internal/pkg/display"
 	"IvolgaOledManager/internal/pkg/logger"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
+// Ensure GPIO-button implements interface.
 var _ Service = (*button.Buttons)(nil)
-var _ Service = (*display.Display)(nil)
+
+// Ensure OLED-display implements interface.
+var _ Service = (*display.Service)(nil)
 
 // App service interface.
 type Service interface {
@@ -70,12 +74,12 @@ func New() (*App, error) {
 	sensorUC := usecase.NewSensorDataUsecase(sensorRepoDB, storage)
 
 	// init buttons services
-	btns, err := button.NewButtons(cfg)
+	btns, err := button.New(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create buttons service: %w", err)
 	}
 	// init display service
-	displ, err := display.NewDisplay(cfg)
+	displ, err := displayservice.New(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create display service: %w", err)
 	}

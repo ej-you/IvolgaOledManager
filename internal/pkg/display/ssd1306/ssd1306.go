@@ -1,4 +1,4 @@
-// Package ssd1306 contains functions and types to controlling SSD1306 OLED display via I2C.
+// Package ssd1306 provides interface to controlling SSD1306 OLED-display via I2C.
 package ssd1306
 
 import (
@@ -9,7 +9,7 @@ import (
 	"periph.io/x/devices/v3/ssd1306"
 )
 
-// SSD1306 oled display.
+// SSD1306 represents an OLED-display.
 type SSD1306 struct {
 	device       *ssd1306.Dev
 	busCloser    func() error
@@ -17,6 +17,7 @@ type SSD1306 struct {
 	screenHeight int
 }
 
+// NewSSD1306 returns a new instance of SSD1306.
 func NewSSD1306(bus string, screenWidth, screenHeight int) (*SSD1306, error) {
 	busCloser, err := i2creg.Open(bus)
 	if err != nil {
@@ -34,15 +35,15 @@ func NewSSD1306(bus string, screenWidth, screenHeight int) (*SSD1306, error) {
 		screenHeight: screenHeight,
 	}
 	if err := instance.DisplayClear(); err != nil {
-		return nil, fmt.Errorf("clear device on startup: %w", err)
+		return nil, fmt.Errorf("clear oled on startup: %w", err)
 	}
 	return instance, nil
 }
 
-// Close closes OLED bus.
+// Close closes OLED bus used by OLED-display.
 func (s *SSD1306) Close() error {
 	if err := s.device.Halt(); err != nil {
-		return fmt.Errorf("clear ssd1306 oled: %w", err)
+		return fmt.Errorf("clear oled: %w", err)
 	}
-	return errors.Wrap(s.busCloser(), "close ssd1306 oled")
+	return errors.Wrap(s.busCloser(), "close oled bus")
 }
