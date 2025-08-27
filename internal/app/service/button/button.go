@@ -100,7 +100,7 @@ func (b *Buttons) Ready() <-chan struct{} {
 		}
 
 		wg.Wait()
-		// all buttons is ready
+		// all buttons are ready
 		close(done)
 	}()
 

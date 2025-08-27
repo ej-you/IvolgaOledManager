@@ -77,14 +77,10 @@ linters:
       - linters:
           - varnamelen
         text: variable name 'wg' is too short for the scope of its usage
-      - linters:
-          - mnd
-        path: internal/app/(controller/buttons/buttons|app)\.go
-        text: "Magic number: [42], in <argument> detected"
       - linters: # relative value of text line height
           - mnd
-        path: internal/app/controller/renderer/display_station\.go
-        text: "Magic number: [2347], in <assign> detected"
+        path: internal/app/entity/sensordata\.go
+        text: "Magic number: [42], in (<argument>|<assign>) detected"
       - linters:
           - lll
         path: config/config\.go

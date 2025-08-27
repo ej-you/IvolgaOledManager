@@ -8,18 +8,16 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"periph.io/x/host/v3"
 
 	"IvolgaOledManager/config"
-	"IvolgaOledManager/internal/app/entity"
-	"IvolgaOledManager/internal/app/repo"
 	repodb "IvolgaOledManager/internal/app/repo/db"
 	"IvolgaOledManager/internal/app/service/button"
 	displayservice "IvolgaOledManager/internal/app/service/display"
 	"IvolgaOledManager/internal/app/service/render"
+	"IvolgaOledManager/internal/app/service/screen"
 	"IvolgaOledManager/internal/app/service/sensordata"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
@@ -39,6 +37,9 @@ var _ Service = (*render.Render)(nil)
 
 // Ensure sensor data updater implements interface.
 var _ Service = (*sensordata.Updater)(nil)
+
+// Ensure screen implements interface.
+var _ Service = screen.Screen(nil)
 
 // App service interface.
 type Service interface {
@@ -105,11 +106,13 @@ func New() (*App, error) {
 	pressUpdater := sensordata.NewPressureUpdater(cfg, storage, sensorUC)
 	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensorUC)
 	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensorUC)
+	// init screens services
+	screenManager := screen.NewManager(cfg, storage)
 
 	return &App{
 		cfg:     cfg,
 		storage: storage,
-		services: []Service{btns, disp, rend,
+		services: []Service{btns, disp, rend, screenManager,
 			tempUpdater, humidUpdater, pressUpdater, windSpeedUpdater, windDirUpdater},
 	}, nil
 }
@@ -157,18 +160,18 @@ func (a *App) Run() error {
 	wgReady.Wait()
 	logrus.Info("all services were started successfully")
 
-	go func() {
-		defer cancel()
-		a.storage.Publish(repo.RendererKey, &entity.Image{
-			ImagePath: a.cfg.App.GreetingsImgPath,
-		})
-		time.Sleep(3 * time.Second)
-		a.storage.Publish(repo.RendererKey, &entity.SensorData{
-			Title: "TEST",
-			Data:  "228",
-		})
-		time.Sleep(3 * time.Second)
-	}()
+	// go func() {
+	// 	defer cancel()
+	// 	a.storage.Publish(repo.RendererKey, &entity.Image{
+	// 		ImagePath: a.cfg.App.GreetingsImgPath,
+	// 	})
+	// 	time.Sleep(3 * time.Second)
+	// 	a.storage.Publish(repo.RendererKey, &entity.SensorData{
+	// 		Title: "TEST",
+	// 		Data:  "228",
+	// 	})
+	// 	time.Sleep(3 * time.Second)
+	// }()
 
 	select {
 	case handledSignal := <-quitSig:
