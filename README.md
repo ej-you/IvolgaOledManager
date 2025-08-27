@@ -68,3 +68,10 @@ DB contains one table with logs from another app.
 | 3      | warn  |
 | 4      | error |
 | 5      | fatal |
+
+## Extra
+
+Extra docs are located in the `./docs/` directory.
+
+File `./docs/IvolgaOledManager.excalidraw` is an exported schema from [Excalidraw service](https://excalidraw.com/)
+You can open this service and import this file there to explore `app schema`.

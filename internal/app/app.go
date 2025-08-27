@@ -116,7 +116,7 @@ func New() (*App, error) {
 
 // Run starts all services. This function is blocking.
 // It waits for os signal to gracefully shutdown all services.
-// Or it waits for fall down one of the services and stop other services.
+// Or it waits for fall down one of the services and stops other services.
 func (a *App) Run() error {
 	var appErr error
 
