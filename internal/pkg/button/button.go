@@ -32,7 +32,10 @@ var DefaultHandlerFunc HandlerFunc = func(_ context.Context) {}
 
 // GPIOButton represents a button based on GPIO.
 type GPIOButton struct {
-	name              Name
+	// will be closed if the service was completely started and is ready-to-use now
+	ready chan struct{}
+
+	Name              Name
 	gpioPin           gpio.PinIO
 	checkAliveTimeout time.Duration
 	state             gpio.Level
@@ -57,7 +60,8 @@ func New(name Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButt
 	}
 
 	return &GPIOButton{
-		name:              name,
+		ready:             make(chan struct{}),
+		Name:              name,
 		gpioPin:           gpioPin,
 		checkAliveTimeout: checkAliveTimeout,
 		state:             gpio.High,
@@ -88,7 +92,10 @@ func (b *GPIOButton) SetFallingHandler(ctx context.Context, handler HandlerFunc)
 // StartWithShutdown starts GPIO button handling and
 // gracefully shutdown it after context is done.
 func (b *GPIOButton) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start button:%s service...", b.name)
+	logrus.Infof("start button:%s service...", b.Name)
+
+	// notify that service is ready-to-use
+	close(b.ready)
 	for {
 		// check context is done
 		select {
@@ -102,6 +109,11 @@ func (b *GPIOButton) StartWithShutdown(ctx context.Context) error {
 		// handle button pressing
 		b.handle()
 	}
+}
+
+// Ready signals that the service is ready-to-use.
+func (b *GPIOButton) Ready() <-chan struct{} {
+	return b.ready
 }
 
 // handle handles button falling if level is HIGH else rising.

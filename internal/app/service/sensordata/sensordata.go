@@ -16,7 +16,11 @@ import (
 // getDataFunc is a function to get new sensor data value from usecase.
 type getDataFunc func() (*entity.SensorData, error)
 
+// Updater represents a sensor data updater.
 type Updater struct {
+	// will be closed if the service was completely started and is ready-to-use now
+	ready chan struct{}
+
 	// time between data update requests
 	updatesDuration time.Duration
 	// function from sensor usecase to get data from specific sensor
@@ -35,6 +39,8 @@ func (s *Updater) StartWithShutdown(ctx context.Context) error {
 	// init ticker for sensor data periodically updates
 	ticker := time.NewTicker(s.updatesDuration)
 	defer ticker.Stop()
+	// notify that service is ready-to-use
+	close(s.ready)
 
 	var newData *entity.SensorData
 	var err error
@@ -56,6 +62,11 @@ func (s *Updater) StartWithShutdown(ctx context.Context) error {
 			}
 		}
 	}
+}
+
+// Ready signals that the service is ready-to-use.
+func (s *Updater) Ready() <-chan struct{} {
+	return s.ready
 }
 
 // NewTemperatureUpdater returns new temperature updater service.
@@ -105,6 +116,7 @@ func newUpdater(cfg *config.Config, store pubsub.Storage,
 	store.Publish(sensorKey, emptyData)
 	// return update service
 	return &Updater{
+		ready:           make(chan struct{}),
 		updatesDuration: cfg.Other.Sensors.DataUpdatesDuration,
 		getData:         getData,
 		store:           store,

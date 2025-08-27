@@ -12,6 +12,9 @@ import (
 
 const _buttonsAmount = 4 // amount of buttons
 
+// Handlers is a map of handlers for buttons.
+type Handlers map[button.Name]button.HandlerFunc
+
 // Buttons is a map of button services.
 type Buttons map[button.Name]*button.GPIOButton
 
@@ -78,4 +81,28 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 	default:
 		return nil
 	}
+}
+
+// Ready signals that the service is ready-to-use.
+func (b *Buttons) Ready() <-chan struct{} {
+	done := make(chan struct{})
+
+	go func() {
+		var wg sync.WaitGroup
+
+		for _, val := range *b {
+			wg.Add(1)
+			go func(btn *button.GPIOButton) {
+				defer wg.Done()
+				// wait for button
+				<-btn.Ready()
+			}(val)
+		}
+
+		wg.Wait()
+		// all buttons is ready
+		close(done)
+	}()
+
+	return done
 }

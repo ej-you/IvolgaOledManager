@@ -1,7 +1,13 @@
 // Package entity contains all app entities.
 package entity
 
-// StationResult is a station result data.
+import (
+	"fmt"
+
+	"IvolgaOledManager/internal/pkg/display"
+)
+
+// SensorData is a data from station sensor.
 type SensorData struct {
 	// measurement name to output
 	Title string
@@ -12,4 +18,17 @@ type SensorData struct {
 	RawData float64
 }
 
-// TODO: implement Renderer
+// Render implements display.Renderer. It renders sensor data on display.
+func (s *SensorData) Render(device display.Display) error {
+	// output text screen
+	err := device.DisplayTextLines(
+		display.TextLine{Content: s.Title, RelativeSize: 2},
+		display.TextLine{Content: "", RelativeSize: 1},
+		display.TextLine{Content: s.Data, RelativeSize: 4},
+		display.TextLine{Content: "", RelativeSize: 1},
+	)
+	if err != nil {
+		return fmt.Errorf("display text screen: %w", err)
+	}
+	return nil
+}

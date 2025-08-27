@@ -8,14 +8,18 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"periph.io/x/host/v3"
 
 	"IvolgaOledManager/config"
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/app/repo"
 	repodb "IvolgaOledManager/internal/app/repo/db"
 	"IvolgaOledManager/internal/app/service/button"
 	displayservice "IvolgaOledManager/internal/app/service/display"
+	"IvolgaOledManager/internal/app/service/render"
 	"IvolgaOledManager/internal/app/service/sensordata"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
@@ -30,13 +34,23 @@ var _ Service = (*button.Buttons)(nil)
 // Ensure OLED-display implements interface.
 var _ Service = (*display.Service)(nil)
 
+// Ensure render implements interface.
+var _ Service = (*render.Render)(nil)
+
+// Ensure sensor data updater implements interface.
+var _ Service = (*sensordata.Updater)(nil)
+
 // App service interface.
 type Service interface {
+	// StartWithShutdown starts service and wait for context cancellation to shutdown it.
 	StartWithShutdown(ctx context.Context) error
+	// Ready returns true if service was completely started and is ready-to-use now.
+	Ready() <-chan struct{}
 }
 
 type App struct {
 	cfg      *config.Config
+	storage  pubsub.Storage
 	services []Service
 }
 
@@ -79,10 +93,12 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("create buttons service: %w", err)
 	}
 	// init display service
-	displ, err := displayservice.New(cfg)
+	disp, err := displayservice.New(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create display service: %w", err)
 	}
+	// init render service
+	rend := render.New(disp, storage)
 	// init updater services
 	tempUpdater := sensordata.NewTemperatureUpdater(cfg, storage, sensorUC)
 	humidUpdater := sensordata.NewHumidityUpdater(cfg, storage, sensorUC)
@@ -91,8 +107,9 @@ func New() (*App, error) {
 	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensorUC)
 
 	return &App{
-		cfg: cfg,
-		services: []Service{btns, displ,
+		cfg:     cfg,
+		storage: storage,
+		services: []Service{btns, disp, rend,
 			tempUpdater, humidUpdater, pressUpdater, windSpeedUpdater, windDirUpdater},
 	}, nil
 }
@@ -117,18 +134,41 @@ func (a *App) Run() error {
 	)
 
 	// start all services
-	var wg sync.WaitGroup // nolint:varnamelen // generally accepted name
+	var wgRunning sync.WaitGroup
+	var wgReady sync.WaitGroup
 	serviceErr := make(chan error, 1)
 	for _, service := range a.services {
-		wg.Add(1)
+		wgRunning.Add(1)
+		wgReady.Add(1)
+		// start service
 		go func() {
-			defer wg.Done()
+			defer wgRunning.Done()
 			if err := service.StartWithShutdown(appContext); err != nil {
 				serviceErr <- err
 			}
 		}()
+		// wait for service is ready
+		go func() {
+			defer wgReady.Done()
+			<-service.Ready()
+		}()
 	}
+	// wait for all services until they are ready
+	wgReady.Wait()
 	logrus.Info("all services were started successfully")
+
+	go func() {
+		defer cancel()
+		a.storage.Publish(repo.RendererKey, &entity.Image{
+			ImagePath: a.cfg.App.GreetingsImgPath,
+		})
+		time.Sleep(3 * time.Second)
+		a.storage.Publish(repo.RendererKey, &entity.SensorData{
+			Title: "TEST",
+			Data:  "228",
+		})
+		time.Sleep(3 * time.Second)
+	}()
 
 	select {
 	case handledSignal := <-quitSig:
@@ -144,7 +184,7 @@ func (a *App) Run() error {
 	}
 
 	// wait for all services
-	wg.Wait()
+	wgRunning.Wait()
 	logrus.Info("All services was stopped. Shutdown app")
 	return appErr
 }

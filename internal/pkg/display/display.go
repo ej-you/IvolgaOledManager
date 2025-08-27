@@ -34,6 +34,9 @@ type TextLine struct {
 // Service represents a display service. It starts with StartWithShutdown method
 // and implements Display interface to output data.
 type Service struct {
+	// will be closed if the service was completely started and is ready-to-use now
+	ready chan struct{}
+
 	device          *ssd1306.SSD1306
 	updatesDuration time.Duration
 	updateNow       chan struct{} // used to force screen update when updating the renderer
@@ -55,6 +58,7 @@ func NewDisplayService(bus string, width, height int,
 		return nil, fmt.Errorf("ssd1306: %w", err)
 	}
 	return &Service{
+		ready:           make(chan struct{}),
 		device:          device,
 		updatesDuration: updatesDuration,
 		updateNow:       make(chan struct{}),
@@ -64,7 +68,7 @@ func NewDisplayService(bus string, width, height int,
 // DisplayTextLines displays given text lines.
 // It is an adaptor for the same method
 // of ssd1306.SSD1306 to implement Display interface.
-func (d *Service) DisplayTextLines(lines ...TextLine) error {
+func (s *Service) DisplayTextLines(lines ...TextLine) error {
 	ssd1306Lines := make([]ssd1306.TextLine, 0, len(lines))
 
 	for _, line := range lines {
@@ -73,23 +77,23 @@ func (d *Service) DisplayTextLines(lines ...TextLine) error {
 			RelativeSize: line.RelativeSize,
 		})
 	}
-	return d.device.DisplayTextLines(ssd1306Lines...)
+	return s.device.DisplayTextLines(ssd1306Lines...)
 }
 
 // DisplayImage displays image from given path on the OLED-display.
-func (d *Service) DisplayImage(path string, x, y int) error {
-	return d.device.DisplayImage(path, x, y)
+func (s *Service) DisplayImage(path string, x, y int) error {
+	return s.device.DisplayImage(path, x, y)
 }
 
 // SetRenderer sets new renderer object for display.
-func (d *Service) SetRenderer(renderer Renderer) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-	d.renderer = renderer
+func (s *Service) SetRenderer(renderer Renderer) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.renderer = renderer
 
 	// send force update signal to chan (if it is not filled)
 	select {
-	case d.updateNow <- struct{}{}:
+	case s.updateNow <- struct{}{}:
 	default:
 	}
 }
@@ -97,33 +101,41 @@ func (d *Service) SetRenderer(renderer Renderer) {
 // StartWithShutdown starts display.
 // Service will stop when given context will be stopped.
 // This method is blocking.
-func (d *Service) StartWithShutdown(ctx context.Context) error {
+func (s *Service) StartWithShutdown(ctx context.Context) error {
 	logrus.Info("start display service...")
 
 	// start display updates loop
-	d.start(ctx)
+	s.start(ctx)
 	// close display after ctx is done
-	if err := d.close(); err != nil {
+	if err := s.close(); err != nil {
 		return err
 	}
 	return nil
 }
 
+// Ready signals that the service is ready-to-use.
+func (s *Service) Ready() <-chan struct{} {
+	return s.ready
+}
+
 // start starts display updates loop.
-func (d *Service) start(ctx context.Context) {
+func (s *Service) start(ctx context.Context) {
 	// init ticker for display periodically updates
-	ticker := time.NewTicker(d.updatesDuration)
+	ticker := time.NewTicker(s.updatesDuration)
 	defer ticker.Stop()
+
+	// notify that service is ready-to-use
+	close(s.ready)
 
 	var err error
 	for {
 		select {
 		// periodically updates
 		case <-ticker.C:
-			err = d.render()
+			err = s.render()
 		// force update after setting new renderer
-		case <-d.updateNow:
-			err = d.render()
+		case <-s.updateNow:
+			err = s.render()
 		// if main context is done
 		case <-ctx.Done():
 			return
@@ -135,22 +147,22 @@ func (d *Service) start(ctx context.Context) {
 }
 
 // render renders renderer object to display.
-func (d *Service) render() error {
-	d.mu.RLock()
-	defer d.mu.RUnlock()
+func (s *Service) render() error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
-	if d.renderer == nil {
+	if s.renderer == nil {
 		return nil
 	}
-	return d.renderer.Render(d)
+	return s.renderer.Render(s)
 }
 
 // close clears display screen and closes display connection.
-func (d *Service) close() error {
-	d.mu.Lock()
-	defer d.mu.Unlock()
-	if err := d.device.DisplayClear(); err != nil {
+func (s *Service) close() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if err := s.device.DisplayClear(); err != nil {
 		logrus.Errorf("clear screen on display close: %v", err)
 	}
-	return d.device.Close()
+	return s.device.Close()
 }
