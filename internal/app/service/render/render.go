@@ -66,10 +66,8 @@ func (r *Render) updateDisplay() error {
 	if !ok {
 		return errors.New("invalid renderer in storage")
 	}
-	// return renderer.Render(r.displayService)
 
 	// set new renderer object for display
-	logrus.Infof("new renderer: %#v", renderer)
 	r.displayService.SetRenderer(renderer)
 	return nil
 }
