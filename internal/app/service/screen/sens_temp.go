@@ -1,11 +1,12 @@
 package screen
 
 import (
-	"IvolgaOledManager/internal/app/repo"
-	"IvolgaOledManager/internal/pkg/pubsub"
 	"context"
 
 	"github.com/sirupsen/logrus"
+
+	"IvolgaOledManager/internal/app/repo"
+	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
 // TODO: create base struct SensorData as template for all sensor data screens.

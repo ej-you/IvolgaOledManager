@@ -1,12 +1,13 @@
 package screen
 
 import (
-	"IvolgaOledManager/internal/app/entity"
-	"IvolgaOledManager/internal/app/repo"
-	"IvolgaOledManager/internal/pkg/pubsub"
 	"context"
 
 	"github.com/sirupsen/logrus"
+
+	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/app/repo"
+	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
 // TODO: create base struct Image as template for all image screens.

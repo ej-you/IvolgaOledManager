@@ -5,13 +5,13 @@ import (
 	"context"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"IvolgaOledManager/config"
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/pubsub"
-
-	"github.com/sirupsen/logrus"
 )
 
 // getDataFunc is a function to get new sensor data value from usecase.

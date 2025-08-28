@@ -6,11 +6,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/sirupsen/logrus"
+
 	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/pkg/display"
 	"IvolgaOledManager/internal/pkg/pubsub"
-
-	"github.com/sirupsen/logrus"
 )
 
 // Render represents render service that sends

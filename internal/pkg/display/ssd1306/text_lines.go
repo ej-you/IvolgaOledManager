@@ -1,13 +1,14 @@
 package ssd1306
 
 import (
-	"IvolgaOledManager/internal/pkg/text"
 	"fmt"
 	"image"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 	"periph.io/x/devices/v3/ssd1306/image1bit"
+
+	"IvolgaOledManager/internal/pkg/text"
 )
 
 // TextLine represents a one text line on display screen.
