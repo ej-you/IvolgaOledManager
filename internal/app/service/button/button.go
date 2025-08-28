@@ -124,7 +124,7 @@ func (b Buttons) SetRisingHandlers(handlers Handlers) {
 			handler = button.DefaultHandlerFunc
 		}
 		// set handler
-		btn.SetRisingHandler(context.Background(), handler)
+		btn.SetRisingHandler(handler)
 	}
 }
 
@@ -139,6 +139,6 @@ func (b Buttons) SetFallingHandlers(handlers Handlers) {
 			handler = button.DefaultHandlerFunc
 		}
 		// set handler
-		btn.SetRisingHandler(context.Background(), handler)
+		btn.SetRisingHandler(handler)
 	}
 }

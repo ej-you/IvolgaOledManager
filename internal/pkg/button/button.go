@@ -20,19 +20,19 @@ var _ Button = (*GPIOButton)(nil)
 // Button describes all methods for button to manage input data.
 type Button interface {
 	// SetRisingHandler sets new handler for button rising.
-	SetRisingHandler(ctx context.Context, handler HandlerFunc)
+	SetRisingHandler(handler HandlerFunc)
 	// SetFallingHandler sets new handler for button falling.
-	SetFallingHandler(ctx context.Context, handler HandlerFunc)
+	SetFallingHandler(handler HandlerFunc)
 }
 
 // Name represents a name of a button.
 type Name string
 
 // HandlerFunc is a function to handle button rising/falling.
-type HandlerFunc func(ctx context.Context)
+type HandlerFunc func()
 
 // DefaultHandlerFunc is an empty handler func.
-var DefaultHandlerFunc HandlerFunc = func(_ context.Context) {}
+var DefaultHandlerFunc HandlerFunc = func() {}
 
 // GPIOButton represents a button based on GPIO.
 type GPIOButton struct {
@@ -45,7 +45,6 @@ type GPIOButton struct {
 	state             gpio.Level
 
 	mu             sync.Mutex
-	handlersCtx    context.Context
 	risingHandler  HandlerFunc
 	fallingHandler HandlerFunc
 }
@@ -69,27 +68,22 @@ func New(name Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButt
 		gpioPin:           gpioPin,
 		checkAliveTimeout: checkAliveTimeout,
 		state:             gpio.High,
-		handlersCtx:       context.Background(),
 		risingHandler:     DefaultHandlerFunc,
 		fallingHandler:    DefaultHandlerFunc,
 	}, nil
 }
 
 // SetRisingHandler sets new handler for button rising.
-func (b *GPIOButton) SetRisingHandler(ctx context.Context, handler HandlerFunc) {
+func (b *GPIOButton) SetRisingHandler(handler HandlerFunc) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-
-	b.handlersCtx = ctx
 	b.risingHandler = handler
 }
 
 // SetFallingHandler sets new handler for button falling.
-func (b *GPIOButton) SetFallingHandler(ctx context.Context, handler HandlerFunc) {
+func (b *GPIOButton) SetFallingHandler(handler HandlerFunc) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-
-	b.handlersCtx = ctx
 	b.fallingHandler = handler
 }
 
@@ -126,9 +120,9 @@ func (b *GPIOButton) handle() {
 	defer b.mu.Unlock()
 
 	if b.state {
-		b.fallingHandler(b.handlersCtx)
+		b.fallingHandler()
 	} else {
-		b.risingHandler(b.handlersCtx)
+		b.risingHandler()
 	}
 }
 

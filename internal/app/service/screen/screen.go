@@ -44,12 +44,12 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 
 	// greetings screen
 	greetingsReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEnt: func(_ context.Context) { greetCh <- false; sensorTempCh <- true }})
+		button.ButtonEnt: func() { greetCh <- false; sensorTempCh <- true }})
 	greetings := NewGreetings(greetCh, greetingsReg, storage, cfg.App.GreetingsImgPath)
 
 	// temperature sensor data screen
 	sensorTempReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc: func(_ context.Context) { sensorTempCh <- false; greetCh <- true }})
+		button.ButtonEsc: func() { sensorTempCh <- false; greetCh <- true }})
 	sensorTemp := NewTemperature(sensorTempCh, sensorTempReg, storage)
 
 	return &Manager{
