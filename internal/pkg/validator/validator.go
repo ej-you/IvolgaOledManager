@@ -1,4 +1,4 @@
-// Package validator provides interface to validate struct data by tags.
+// Package validator provides interface to validate struct data.
 package validator
 
 import (
@@ -14,12 +14,13 @@ import (
 // Ensure tags validator implements interface.
 var _ Validator = (*TagsValidator)(nil)
 
-// Validator provides method to validate any struct.
+// Validator describes a struct validator.
 type Validator interface {
+	// Validate validates given struct s by tags (using pointer to this struct).
 	Validate(s any) error
 }
 
-// Validator implementation.
+// TagsValidator is a struct validator based on struct tags.
 type TagsValidator struct {
 	validatorInstance *govalidator.Validate
 	translator        ut.Translator

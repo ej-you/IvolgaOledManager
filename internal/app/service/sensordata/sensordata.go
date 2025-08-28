@@ -1,3 +1,4 @@
+// Package sensordata provides services to update sensors data.
 package sensordata
 
 import (
@@ -69,35 +70,35 @@ func (s *Updater) Ready() <-chan struct{} {
 	return s.ready
 }
 
-// NewTemperatureUpdater returns new temperature updater service.
+// NewTemperatureUpdater returns a new instance of temperature Updater.
 func NewTemperatureUpdater(cfg *config.Config, store pubsub.Storage,
 	sensorUC usecase.SensorDataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetTemperature, repo.SensTempKey)
 }
 
-// NewHumidityUpdater returns new humidity updater service.
+// NewHumidityUpdater returns a new instance of humidity Updater.
 func NewHumidityUpdater(cfg *config.Config, store pubsub.Storage,
 	sensorUC usecase.SensorDataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetHumidity, repo.SensHumidKey)
 }
 
-// NewPressureUpdater returns new pressure updater service.
+// NewPressureUpdater returns a new instance of pressure Updater.
 func NewPressureUpdater(cfg *config.Config, store pubsub.Storage,
 	sensorUC usecase.SensorDataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetPressure, repo.SensPressKey)
 }
 
-// NewWindSpeedUpdater returns new wind speed updater service.
+// NewWindSpeedUpdater returns a new instance of wind speed Updater.
 func NewWindSpeedUpdater(cfg *config.Config, store pubsub.Storage,
 	sensorUC usecase.SensorDataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetWindSpeed, repo.SensWindSpeedKey)
 }
 
-// NewWindDirUpdater returns new wind direction updater service.
+// NewWindDirUpdater returns a new instance of wind direction Updater.
 func NewWindDirUpdater(cfg *config.Config, store pubsub.Storage,
 	sensorUC usecase.SensorDataUsecase) *Updater {
 

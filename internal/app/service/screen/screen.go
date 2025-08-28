@@ -1,3 +1,5 @@
+// Package screen provides screen services for serving
+// specific screens and navigating between them.
 package screen
 
 import (
@@ -6,15 +8,16 @@ import (
 	"sync"
 
 	"IvolgaOledManager/config"
-	buttonservice "IvolgaOledManager/internal/app/service/button"
+	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/render"
-	"IvolgaOledManager/internal/pkg/button"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
 // Ensure specific screens implements interface.
 var _ Screen = (*Greetings)(nil)
+var _ Screen = (*Temperature)(nil)
 
+// Screen describes a screen service.
 type Screen interface {
 	// StartWithShutdown starts service and wait for context cancellation to shutdown it.
 	StartWithShutdown(ctx context.Context) error
@@ -22,14 +25,15 @@ type Screen interface {
 	Ready() <-chan struct{}
 }
 
-// Manager prepare all screen services and connect them with chans.
+// Manager represents screen manager.
+// It prepares all screen services and connects them with chans.
 type Manager struct {
 	screens       []Screen
 	renderService *render.Render
 }
 
 // NewManager returns a new instance of ScreenManager.
-func NewManager(cfg *config.Config, btns *buttonservice.Buttons,
+func NewManager(cfg *config.Config, btns button.Buttons,
 	renderService *render.Render, storage pubsub.Storage) *Manager {
 
 	// init screen active chans
@@ -39,12 +43,12 @@ func NewManager(cfg *config.Config, btns *buttonservice.Buttons,
 	greetCh <- true
 
 	// greetings screen
-	greetingsReg := getBtnHandlersRegFunc(btns, buttonservice.Handlers{
+	greetingsReg := getBtnHandlersRegFunc(btns, button.Handlers{
 		button.ButtonEnt: func(_ context.Context) { greetCh <- false; sensorTempCh <- true }})
 	greetings := NewGreetings(greetCh, greetingsReg, storage, cfg.App.GreetingsImgPath)
 
 	// temperature sensor data screen
-	sensorTempReg := getBtnHandlersRegFunc(btns, buttonservice.Handlers{
+	sensorTempReg := getBtnHandlersRegFunc(btns, button.Handlers{
 		button.ButtonEsc: func(_ context.Context) { sensorTempCh <- false; greetCh <- true }})
 	sensorTemp := NewTemperature(sensorTempCh, sensorTempReg, storage)
 
@@ -122,20 +126,8 @@ func (m *Manager) Ready() <-chan struct{} {
 type BtnHandlersRegFunc func()
 
 // getBtnHandlersRegFunc returns a button handlers register func for given buttons' handlers.
-func getBtnHandlersRegFunc(btns *buttonservice.Buttons,
-	handlers buttonservice.Handlers) BtnHandlersRegFunc {
-
+func getBtnHandlersRegFunc(btns button.Buttons, handlers button.Handlers) BtnHandlersRegFunc {
 	return func() {
-		var handler button.HandlerFunc
-		var found bool
-		// iterate buttons
-		for btnName, btn := range *btns {
-			// use default handler if handler for button is not specified
-			if handler, found = handlers[btnName]; !found {
-				handler = button.DefaultHandlerFunc
-			}
-			// set handler
-			btn.SetRisingHandler(context.Background(), handler)
-		}
+		btns.SetRisingHandlers(handlers)
 	}
 }

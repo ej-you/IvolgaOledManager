@@ -1,4 +1,4 @@
-// Package pubsub contains key-value storage with pub/sub funcs.
+// Package pubsub provides key-value storage with pub/sub funcs.
 package pubsub
 
 import (
@@ -6,9 +6,10 @@ import (
 	"sync"
 )
 
+// Ensure key-value storage implements interface.
 var _ Storage = (*KeyValueStorage)(nil)
 
-// Storage is aa pub/sub storage interface.
+// Storage represents a pub/sub storage interface.
 type Storage interface {
 	Get(key string) any
 	Publish(key string, val any)

@@ -1,7 +1,7 @@
 package db
 
 import (
-	"math/rand/v2"
+	rand "math/rand/v2"
 
 	"IvolgaOledManager/internal/app/repo"
 )
@@ -13,12 +13,15 @@ const (
 	_toRand2   = 300 // end random interval 2
 )
 
+// Ensure sensors mock implements interface.
 var _ repo.SensorRepoDB = (*SensorsMock)(nil)
 
-// SensorsMock is a repo.SensorsRepoDB implementation.
+// SensorsMock is a mock of repo for sensors data.
+// It generates random data values.
 type SensorsMock struct{}
 
-func NewMockStationResultRepoDB() repo.SensorRepoDB {
+// NewMockStationResultRepoDB returns a new instance of SensorsMock.
+func NewMockStationResultRepoDB() *SensorsMock {
 	return &SensorsMock{}
 }
 
@@ -47,7 +50,7 @@ func (r *SensorsMock) GetWindDirection() (float64, error) {
 	return getRandomFloat64(_fromRand2, _toRand2), nil
 }
 
-// getRandomFloat64 returns random float64 in the half open interval [from, to).
+// getRandomFloat64 returns random float64 in the half-open interval [from, to).
 func getRandomFloat64(from, to float64) float64 {
-	return rand.Float64()*(from-to) + from //nolint:gosec // crypto/rand is excessive
+	return rand.Float64()*(to-from) + from //nolint:gosec // crypto/rand is excessive
 }

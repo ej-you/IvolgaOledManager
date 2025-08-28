@@ -9,13 +9,16 @@ import (
 	"IvolgaOledManager/internal/app/repo"
 )
 
+// Ensure sensors repo implements interface.
 var _ repo.SensorRepoDB = (*SensorsRepo)(nil)
 
-// SensorsRepo is a repo.SensorsRepoDB implementation.
+// SensorsRepo is a repo for sensor data.
+// It gets data values from DB.
 type SensorsRepo struct {
 	dbStorage *gorm.DB
 }
 
+// NewSensorsRepoDB returns a new instance of SensorsRepo.
 func NewSensorsRepoDB(dbStorage *gorm.DB) *SensorsRepo {
 	return &SensorsRepo{
 		dbStorage: dbStorage,

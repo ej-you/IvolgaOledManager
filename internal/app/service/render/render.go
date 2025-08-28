@@ -1,3 +1,5 @@
+// Package render provides render service to create output tasks
+// and print them out via display service.
 package render
 
 import (

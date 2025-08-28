@@ -28,13 +28,6 @@ type Button interface {
 // Name represents a name of a button.
 type Name string
 
-var (
-	ButtonEsc  Name = "esc"  // escape button
-	ButtonUp   Name = "up"   // up button
-	ButtonDown Name = "down" // down button
-	ButtonEnt  Name = "ent"  // enter button
-)
-
 // HandlerFunc is a function to handle button rising/falling.
 type HandlerFunc func(ctx context.Context)
 

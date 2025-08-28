@@ -1,3 +1,5 @@
+// Package text provides funcs to work and
+// process the text and its parameters like font.
 package text
 
 import (

@@ -1,4 +1,4 @@
-// Package logger provides Init function to setup global logrus logger.
+// Package logger provides init function to setup global logrus logger.
 package logger
 
 import (
@@ -16,7 +16,7 @@ const (
 	_logLevelInfo  = "info"  // info log level tag
 )
 
-// JSONFormatterUTC is the logrus.JSONFormatter wrapper with time in UTC.
+// JSONFormatterUTC represents the logrus.JSONFormatter wrapper with time in UTC.
 type JSONFormatterUTC struct {
 	logrus.JSONFormatter
 }
@@ -27,7 +27,7 @@ func (f *JSONFormatterUTC) Format(e *logrus.Entry) ([]byte, error) {
 	return f.JSONFormatter.Format(e)
 }
 
-// TextFormatterUTC is the logrus.TextFormatter wrapper with time in UTC.
+// TextFormatterUTC represents the logrus.TextFormatter wrapper with time in UTC.
 type TextFormatterUTC struct {
 	logrus.TextFormatter
 }

@@ -12,44 +12,48 @@ import (
 
 const _buttonsAmount = 4 // amount of buttons
 
-// Handlers is a map of handlers for buttons.
-type Handlers map[button.Name]button.HandlerFunc
+var (
+	ButtonEsc  button.Name = "esc"  // escape button
+	ButtonUp   button.Name = "up"   // up button
+	ButtonDown button.Name = "down" // down button
+	ButtonEnt  button.Name = "ent"  // enter button
+)
 
 // Buttons is a map of button services.
 type Buttons map[button.Name]*button.GPIOButton
 
 // New sets up all buttons and returns them as a map.
-func New(cfg *config.Config) (*Buttons, error) {
+func New(cfg *config.Config) (Buttons, error) {
 	var err error
 	btns := make(Buttons, _buttonsAmount)
 
-	btns[button.ButtonEsc], err = button.New(button.ButtonEsc,
+	btns[ButtonEsc], err = button.New(ButtonEsc,
 		cfg.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[button.ButtonUp], err = button.New(button.ButtonUp,
+	btns[ButtonUp], err = button.New(ButtonUp,
 		cfg.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[button.ButtonDown], err = button.New(button.ButtonDown,
+	btns[ButtonDown], err = button.New(ButtonDown,
 		cfg.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[button.ButtonEnt], err = button.New(button.ButtonEnt,
+	btns[ButtonEnt], err = button.New(ButtonEnt,
 		cfg.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	return &btns, nil
+	return btns, nil
 }
 
 // StartWithShutdown starts all buttons to handle pressings.
 // Given context is used for all buttons.
 // This method is blocking.
-func (b *Buttons) StartWithShutdown(ctx context.Context) error {
+func (b Buttons) StartWithShutdown(ctx context.Context) error {
 	btnsCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -57,7 +61,7 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 	errChan := make(chan error, 1)
 
 	// start all buttons
-	for key, val := range *b {
+	for key, val := range b {
 		wg.Add(1)
 		go func(btnName button.Name, btn *button.GPIOButton) {
 			defer wg.Done()
@@ -84,13 +88,14 @@ func (b *Buttons) StartWithShutdown(ctx context.Context) error {
 }
 
 // Ready signals that the service is ready-to-use.
-func (b *Buttons) Ready() <-chan struct{} {
+func (b Buttons) Ready() <-chan struct{} {
 	done := make(chan struct{})
 
 	go func() {
+		defer close(done)
 		var wg sync.WaitGroup
 
-		for _, val := range *b {
+		for _, val := range b {
 			wg.Add(1)
 			go func(btn *button.GPIOButton) {
 				defer wg.Done()
@@ -98,11 +103,42 @@ func (b *Buttons) Ready() <-chan struct{} {
 				<-btn.Ready()
 			}(val)
 		}
-
+		// wait for all buttons
 		wg.Wait()
-		// all buttons are ready
-		close(done)
 	}()
 
 	return done
+}
+
+// Handlers is a map of handlers for buttons.
+type Handlers map[button.Name]button.HandlerFunc
+
+// SetRisingHandlers sets new handlers for buttons' rising.
+func (b Buttons) SetRisingHandlers(handlers Handlers) {
+	var handler button.HandlerFunc
+	var found bool
+	// iterate buttons
+	for btnName, btn := range b {
+		// use default handler if handler for button is not specified
+		if handler, found = handlers[btnName]; !found {
+			handler = button.DefaultHandlerFunc
+		}
+		// set handler
+		btn.SetRisingHandler(context.Background(), handler)
+	}
+}
+
+// SetFallingHandlers sets new handlers for buttons' falling.
+func (b Buttons) SetFallingHandlers(handlers Handlers) {
+	var handler button.HandlerFunc
+	var found bool
+	// iterate buttons
+	for btnName, btn := range b {
+		// use default handler if handler for button is not specified
+		if handler, found = handlers[btnName]; !found {
+			handler = button.DefaultHandlerFunc
+		}
+		// set handler
+		btn.SetRisingHandler(context.Background(), handler)
+	}
 }

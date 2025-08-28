@@ -6,7 +6,7 @@ import (
 	"IvolgaOledManager/internal/pkg/display"
 )
 
-// New returns a new instance of display service.
+// New returns a new instance of display.Service.
 func New(cfg *config.Config) (*display.Service, error) {
 	return display.NewDisplayService(
 		cfg.Hardware.Oled.Bus,

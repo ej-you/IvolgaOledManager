@@ -8,6 +8,7 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
+// Ensure sensor data usecase implementats interface.
 var _ SensorDataUsecase = (*SensorDataUC)(nil)
 
 var (
@@ -29,14 +30,15 @@ var (
 	}
 )
 
-// SensorDataUC is a SensorDataUsecase implementation.
+// SensorDataUC represents a usecase for sensor data.
 type SensorDataUC struct {
 	sensorRepoDB repo.SensorRepoDB
 	storage      pubsub.Storage
 }
 
+// NewSensorDataUsecase returns a new instance of SensorDataUC.
 func NewSensorDataUsecase(sensorsRepoDB repo.SensorRepoDB,
-	storage pubsub.Storage) SensorDataUsecase {
+	storage pubsub.Storage) *SensorDataUC {
 
 	return &SensorDataUC{
 		sensorRepoDB: sensorsRepoDB,

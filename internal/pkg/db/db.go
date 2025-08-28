@@ -16,13 +16,14 @@ const (
 	_logLevelWarn  = "warn"  // warn log level tag
 )
 
-// Internal interface compatible with a logger.Writer.
-// Used to configure a custom DB logger.
+// Logger is an internal interface compatible with a logger.Writer.
+// It is used to configure a custom DB logger.
 type Logger interface {
 	Printf(format string, args ...any)
 }
 
-// Provides *gorm.DB with custom options when creating an object.
+// dbSettings is a db settings for *gorm.DB with custom options.
+// It is used when creating a new *gorm.DB object.
 type dbSettings struct {
 	customLogger    Logger
 	logLevel        logger.LogLevel
@@ -31,10 +32,10 @@ type dbSettings struct {
 	disableColorful bool
 }
 
-// Type for options for DB struct initializing.
+// Option represents an option for DB struct initializing.
 type Option func(*dbSettings)
 
-// Returns new DB instance with connection to given DSN.
+// New returns new DB instance with connection to given DSN.
 // Options can be set with "WithSmth" funcs.
 func New(dsn string, options ...Option) (*gorm.DB, error) {
 	dbStorage := &dbSettings{
@@ -72,18 +73,18 @@ func New(dsn string, options ...Option) (*gorm.DB, error) {
 		return nil, fmt.Errorf("open db connection: %w", err)
 	}
 
-	dbStorage.customLogger.Printf("Successfully connected to DB")
+	dbStorage.customLogger.Printf("successfully connected to DB")
 	return gormDB, nil
 }
 
-// Set custom logger for DB. Optional.
+// WithLogger sets custom logger for DB. Optional.
 func WithLogger(customLogger Logger) Option {
 	return func(d *dbSettings) {
 		d.customLogger = customLogger
 	}
 }
 
-// Set log level for DB. Accepted values: "info", "warn", "error". Optional.
+// WithLogLevel sets log level for DB. Accepted values: "info", "warn", "error". Optional.
 func WithLogLevel(logLevel string) Option {
 	// default level is info level
 	level := logger.Info
@@ -99,43 +100,43 @@ func WithLogLevel(logLevel string) Option {
 	}
 }
 
-// Set error log level for DB. Optional.
+// WithErrorLogLevel sets error log level for DB. Optional.
 func WithErrorLogLevel() Option {
 	return func(d *dbSettings) {
 		d.logLevel = logger.Error
 	}
 }
 
-// Set warn log level for DB. Optional.
+// WithWarnLogLevel sets warn log level for DB. Optional.
 func WithWarnLogLevel() Option {
 	return func(d *dbSettings) {
 		d.logLevel = logger.Warn
 	}
 }
 
-// Set translate error parameter true. Optional.
+// WithTranslateError sets translate error parameter true. Optional.
 func WithTranslateError() Option {
 	return func(d *dbSettings) {
 		d.translateError = true
 	}
 }
 
-// Set ignore record not found error parameter true. Optional.
+// WithIgnoreNotFound sets ignore record not found error parameter true. Optional.
 func WithIgnoreNotFound() Option {
 	return func(d *dbSettings) {
 		d.ignoreNotFound = true
 	}
 }
 
-// Set colorful log output false. Optional.
+// WithDisableColorful sets colorful log output false. Optional.
 func WithDisableColorful() Option {
 	return func(d *dbSettings) {
 		d.disableColorful = true
 	}
 }
 
-// Set connection for DB. Required.
-// In this case used MyySQL as DB.
+// withConn sets connection for DB. Required.
+// There is the MyySQL is used as DB.
 func withConn(dsn string) gorm.Dialector {
 	return mysql.Open(dsn)
 }

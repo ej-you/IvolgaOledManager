@@ -1,4 +1,4 @@
-// Package app provides struct with Run method to start full application.
+// Package app provides object with Run method to start full application.
 package app
 
 import (
@@ -41,7 +41,7 @@ var _ Service = (*sensordata.Updater)(nil)
 // Ensure screen implements interface.
 var _ Service = screen.Screen(nil)
 
-// App service interface.
+// Service describes an app service.
 type Service interface {
 	// StartWithShutdown starts service and wait for context cancellation to shutdown it.
 	StartWithShutdown(ctx context.Context) error
@@ -49,13 +49,14 @@ type Service interface {
 	Ready() <-chan struct{}
 }
 
+// App is a main object that starts full app.
 type App struct {
 	cfg      *config.Config
 	storage  pubsub.Storage
 	services []Service
 }
 
-// New returns new app instance.
+// New returns a new instance of App.
 func New() (*App, error) {
 	// initialise all relevant drivers
 	if _, err := host.Init(); err != nil {
@@ -91,7 +92,7 @@ func New() (*App, error) {
 	// init buttons services
 	btns, err := button.New(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("create buttons service: %w", err)
+		return nil, fmt.Errorf("create buttons services: %w", err)
 	}
 	// init display service
 	disp, err := displayservice.New(cfg)
@@ -163,18 +164,18 @@ func (a *App) Run() error {
 	select {
 	case handledSignal := <-quitSig:
 		cancel()
-		logrus.Infof("Got %s signal. Shutdown services...", handledSignal.String())
+		logrus.Infof("got %s signal. Shutdown services...", handledSignal.String())
 	case err := <-serviceErr:
 		cancel()
 		appErr = fmt.Errorf("service: %w", err)
-		logrus.Info("One of the services fell down. Shutdown other services...")
+		logrus.Info("one of the services fell down. Shutdown other services...")
 	case <-appContext.Done():
 		appErr = appContext.Err()
-		logrus.Info("Context canceled. Shutdown app...")
+		logrus.Info("context canceled. Shutdown app...")
 	}
 
 	// wait for all services
 	wgRunning.Wait()
-	logrus.Info("All services was stopped. Shutdown app")
+	logrus.Info("all services was stopped. Shutdown app")
 	return appErr
 }
