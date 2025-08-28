@@ -14,6 +14,17 @@ import (
 	"periph.io/x/conn/v3/gpio/gpioreg"
 )
 
+// Ensure GPIO-button implements interface
+var _ Button = (*GPIOButton)(nil)
+
+// Button describes all methods for button to manage input data.
+type Button interface {
+	// SetRisingHandler sets new handler for button rising.
+	SetRisingHandler(ctx context.Context, handler HandlerFunc)
+	// SetFallingHandler sets new handler for button falling.
+	SetFallingHandler(ctx context.Context, handler HandlerFunc)
+}
+
 // Name represents a name of a button.
 type Name string
 
@@ -71,7 +82,7 @@ func New(name Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButt
 	}, nil
 }
 
-// SetRisingHandler sets new handler when the button is rise.
+// SetRisingHandler sets new handler for button rising.
 func (b *GPIOButton) SetRisingHandler(ctx context.Context, handler HandlerFunc) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
@@ -80,7 +91,7 @@ func (b *GPIOButton) SetRisingHandler(ctx context.Context, handler HandlerFunc) 
 	b.risingHandler = handler
 }
 
-// SetFallingHandler sets new handler when the button is fall.
+// SetFallingHandler sets new handler for button falling.
 func (b *GPIOButton) SetFallingHandler(ctx context.Context, handler HandlerFunc) {
 	b.mu.Lock()
 	defer b.mu.Unlock()

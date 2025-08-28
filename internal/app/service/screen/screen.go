@@ -6,6 +6,9 @@ import (
 	"sync"
 
 	"IvolgaOledManager/config"
+	buttonservice "IvolgaOledManager/internal/app/service/button"
+	"IvolgaOledManager/internal/app/service/render"
+	"IvolgaOledManager/internal/pkg/button"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
@@ -21,27 +24,42 @@ type Screen interface {
 
 // Manager prepare all screen services and connect them with chans.
 type Manager struct {
-	screens []Screen
+	screens       []Screen
+	renderService *render.Render
 }
 
 // NewManager returns a new instance of ScreenManager.
-func NewManager(cfg *config.Config, storage pubsub.Storage) *Manager {
+func NewManager(cfg *config.Config, btns *buttonservice.Buttons,
+	renderService *render.Render, storage pubsub.Storage) *Manager {
+
 	// init screen active chans
 	greetCh := make(chan bool, 1)
 	sensorTempCh := make(chan bool, 1)
 	// active greetings screen by default
 	greetCh <- true
 
-	greetings := NewGreetings(greetCh, storage, cfg.App.GreetingsImgPath)
-	sensorTemp := NewTemperature(sensorTempCh, storage)
+	// greetings screen
+	greetingsReg := getBtnHandlersRegFunc(btns, buttonservice.Handlers{
+		button.ButtonEnt: func(_ context.Context) { greetCh <- false; sensorTempCh <- true }})
+	greetings := NewGreetings(greetCh, greetingsReg, storage, cfg.App.GreetingsImgPath)
+
+	// temperature sensor data screen
+	sensorTempReg := getBtnHandlersRegFunc(btns, buttonservice.Handlers{
+		button.ButtonEsc: func(_ context.Context) { sensorTempCh <- false; greetCh <- true }})
+	sensorTemp := NewTemperature(sensorTempCh, sensorTempReg, storage)
+
 	return &Manager{
-		screens: []Screen{greetings, sensorTemp},
+		screens:       []Screen{greetings, sensorTemp},
+		renderService: renderService,
 	}
 }
 
 // StartWithShutdown starts all screens. This method is blocking.
 // Cancellation of given context may be used to shutdown service.
 func (m *Manager) StartWithShutdown(ctx context.Context) error {
+	// wait for the start of the render service
+	<-m.renderService.Ready()
+
 	screensCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -97,4 +115,27 @@ func (m *Manager) Ready() <-chan struct{} {
 	}()
 
 	return done
+}
+
+// BtnHandlersRegFunc is a func to register button handlers for
+// connecting screen services and navigating between screens
+type BtnHandlersRegFunc func()
+
+// getBtnHandlersRegFunc returns a button handlers register func for given buttons' handlers.
+func getBtnHandlersRegFunc(btns *buttonservice.Buttons,
+	handlers buttonservice.Handlers) BtnHandlersRegFunc {
+
+	return func() {
+		var handler button.HandlerFunc
+		var found bool
+		// iterate buttons
+		for btnName, btn := range *btns {
+			// use default handler if handler for button is not specified
+			if handler, found = handlers[btnName]; !found {
+				handler = button.DefaultHandlerFunc
+			}
+			// set handler
+			btn.SetRisingHandler(context.Background(), handler)
+		}
+	}
 }

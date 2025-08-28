@@ -107,7 +107,7 @@ func New() (*App, error) {
 	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensorUC)
 	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensorUC)
 	// init screens services
-	screenManager := screen.NewManager(cfg, storage)
+	screenManager := screen.NewManager(cfg, btns, rend, storage)
 
 	return &App{
 		cfg:     cfg,
@@ -159,19 +159,6 @@ func (a *App) Run() error {
 	// wait for all services until they are ready
 	wgReady.Wait()
 	logrus.Info("all services were started successfully")
-
-	// go func() {
-	// 	defer cancel()
-	// 	a.storage.Publish(repo.RendererKey, &entity.Image{
-	// 		ImagePath: a.cfg.App.GreetingsImgPath,
-	// 	})
-	// 	time.Sleep(3 * time.Second)
-	// 	a.storage.Publish(repo.RendererKey, &entity.SensorData{
-	// 		Title: "TEST",
-	// 		Data:  "228",
-	// 	})
-	// 	time.Sleep(3 * time.Second)
-	// }()
 
 	select {
 	case handledSignal := <-quitSig:

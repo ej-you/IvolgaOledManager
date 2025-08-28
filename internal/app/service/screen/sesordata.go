@@ -13,17 +13,21 @@ type Temperature struct {
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
-	active     chan bool
-	storage    pubsub.Storage
-	storageKey string
+	active         chan bool
+	storage        pubsub.Storage
+	storageKey     string
+	btnHandlersReg BtnHandlersRegFunc
 }
 
-func NewTemperature(active chan bool, storage pubsub.Storage) *Temperature {
+func NewTemperature(active chan bool, btnHandlersReg BtnHandlersRegFunc,
+	storage pubsub.Storage) *Temperature {
+
 	return &Temperature{
-		ready:      make(chan struct{}),
-		active:     active,
-		storage:    storage,
-		storageKey: repo.SensTempKey,
+		ready:          make(chan struct{}),
+		active:         active,
+		storage:        storage,
+		storageKey:     repo.SensTempKey,
+		btnHandlersReg: btnHandlersReg,
 	}
 }
 
@@ -49,18 +53,24 @@ func (t *Temperature) StartWithShutdown(ctx context.Context) error {
 			}
 			return nil
 		case isActive, ok := <-t.active:
-			if cancel != nil {
-				cancel()
-				cancel = nil
-			}
-
 			// if chan is closed
 			if !ok {
+				if cancel != nil {
+					cancel()
+				}
 				return nil
 			}
 			if !isActive {
+				if cancel != nil {
+					cancel()
+					cancel = nil
+				}
 				continue
 			}
+			if cancel != nil {
+				continue
+			}
+			t.btnHandlersReg()
 			activeCtx, cancel = context.WithCancel(ctx)
 			go t.run(activeCtx)
 		}

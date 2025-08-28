@@ -14,17 +14,19 @@ type Greetings struct {
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
-	active    chan bool
-	storage   pubsub.Storage
-	imagePath string
+	active         chan bool
+	storage        pubsub.Storage
+	imagePath      string
+	btnHandlersReg BtnHandlersRegFunc
 }
 
-func NewGreetings(active chan bool, storage pubsub.Storage, imagePath string) *Greetings {
+func NewGreetings(active chan bool, btnHandlersReg BtnHandlersRegFunc, storage pubsub.Storage, imagePath string) *Greetings {
 	return &Greetings{
-		ready:     make(chan struct{}),
-		active:    active,
-		storage:   storage,
-		imagePath: imagePath,
+		ready:          make(chan struct{}),
+		active:         active,
+		storage:        storage,
+		imagePath:      imagePath,
+		btnHandlersReg: btnHandlersReg,
 	}
 }
 
@@ -50,6 +52,7 @@ func (g *Greetings) StartWithShutdown(ctx context.Context) error {
 			if !isActive {
 				continue
 			}
+			g.btnHandlersReg()
 			g.run()
 		}
 	}
