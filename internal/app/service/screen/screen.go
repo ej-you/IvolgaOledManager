@@ -27,13 +27,15 @@ type Manager struct {
 // NewManager returns a new instance of ScreenManager.
 func NewManager(cfg *config.Config, storage pubsub.Storage) *Manager {
 	// init screen active chans
-	greetScreenCh := make(chan bool, 1)
+	greetCh := make(chan bool, 1)
+	sensorTempCh := make(chan bool, 1)
 	// active greetings screen by default
-	greetScreenCh <- true
+	greetCh <- true
 
-	greetings := NewGreetings(greetScreenCh, storage, cfg.App.GreetingsImgPath)
+	greetings := NewGreetings(greetCh, storage, cfg.App.GreetingsImgPath)
+	sensorTemp := NewTemperature(sensorTempCh, storage)
 	return &Manager{
-		screens: []Screen{greetings},
+		screens: []Screen{greetings, sensorTemp},
 	}
 }
 
