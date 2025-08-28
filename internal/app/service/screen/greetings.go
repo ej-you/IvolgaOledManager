@@ -20,7 +20,9 @@ type Greetings struct {
 	btnHandlersReg BtnHandlersRegFunc
 }
 
-func NewGreetings(active chan bool, btnHandlersReg BtnHandlersRegFunc, storage pubsub.Storage, imagePath string) *Greetings {
+func NewGreetings(active chan bool, btnHandlersReg BtnHandlersRegFunc,
+	storage pubsub.Storage, imagePath string) *Greetings {
+
 	return &Greetings{
 		ready:          make(chan struct{}),
 		active:         active,
