@@ -18,9 +18,9 @@ type SensorRepoDB interface {
 // Precompiled string keys for pub/sub storage.
 const (
 	RendererKey      = "renderer"
-	SensTempKey      = "sensor:temperature"
-	SensHumidKey     = "sensor:humidity"
-	SensPressKey     = "sensor:pressure"
-	SensWindSpeedKey = "sensor:wind:speed"
-	SensWindDirKey   = "sensor:wind:direction"
+	SensTempKey      = "sensordata:temperature"
+	SensHumidKey     = "sensordata:humidity"
+	SensPressKey     = "sensordata:pressure"
+	SensWindSpeedKey = "sensordata:wind:speed"
+	SensWindDirKey   = "sensordata:wind:direction"
 )

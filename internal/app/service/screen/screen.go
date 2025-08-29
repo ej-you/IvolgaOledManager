@@ -10,12 +10,13 @@ import (
 	"IvolgaOledManager/config"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/render"
+	"IvolgaOledManager/internal/app/service/screen/template"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Ensure specific screens implements interface.
-var _ Screen = (*Greetings)(nil)
-var _ Screen = (*Temperature)(nil)
+// Ensure specific screen templates implements interface.
+var _ Screen = (*template.Image)(nil)
+var _ Screen = (*template.SensorData)(nil)
 
 // Screen describes a screen service.
 type Screen interface {
@@ -39,22 +40,52 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	// TODO: close chans
 	// init screen active chans
 	greetCh := make(chan bool, 1)
-	sensorTempCh := make(chan bool, 1)
+	sensTempCh := make(chan bool, 1)
+	sensHumidCh := make(chan bool, 1)
+	sensPressCh := make(chan bool, 1)
+	sensWindSpeedCh := make(chan bool, 1)
+	sensWindDirCh := make(chan bool, 1)
 	// active greetings screen by default
 	greetCh <- true
 
 	// greetings screen
 	greetingsReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEnt: func() { greetCh <- false; sensorTempCh <- true }})
+		button.ButtonEnt: func() { greetCh <- false; sensTempCh <- true }})
 	greetings := NewGreetings(greetCh, greetingsReg, storage, cfg.App.GreetingsImgPath)
-
 	// temperature sensor data screen
-	sensorTempReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc: func() { sensorTempCh <- false; greetCh <- true }})
-	sensorTemp := NewTemperature(sensorTempCh, sensorTempReg, storage)
+	sensTempReg := getBtnHandlersRegFunc(btns, button.Handlers{
+		button.ButtonEsc:  func() { sensTempCh <- false; greetCh <- true },
+		button.ButtonUp:   func() { sensTempCh <- false; sensHumidCh <- true },
+		button.ButtonDown: func() { sensTempCh <- false; sensWindDirCh <- true }})
+	sensTemp := NewSensTemp(sensTempCh, sensTempReg, storage)
+	// humidity sensor data screen
+	sensHumidReg := getBtnHandlersRegFunc(btns, button.Handlers{
+		button.ButtonEsc:  func() { sensHumidCh <- false; greetCh <- true },
+		button.ButtonUp:   func() { sensHumidCh <- false; sensPressCh <- true },
+		button.ButtonDown: func() { sensHumidCh <- false; sensTempCh <- true }})
+	sensHumid := NewSensHumid(sensHumidCh, sensHumidReg, storage)
+	// pressure sensor data screen
+	sensPressReg := getBtnHandlersRegFunc(btns, button.Handlers{
+		button.ButtonEsc:  func() { sensPressCh <- false; greetCh <- true },
+		button.ButtonUp:   func() { sensPressCh <- false; sensWindSpeedCh <- true },
+		button.ButtonDown: func() { sensPressCh <- false; sensHumidCh <- true }})
+	sensPress := NewSensPress(sensPressCh, sensPressReg, storage)
+	// wind speed sensor data screen
+	sensWindSpeedReg := getBtnHandlersRegFunc(btns, button.Handlers{
+		button.ButtonEsc:  func() { sensWindSpeedCh <- false; greetCh <- true },
+		button.ButtonUp:   func() { sensWindSpeedCh <- false; sensWindDirCh <- true },
+		button.ButtonDown: func() { sensWindSpeedCh <- false; sensPressCh <- true }})
+	sensWindSpeed := NewSensWindSpeed(sensWindSpeedCh, sensWindSpeedReg, storage)
+	// wind direction sensor data screen
+	sensWindDirReg := getBtnHandlersRegFunc(btns, button.Handlers{
+		button.ButtonEsc:  func() { sensWindDirCh <- false; greetCh <- true },
+		button.ButtonUp:   func() { sensWindDirCh <- false; sensTempCh <- true },
+		button.ButtonDown: func() { sensWindDirCh <- false; sensWindSpeedCh <- true }})
+	sensWindDir := NewSensWindDir(sensWindDirCh, sensWindDirReg, storage)
 
 	return &Manager{
-		screens:       []Screen{greetings, sensorTemp},
+		screens: []Screen{greetings,
+			sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir},
 		renderService: renderService,
 	}
 }
