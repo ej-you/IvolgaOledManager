@@ -15,7 +15,7 @@ type Image struct {
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
-	active         chan bool
+	active         <-chan bool
 	btnHandlersReg func()
 	storage        pubsub.Storage
 	image          *entity.Image
@@ -23,7 +23,7 @@ type Image struct {
 }
 
 // NewImage returns a new instance of Image.
-func NewImage(active chan bool, btnHandlersReg func(),
+func NewImage(active <-chan bool, btnHandlersReg func(),
 	storage pubsub.Storage, image *entity.Image, screenName string) *Image {
 
 	return &Image{
@@ -57,6 +57,7 @@ func (i *Image) StartWithShutdown(ctx context.Context) error {
 			if !ok {
 				return nil
 			}
+			// screen is inactive
 			if !isActive {
 				continue
 			}

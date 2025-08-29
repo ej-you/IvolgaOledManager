@@ -14,14 +14,14 @@ type SensorData struct {
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
-	active         chan bool
+	active         <-chan bool
 	btnHandlersReg func()
 	storage        pubsub.Storage
 	storageKey     string
 }
 
 // NewSensorData returns a new innstance of SensorData.
-func NewSensorData(active chan bool, btnHandlersReg func(),
+func NewSensorData(active <-chan bool, btnHandlersReg func(),
 	storage pubsub.Storage, storageKey string) *SensorData {
 
 	return &SensorData{
@@ -71,6 +71,7 @@ func (s *SensorData) StartWithShutdown(ctx context.Context) error {
 				}
 				continue
 			}
+			// if "run" method already started
 			if cancel != nil {
 				continue
 			}

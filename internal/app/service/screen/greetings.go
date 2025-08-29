@@ -7,7 +7,7 @@ import (
 )
 
 // NewGreetings returns a new instance of template.Image for greetings screen.
-func NewGreetings(active chan bool, btnHandlersReg func(),
+func NewGreetings(active <-chan bool, btnHandlersReg func(),
 	storage pubsub.Storage, imagePath string) *template.Image {
 
 	image := &entity.Image{ImagePath: imagePath}

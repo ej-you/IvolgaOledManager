@@ -37,7 +37,6 @@ type Manager struct {
 func NewManager(cfg *config.Config, btns button.Buttons,
 	renderService *render.Render, storage pubsub.Storage) *Manager {
 
-	// TODO: close chans
 	// init screen active chans
 	greetCh := make(chan bool, 1)
 	sensTempCh := make(chan bool, 1)
