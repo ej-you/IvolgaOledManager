@@ -42,7 +42,7 @@ func (i *Image) Ready() <-chan struct{} {
 }
 
 // StartWithShutdown starts screen service.
-// It can be stopped by cancellaiton given context.
+// It can be stopped by cancellaiton the given context.
 func (i *Image) StartWithShutdown(ctx context.Context) error {
 	logrus.Infof("start screen:%s service...", i.screenName)
 	// notify that service is ready-to-use

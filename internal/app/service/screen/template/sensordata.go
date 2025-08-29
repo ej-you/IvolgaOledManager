@@ -20,7 +20,7 @@ type SensorData struct {
 	storageKey     string
 }
 
-// NewSensorData returns a new innstance of SensorData.
+// NewSensorData returns a new instance of SensorData.
 func NewSensorData(active <-chan bool, btnHandlersReg func(),
 	storage pubsub.Storage, storageKey string) *SensorData {
 
@@ -39,7 +39,7 @@ func (s *SensorData) Ready() <-chan struct{} {
 }
 
 // StartWithShutdown starts screen service.
-// It can be stopped by cancellaiton given context.
+// It can be stopped by cancellaiton the given context.
 func (s *SensorData) StartWithShutdown(ctx context.Context) error {
 	logrus.Infof("start screen:%s service...", s.storageKey)
 	// notify that service is ready-to-use
