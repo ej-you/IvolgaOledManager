@@ -52,5 +52,5 @@ func (g *GreetingsScreen) prepareBtnHandlers() {
 // btnEnt represents an enter button handler for screen.
 func (g *GreetingsScreen) btnEnt() {
 	g.activeChanMap[Greetings] <- false
-	g.activeChanMap[SensTemp] <- true
+	g.activeChanMap[MenuMain] <- true
 }

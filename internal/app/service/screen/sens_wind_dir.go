@@ -59,7 +59,7 @@ func (s *SensWindDirScreen) prepareBtnHandlers() {
 // btnEsc represents an escape button handler for screen.
 func (s *SensWindDirScreen) btnEsc() {
 	s.activeChanMap[SensWindDir] <- false
-	s.activeChanMap[Greetings] <- true
+	s.activeChanMap[MenuMain] <- true
 }
 
 // btnUp represents an up button handler for screen.

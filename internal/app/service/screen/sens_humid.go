@@ -59,7 +59,7 @@ func (s *SensHumidScreen) prepareBtnHandlers() {
 // btnEsc represents an escape button handler for screen.
 func (s *SensHumidScreen) btnEsc() {
 	s.activeChanMap[SensHumid] <- false
-	s.activeChanMap[Greetings] <- true
+	s.activeChanMap[MenuMain] <- true
 }
 
 // btnUp represents an up button handler for screen.

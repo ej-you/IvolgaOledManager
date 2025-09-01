@@ -10,46 +10,46 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Image represents any image screen.
-type Image struct {
+// Menu represents any menu screen.
+type Menu struct {
 	screenName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
 	active         <-chan bool
 	storage        pubsub.Storage
-	image          *entity.Image
+	menu           *entity.Menu
 	btnHandlersReg func()
 }
 
-// NewImage returns a new instance of Image.
-func NewImage(screenName string, active <-chan bool,
-	storage pubsub.Storage, image *entity.Image) *Image {
+// NewMenu returns a new instance of Menu.
+func NewMenu(screenName string, active <-chan bool,
+	storage pubsub.Storage, menu *entity.Menu) *Menu {
 
-	return &Image{
+	return &Menu{
 		screenName:     screenName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
-		image:          image,
+		menu:           menu,
 		btnHandlersReg: func() {},
 	}
 }
 
 // SetBtnHandlersReg sets btn handlers reg func
 // used to update btn handlers when screen is active.
-func (m *Image) SetBtnHandlersReg(btnHandlersReg func()) {
+func (m *Menu) SetBtnHandlersReg(btnHandlersReg func()) {
 	m.btnHandlersReg = btnHandlersReg
 }
 
 // Ready signals that the service is ready-to-use.
-func (m *Image) Ready() <-chan struct{} {
+func (m *Menu) Ready() <-chan struct{} {
 	return m.ready
 }
 
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
-func (m *Image) StartWithShutdown(ctx context.Context) error {
+func (m *Menu) StartWithShutdown(ctx context.Context) error {
 	logrus.Infof("start screen:%s service...", m.screenName)
 	// notify that service is ready-to-use
 	close(m.ready)
@@ -69,7 +69,7 @@ func (m *Image) StartWithShutdown(ctx context.Context) error {
 			}
 			m.btnHandlersReg()
 			// publish image data for render service
-			m.storage.Publish(repo.RendererKey, m.image)
+			m.storage.Publish(repo.RendererKey, m.menu)
 		}
 	}
 }

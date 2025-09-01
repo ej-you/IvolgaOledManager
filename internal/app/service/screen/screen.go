@@ -26,6 +26,7 @@ type Name string
 
 var (
 	Greetings     Name = "greetings"
+	MenuMain      Name = "menu:main"
 	SensTemp      Name = "sensordata:temperature"
 	SensHumid     Name = "sensordata:humidity"
 	SensPress     Name = "sensordata:pressure"
@@ -43,6 +44,7 @@ type ActiveChanMap map[Name]ActiveChan
 func newActiveChanMap() ActiveChanMap {
 	return ActiveChanMap{
 		Greetings:     make(ActiveChan, 1),
+		MenuMain:      make(ActiveChan, 1),
 		SensTemp:      make(ActiveChan, 1),
 		SensHumid:     make(ActiveChan, 1),
 		SensPress:     make(ActiveChan, 1),
@@ -80,6 +82,8 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 
 	// greetings screen
 	greetings := NewGreetingsScreen(activeCh, btns, storage, cfg.App.GreetingsImgPath)
+	// main menu screen
+	menuMain := NewMenuMainScreen(activeCh, btns, storage)
 	// sensor data screens
 	sensTemp := NewSensTempScreen(activeCh, btns, storage)
 	sensHumid := NewSensHumidScreen(activeCh, btns, storage)
@@ -89,6 +93,7 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 
 	screens := []Screen{
 		greetings,
+		menuMain,
 		sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir,
 	}
 	// prepare button handlers for all screens

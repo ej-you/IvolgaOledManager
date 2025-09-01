@@ -59,7 +59,7 @@ func (s *SensPressScreen) prepareBtnHandlers() {
 // btnEsc represents an escape button handler for screen.
 func (s *SensPressScreen) btnEsc() {
 	s.activeChanMap[SensPress] <- false
-	s.activeChanMap[Greetings] <- true
+	s.activeChanMap[MenuMain] <- true
 }
 
 // btnUp represents an up button handler for screen.
