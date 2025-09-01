@@ -1,0 +1,75 @@
+package screen
+
+import (
+	"context"
+
+	"IvolgaOledManager/internal/app/repo"
+	"IvolgaOledManager/internal/app/service/button"
+	"IvolgaOledManager/internal/app/service/screen/template"
+	"IvolgaOledManager/internal/pkg/pubsub"
+)
+
+// SensTempScreen represents a humidity sensor data screen.
+type SensHumidScreen struct {
+	activeChanMap ActiveChanMap
+	btns          button.Buttons
+	templ         *template.SensorData
+}
+
+// NewSensHumidScreen returns a new instance of SensHumidScreen.
+func NewSensHumidScreen(activeChanMap ActiveChanMap, btns button.Buttons,
+	storage pubsub.Storage) *SensHumidScreen {
+
+	templ := template.NewSensorData(
+		string(SensHumid),
+		activeChanMap[SensHumid],
+		storage,
+		repo.SensHumidKey,
+	)
+	return &SensHumidScreen{
+		activeChanMap: activeChanMap,
+		btns:          btns,
+		templ:         templ,
+	}
+}
+
+// Ready returns true if service was completely started and is ready-to-use now.
+func (s *SensHumidScreen) Ready() <-chan struct{} {
+	return s.templ.Ready()
+}
+
+// StartWithShutdown starts service and wait for context cancellation to shutdown it.
+func (s *SensHumidScreen) StartWithShutdown(ctx context.Context) error {
+	return s.templ.StartWithShutdown(ctx)
+}
+
+// prepareBtnHandlers creates button handlers to apply them after the screen is active
+func (s *SensHumidScreen) prepareBtnHandlers() {
+	btnHandlers := button.Handlers{
+		button.ButtonEsc:  s.btnEsc,
+		button.ButtonUp:   s.btnUp,
+		button.ButtonDown: s.btnDown,
+	}
+
+	s.templ.SetBtnHandlersReg(func() {
+		s.btns.SetRisingHandlers(btnHandlers)
+	})
+}
+
+// btnEsc represents an escape button handler for screen.
+func (s *SensHumidScreen) btnEsc() {
+	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[Greetings] <- true
+}
+
+// btnUp represents an up button handler for screen.
+func (s *SensHumidScreen) btnUp() {
+	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[SensPress] <- true
+}
+
+// btnDown represents an down button handler for screen.
+func (s *SensHumidScreen) btnDown() {
+	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[SensTemp] <- true
+}

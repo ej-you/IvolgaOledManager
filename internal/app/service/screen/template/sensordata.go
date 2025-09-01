@@ -9,28 +9,36 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// SensorData represents a template for sensor data screen.
+// SensorData represents any sensor data screen.
 type SensorData struct {
+	screenName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
 	active         <-chan bool
-	btnHandlersReg func()
 	storage        pubsub.Storage
 	storageKey     string
+	btnHandlersReg func()
 }
 
 // NewSensorData returns a new instance of SensorData.
-func NewSensorData(active <-chan bool, btnHandlersReg func(),
+func NewSensorData(screenName string, active <-chan bool,
 	storage pubsub.Storage, storageKey string) *SensorData {
 
 	return &SensorData{
+		screenName:     screenName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
 		storageKey:     storageKey,
-		btnHandlersReg: btnHandlersReg,
+		btnHandlersReg: func() {},
 	}
+}
+
+// SetBtnHandlersReg sets btn handlers reg func
+// used to update btn handlers when screen is active.
+func (s *SensorData) SetBtnHandlersReg(btnHandlersReg func()) {
+	s.btnHandlersReg = btnHandlersReg
 }
 
 // Ready signals that the service is ready-to-use.
@@ -41,7 +49,7 @@ func (s *SensorData) Ready() <-chan struct{} {
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
 func (s *SensorData) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start screen:%s service...", s.storageKey)
+	logrus.Infof("start screen:%s service...", s.screenName)
 	// notify that service is ready-to-use
 	close(s.ready)
 

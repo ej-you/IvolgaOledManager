@@ -10,30 +10,36 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// SensorData represents a template for image screen.
+// Image represents any image screen.
 type Image struct {
+	screenName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
 	active         <-chan bool
-	btnHandlersReg func()
 	storage        pubsub.Storage
 	image          *entity.Image
-	screenName     string
+	btnHandlersReg func()
 }
 
 // NewImage returns a new instance of Image.
-func NewImage(active <-chan bool, btnHandlersReg func(),
-	storage pubsub.Storage, image *entity.Image, screenName string) *Image {
+func NewImage(screenName string, active <-chan bool,
+	storage pubsub.Storage, image *entity.Image) *Image {
 
 	return &Image{
+		screenName:     screenName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
 		image:          image,
-		screenName:     screenName,
-		btnHandlersReg: btnHandlersReg,
+		btnHandlersReg: func() {},
 	}
+}
+
+// SetBtnHandlersReg sets btn handlers reg func
+// used to update btn handlers when screen is active.
+func (i *Image) SetBtnHandlersReg(btnHandlersReg func()) {
+	i.btnHandlersReg = btnHandlersReg
 }
 
 // Ready signals that the service is ready-to-use.

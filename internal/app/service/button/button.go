@@ -110,35 +110,38 @@ func (b Buttons) Ready() <-chan struct{} {
 	return done
 }
 
+// Handlers is an alias for button.HandlerFunc.
+type HandlerFunc button.HandlerFunc
+
 // Handlers is a map of handlers for buttons.
-type Handlers map[button.Name]button.HandlerFunc
+type Handlers map[button.Name]HandlerFunc
 
 // SetRisingHandlers sets new handlers for buttons' rising.
 func (b Buttons) SetRisingHandlers(handlers Handlers) {
-	var handler button.HandlerFunc
+	var handler HandlerFunc
 	var found bool
 	// iterate buttons
 	for btnName, btn := range b {
 		// use default handler if handler for button is not specified
 		if handler, found = handlers[btnName]; !found {
-			handler = button.DefaultHandlerFunc
+			btn.SetRisingHandler(button.DefaultHandlerFunc)
+		} else {
+			btn.SetRisingHandler(button.HandlerFunc(handler))
 		}
-		// set handler
-		btn.SetRisingHandler(handler)
 	}
 }
 
 // SetFallingHandlers sets new handlers for buttons' falling.
 func (b Buttons) SetFallingHandlers(handlers Handlers) {
-	var handler button.HandlerFunc
+	var handler HandlerFunc
 	var found bool
 	// iterate buttons
 	for btnName, btn := range b {
 		// use default handler if handler for button is not specified
 		if handler, found = handlers[btnName]; !found {
-			handler = button.DefaultHandlerFunc
+			btn.SetRisingHandler(button.DefaultHandlerFunc)
+		} else {
+			btn.SetRisingHandler(button.HandlerFunc(handler))
 		}
-		// set handler
-		btn.SetRisingHandler(handler)
 	}
 }

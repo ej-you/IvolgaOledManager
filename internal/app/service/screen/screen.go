@@ -10,13 +10,46 @@ import (
 	"IvolgaOledManager/config"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/render"
-	"IvolgaOledManager/internal/app/service/screen/template"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Ensure specific screen templates implements interface.
-var _ Screen = (*template.Image)(nil)
-var _ Screen = (*template.SensorData)(nil)
+// Ensure specific screens implement interfaces.
+var _ Screen = (*GreetingsScreen)(nil)
+var _ Screen = (*SensTempScreen)(nil)
+var _ Screen = (*SensHumidScreen)(nil)
+var _ Screen = (*SensPressScreen)(nil)
+var _ Screen = (*SensWindSpeedScreen)(nil)
+var _ Screen = (*SensWindDirScreen)(nil)
+
+// Name represents a screen name.
+type Name string
+
+var (
+	Greetings     Name = "greetings"
+	SensTemp      Name = "sensordata:temperature"
+	SensHumid     Name = "sensordata:humidity"
+	SensPress     Name = "sensordata:pressure"
+	SensWindSpeed Name = "sensordata:wind:speed"
+	SensWindDir   Name = "sensordata:wind:direction"
+)
+
+// ActiveChan represents an active chan for screen.
+type ActiveChan chan bool
+
+// ActiveChanMap is a map of screen active chans.
+type ActiveChanMap map[Name]ActiveChan
+
+// newActiveChanMap returns a new instanse of ActiveChMap.
+func newActiveChanMap() ActiveChanMap {
+	return ActiveChanMap{
+		Greetings:     make(ActiveChan, 1),
+		SensTemp:      make(ActiveChan, 1),
+		SensHumid:     make(ActiveChan, 1),
+		SensPress:     make(ActiveChan, 1),
+		SensWindSpeed: make(ActiveChan, 1),
+		SensWindDir:   make(ActiveChan, 1),
+	}
+}
 
 // Screen describes a screen service.
 type Screen interface {
@@ -24,6 +57,9 @@ type Screen interface {
 	StartWithShutdown(ctx context.Context) error
 	// Ready returns true if service was completely started and is ready-to-use now.
 	Ready() <-chan struct{}
+
+	// prepareBtnHandlers creates button handlers to apply them after the screen is active
+	prepareBtnHandlers()
 }
 
 // Manager represents screen manager.
@@ -38,53 +74,29 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	renderService *render.Render, storage pubsub.Storage) *Manager {
 
 	// init screen active chans
-	greetCh := make(chan bool, 1)
-	sensTempCh := make(chan bool, 1)
-	sensHumidCh := make(chan bool, 1)
-	sensPressCh := make(chan bool, 1)
-	sensWindSpeedCh := make(chan bool, 1)
-	sensWindDirCh := make(chan bool, 1)
+	activeCh := newActiveChanMap()
 	// active greetings screen by default
-	greetCh <- true
+	activeCh[Greetings] <- true
 
 	// greetings screen
-	greetingsReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEnt: func() { greetCh <- false; sensTempCh <- true }})
-	greetings := NewGreetings(greetCh, greetingsReg, storage, cfg.App.GreetingsImgPath)
-	// temperature sensor data screen
-	sensTempReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc:  func() { sensTempCh <- false; greetCh <- true },
-		button.ButtonUp:   func() { sensTempCh <- false; sensHumidCh <- true },
-		button.ButtonDown: func() { sensTempCh <- false; sensWindDirCh <- true }})
-	sensTemp := NewSensTemp(sensTempCh, sensTempReg, storage)
-	// humidity sensor data screen
-	sensHumidReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc:  func() { sensHumidCh <- false; greetCh <- true },
-		button.ButtonUp:   func() { sensHumidCh <- false; sensPressCh <- true },
-		button.ButtonDown: func() { sensHumidCh <- false; sensTempCh <- true }})
-	sensHumid := NewSensHumid(sensHumidCh, sensHumidReg, storage)
-	// pressure sensor data screen
-	sensPressReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc:  func() { sensPressCh <- false; greetCh <- true },
-		button.ButtonUp:   func() { sensPressCh <- false; sensWindSpeedCh <- true },
-		button.ButtonDown: func() { sensPressCh <- false; sensHumidCh <- true }})
-	sensPress := NewSensPress(sensPressCh, sensPressReg, storage)
-	// wind speed sensor data screen
-	sensWindSpeedReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc:  func() { sensWindSpeedCh <- false; greetCh <- true },
-		button.ButtonUp:   func() { sensWindSpeedCh <- false; sensWindDirCh <- true },
-		button.ButtonDown: func() { sensWindSpeedCh <- false; sensPressCh <- true }})
-	sensWindSpeed := NewSensWindSpeed(sensWindSpeedCh, sensWindSpeedReg, storage)
-	// wind direction sensor data screen
-	sensWindDirReg := getBtnHandlersRegFunc(btns, button.Handlers{
-		button.ButtonEsc:  func() { sensWindDirCh <- false; greetCh <- true },
-		button.ButtonUp:   func() { sensWindDirCh <- false; sensTempCh <- true },
-		button.ButtonDown: func() { sensWindDirCh <- false; sensWindSpeedCh <- true }})
-	sensWindDir := NewSensWindDir(sensWindDirCh, sensWindDirReg, storage)
+	greetings := NewGreetingsScreen(activeCh, btns, storage, cfg.App.GreetingsImgPath)
+	// sensor data screens
+	sensTemp := NewSensTempScreen(activeCh, btns, storage)
+	sensHumid := NewSensHumidScreen(activeCh, btns, storage)
+	sensPress := NewSensPressScreen(activeCh, btns, storage)
+	sensWindSpeed := NewSensWindSpeedScreen(activeCh, btns, storage)
+	sensWindDir := NewSensWindDirScreen(activeCh, btns, storage)
 
+	screens := []Screen{
+		greetings,
+		sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir,
+	}
+	// prepare button handlers for all screens
+	for _, screen := range screens {
+		screen.prepareBtnHandlers()
+	}
 	return &Manager{
-		screens: []Screen{greetings,
-			sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir},
+		screens:       screens,
 		renderService: renderService,
 	}
 }
