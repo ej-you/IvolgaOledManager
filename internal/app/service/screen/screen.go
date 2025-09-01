@@ -39,7 +39,7 @@ type ActiveChan chan bool
 // ActiveChanMap is a map of screen active chans.
 type ActiveChanMap map[Name]ActiveChan
 
-// newActiveChanMap returns a new instanse of ActiveChMap.
+// newActiveChanMap returns a new instance of ActiveChMap.
 func newActiveChanMap() ActiveChanMap {
 	return ActiveChanMap{
 		Greetings:     make(ActiveChan, 1),
@@ -162,15 +162,4 @@ func (m *Manager) Ready() <-chan struct{} {
 	}()
 
 	return done
-}
-
-// BtnHandlersRegFunc is a func to register button handlers for
-// connecting screen services and navigating between screens
-type BtnHandlersRegFunc func()
-
-// getBtnHandlersRegFunc returns a button handlers register func for given buttons' handlers.
-func getBtnHandlersRegFunc(btns button.Buttons, handlers button.Handlers) BtnHandlersRegFunc {
-	return func() {
-		btns.SetRisingHandlers(handlers)
-	}
 }
