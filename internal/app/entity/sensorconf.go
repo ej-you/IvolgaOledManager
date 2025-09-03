@@ -2,7 +2,12 @@ package entity
 
 import "strings"
 
-const _inactivePrefix = "#" // prefix for config line of inactive sensor
+const (
+	SensorconfCtxKey     = "sensorconf"     // key for sensorconf value in context
+	SensorconfItemCtxKey = "sensorconfItem" // key for sensorconf item value in context
+
+	_inactivePrefix = "#" // prefix for config line of inactive sensor
+)
 
 // Sensorconf is a slice of sensorconf items.
 // It's the result of parsing the sensors' config file.

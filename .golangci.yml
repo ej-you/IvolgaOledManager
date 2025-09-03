@@ -87,7 +87,7 @@ linters:
       - linters: # different screen sctucts are more understandable
           - dupl
         path: internal/app/service/screen/sens_.*?\.go
-        text: "1-75 lines are duplicate of `internal/app/service/screen/sens_.*?.go:1-75`"
+        text: "1-78 lines are duplicate of `internal/app/service/screen/sens_.*?.go:1-78`"
     paths:
       - bin
 

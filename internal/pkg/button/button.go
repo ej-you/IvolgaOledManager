@@ -125,9 +125,8 @@ func (b *GPIOButton) handle() error {
 	// run handler
 	if b.state {
 		return b.fallingHandler()
-	} else {
-		return b.risingHandler()
 	}
+	return b.risingHandler()
 }
 
 // edgeOccurred returns true if real edge is occurred, not timeout wait.

@@ -14,7 +14,7 @@ const _buttonsAmount = 4 // amount of buttons
 
 var (
 	Esc  button.Name = "button:esc"  // escape button
-	Up   button.Name = "button:up"   // up button
+	Up   button.Name = "button:up"   // nolint:varnamelen // up button
 	Down button.Name = "button:down" // down button
 	Ent  button.Name = "button:ent"  // enter button
 )

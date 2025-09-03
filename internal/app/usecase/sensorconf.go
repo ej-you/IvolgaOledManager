@@ -46,12 +46,12 @@ func (s *SensorconfUC) UpdateSensorconf(data entity.Sensorconf) error {
 // Each sensor config line will be a separate menu item.
 func (s *SensorconfUC) ToMenu(data entity.Sensorconf) *entity.Menu {
 	// context with full sensorconf slice
-	ctxWithData := context.WithValue(context.Background(), "sensorconf", data)
+	ctxWithData := context.WithValue(context.Background(), entity.SensorconfCtxKey, data)
 	// collect menu items
 	menuItems := make([]*entity.MenuItem, 0, len(data))
 	for _, sensorconfItem := range data {
 		menuItems = append(menuItems, entity.NewMenuItem(
-			context.WithValue(ctxWithData, "sensorconfItem", sensorconfItem),
+			context.WithValue(ctxWithData, entity.SensorconfItemCtxKey, sensorconfItem),
 			sensorconfItem.Name,
 		))
 	}
