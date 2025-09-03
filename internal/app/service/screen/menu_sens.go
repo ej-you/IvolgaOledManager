@@ -9,20 +9,27 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Static sensor menu instance.
-var _menuSensInst = &entity.Menu{
-	Title: "Датчики",
-	Items: []*entity.MenuItem{
-		entity.NewMenuItem(context.Background(), "Данные"),
-		entity.NewMenuItem(context.Background(), "Настройка"),
-	},
+// newMenuSensGetter returns menu getter func for sensor menu.
+func newMenuSensGetter() template.MenuGetter {
+	menu := &entity.Menu{
+		Title: "Датчики",
+		Items: []*entity.MenuItem{
+			entity.NewMenuItem(context.Background(), "Данные"),
+			entity.NewMenuItem(context.Background(), "Настройка"),
+		},
+	}
+	return func() (*entity.Menu, error) {
+		menu.FirstItem = 0
+		menu.SelectedItem = 0
+		return menu, nil
+	}
 }
 
 // MenuSensScreen represents the sensor menu screen.
 type MenuSensScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	storage       pubsub.Storage
 	templ         *template.Menu
 }
 
@@ -37,9 +44,9 @@ func NewMenuSensScreen(screenName Name, activeChanMap ActiveChanMap, btns button
 		newMenuSensGetter(),
 	)
 	return &MenuSensScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
-		storage:       storage,
 		templ:         templ,
 	}
 }
@@ -70,7 +77,7 @@ func (s *MenuSensScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *MenuSensScreen) btnEsc() error {
-	s.activeChanMap[MenuSens] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuMain] <- true
 	return nil
 }
@@ -82,22 +89,13 @@ func (s *MenuSensScreen) btnEnt() error {
 		return err
 	}
 
-	s.activeChanMap[MenuSens] <- false
+	s.activeChanMap[s.name] <- false
 	// set active screen according to selected menu item
-	switch menuInst.Items[menuInst.SelectedItem] {
-	case _menuSensInst.Items[0]:
+	switch menuInst.SelectedItem {
+	case 0:
 		s.activeChanMap[SensTemp] <- true
-	case _menuSensInst.Items[1]:
+	case 1:
 		s.activeChanMap[MenuSensorconf] <- true
 	}
 	return nil
-}
-
-// newMenuSensGetter returns menu getter func for sensor menu.
-func newMenuSensGetter() template.MenuGetter {
-	return func() (*entity.Menu, error) {
-		_menuSensInst.FirstItem = 0
-		_menuSensInst.SelectedItem = 0
-		return _menuSensInst, nil
-	}
 }

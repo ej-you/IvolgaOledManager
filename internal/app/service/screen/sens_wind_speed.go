@@ -11,6 +11,7 @@ import (
 
 // SensTempScreen represents a wind speed sensor data screen.
 type SensWindSpeedScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.SensorData
@@ -27,6 +28,7 @@ func NewSensWindSpeedScreen(screenName Name, activeChanMap ActiveChanMap, btns b
 		repo.SensWindSpeedKey,
 	)
 	return &SensWindSpeedScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
@@ -58,21 +60,21 @@ func (s *SensWindSpeedScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *SensWindSpeedScreen) btnEsc() error {
-	s.activeChanMap[SensWindSpeed] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSens] <- true
 	return nil
 }
 
 // btnUp represents an up button handler for screen.
 func (s *SensWindSpeedScreen) btnUp() error {
-	s.activeChanMap[SensWindSpeed] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensWindDir] <- true
 	return nil
 }
 
 // btnDown represents an down button handler for screen.
 func (s *SensWindSpeedScreen) btnDown() error {
-	s.activeChanMap[SensWindSpeed] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensPress] <- true
 	return nil
 }

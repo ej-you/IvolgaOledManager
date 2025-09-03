@@ -9,23 +9,30 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Static main menu instance.
-var _menuMainInst = &entity.Menu{
-	Title: "Главное меню",
-	Items: []*entity.MenuItem{
-		entity.NewMenuItem(context.Background(), "Датчики"),
-		entity.NewMenuItem(context.Background(), "Что-то"),
-		entity.NewMenuItem(context.Background(), "И ещё"),
-		entity.NewMenuItem(context.Background(), "И для проверки прокрутки - ещё!"),
-		entity.NewMenuItem(context.Background(), "And the last for test"),
-	},
+// newMenuMainGetter returns menu getter func for main menu.
+func newMenuMainGetter() template.MenuGetter {
+	menu := &entity.Menu{
+		Title: "Главное меню",
+		Items: []*entity.MenuItem{
+			entity.NewMenuItem(context.Background(), "Датчики"),
+			entity.NewMenuItem(context.Background(), "Что-то"),
+			entity.NewMenuItem(context.Background(), "И ещё"),
+			entity.NewMenuItem(context.Background(), "И для проверки прокрутки - ещё!"),
+			entity.NewMenuItem(context.Background(), "And the last for test"),
+		},
+	}
+	return func() (*entity.Menu, error) {
+		menu.FirstItem = 0
+		menu.SelectedItem = 0
+		return menu, nil
+	}
 }
 
 // MenuMainScreen represents the main menu screen.
 type MenuMainScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	storage       pubsub.Storage
 	templ         *template.Menu
 }
 
@@ -40,9 +47,9 @@ func NewMenuMainScreen(screenName Name, activeChanMap ActiveChanMap, btns button
 		newMenuMainGetter(),
 	)
 	return &MenuMainScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
-		storage:       storage,
 		templ:         templ,
 	}
 }
@@ -73,7 +80,7 @@ func (s *MenuMainScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *MenuMainScreen) btnEsc() error {
-	s.activeChanMap[MenuMain] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[ImgGreetings] <- true
 	return nil
 }
@@ -85,22 +92,13 @@ func (s *MenuMainScreen) btnEnt() error {
 		return err
 	}
 
-	s.activeChanMap[MenuMain] <- false
+	s.activeChanMap[s.name] <- false
 	// set active screen according to selected menu item
-	switch menuInst.Items[menuInst.SelectedItem] {
-	case _menuMainInst.Items[0]:
+	switch menuInst.SelectedItem {
+	case 0:
 		s.activeChanMap[MenuSens] <- true
-	case _menuMainInst.Items[1]:
+	case 1:
 		s.activeChanMap[SensTemp] <- true
 	}
 	return nil
-}
-
-// newMenuMainGetter returns menu getter func for main menu.
-func newMenuMainGetter() template.MenuGetter {
-	return func() (*entity.Menu, error) {
-		_menuMainInst.FirstItem = 0
-		_menuMainInst.SelectedItem = 0
-		return _menuMainInst, nil
-	}
 }

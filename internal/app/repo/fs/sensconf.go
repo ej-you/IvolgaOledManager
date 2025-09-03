@@ -14,26 +14,26 @@ import (
 )
 
 const (
-	_sensorSectionPrefix = "sensors:" // text prefix to start parse sensors
-	_openBracket         = "{"        // bracket prefix to start parse sensors
-	_closeBracket        = "}"        // bracket prefix to stop parse sensors
+	_sensSectionPrefix = "sensors:" // text prefix to start parse sensors
+	_openBracket       = "{"        // bracket prefix to start parse sensors
+	_closeBracket      = "}"        // bracket prefix to stop parse sensors
 
-	_sensorsCap = 10 // init cap for sensors slice (length can be less or more)
+	_sensCap = 10 // init cap for sensors slice (length can be less or more)
 )
 
 // Ensure sensors' config repo implementats interface.
-var _ repo.SensorconfRepoFS = (*SensorconfRepo)(nil)
+var _ repo.SensconfRepoFS = (*SensconfRepo)(nil)
 
-// SensorconfRepo represents a file repo for sensors' config.
-type SensorconfRepo struct {
+// SensconfRepo represents a file repo for sensors' config.
+type SensconfRepo struct {
 	configPath            string
 	configPermissions     fs.FileMode
 	sensorNameRegexp      *regexp.Regexp
 	sensorsSettingsRegexp *regexp.Regexp
 }
 
-// NewSensorconfRepoFS returns a new instance of SensorconfRepo.
-func NewSensorconfRepoFS(configPath string) (*SensorconfRepo, error) {
+// NewSensconfRepoFS returns a new instance of SensconfRepo.
+func NewSensconfRepoFS(configPath string) (*SensconfRepo, error) {
 	// get config file info
 	fileInfo, err := os.Stat(configPath)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewSensorconfRepoFS(configPath string) (*SensorconfRepo, error) {
 	sensorNameRegexp := regexp.MustCompile(`.+/(.+?)\.conf`)
 	// to parse full sensors settings block [use (?s) for single-line mode]
 	sensorsSettingsRegexp := regexp.MustCompile(`(?s)(^.*sensors:\s{)(.*?)(\s}.*$)`)
-	return &SensorconfRepo{
+	return &SensconfRepo{
 		configPath:            configPath,
 		configPermissions:     fileInfo.Mode().Perm(),
 		sensorNameRegexp:      sensorNameRegexp,
@@ -51,11 +51,11 @@ func NewSensorconfRepoFS(configPath string) (*SensorconfRepo, error) {
 	}, nil
 }
 
-// ParseSensors returns slice of station sensors.
+// ParseSensconf returns slice of station sensors.
 // It parse station config file with the next layout:
 // `_sensorSectionPrefix \n _openBracket ...[config-lines]... \n _closeBracket`.
-func (r *SensorconfRepo) ParseSensors() (entity.Sensorconf, error) {
-	sensors := make(entity.Sensorconf, 0, _sensorsCap)
+func (r *SensconfRepo) ParseSensconf() (entity.Sensconf, error) {
+	sensors := make(entity.Sensconf, 0, _sensCap)
 
 	// open config file
 	file, err := os.Open(r.configPath)
@@ -81,12 +81,12 @@ func (r *SensorconfRepo) ParseSensors() (entity.Sensorconf, error) {
 		}
 		// parse line
 		if start {
-			sensors = append(sensors, r.createSensor(idx, line))
+			sensors = append(sensors, r.createSensconfItem(idx, line))
 			idx++
 			continue
 		}
 		// start
-		if strings.HasPrefix(line, _sensorSectionPrefix) {
+		if strings.HasPrefix(line, _sensSectionPrefix) {
 			start = true
 		}
 	}
@@ -96,8 +96,8 @@ func (r *SensorconfRepo) ParseSensors() (entity.Sensorconf, error) {
 	return sensors, nil
 }
 
-// UpdateSensors updates sensor section of config file according to given sensors data.
-func (r *SensorconfRepo) UpdateSensors(sensors entity.Sensorconf) error {
+// UpdateSensconf updates sensor section of config file according to given sensors data.
+func (r *SensconfRepo) UpdateSensconf(sensors entity.Sensconf) error {
 	// read file content
 	content, err := os.ReadFile(r.configPath)
 	if err != nil {
@@ -115,9 +115,9 @@ func (r *SensorconfRepo) UpdateSensors(sensors entity.Sensorconf) error {
 	return nil
 }
 
-// createSensor creates StationSensor instance from raw config line.
-func (r *SensorconfRepo) createSensor(idx int, rawConfigLine string) *entity.SensorconfItem {
-	sensor := &entity.SensorconfItem{
+// createSensconfItem creates SensconfItem instance from raw config line.
+func (r *SensconfRepo) createSensconfItem(idx int, rawConfigLine string) *entity.SensconfItem {
+	sensor := &entity.SensconfItem{
 		Idx:    idx,
 		Line:   rawConfigLine,
 		Active: !strings.HasPrefix(rawConfigLine, "#"),
@@ -133,7 +133,7 @@ func (r *SensorconfRepo) createSensor(idx int, rawConfigLine string) *entity.Sen
 }
 
 // CollectAll collects all sensor lines to a slice of bytes and returns it.
-func collectSensorconfToBytes(data entity.Sensorconf, prefix, suffix string) []byte {
+func collectSensorconfToBytes(data entity.Sensconf, prefix, suffix string) []byte {
 	var builder strings.Builder
 	builder.WriteString(prefix)
 	// collect sensor lines

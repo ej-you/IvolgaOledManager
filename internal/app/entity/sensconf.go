@@ -3,20 +3,20 @@ package entity
 import "strings"
 
 const (
-	SensorconfCtxKey     = "sensorconf"     // key for sensorconf value in context
-	SensorconfItemCtxKey = "sensorconfItem" // key for sensorconf item value in context
+	SensconfCtxKey     = "sensorconf"     // key for sensorconf value in context
+	SensconfItemCtxKey = "sensorconfItem" // key for sensorconf item value in context
 
 	_inactivePrefix = "#" // prefix for config line of inactive sensor
 )
 
-// Sensorconf is a slice of sensorconf items.
+// Sensconf is a slice of sensorconf items.
 // It's the result of parsing the sensors' config file.
-type Sensorconf []*SensorconfItem
+type Sensconf []*SensconfItem
 
-// SensorconfItem is a model for station sensor config line.
+// SensconfItem is a model for station sensor config line.
 // The line looks like `@include "/etc/ssc-station.d/GPS.conf"` for active sensor and
 // `# @include "/etc/ssc-station.d/GPS.conf"` for inactive sensor.
-type SensorconfItem struct {
+type SensconfItem struct {
 	// index of sensor
 	Idx int
 	// config line (e.g. @include "/etc/ssc-station.d/GPS.conf")
@@ -29,7 +29,7 @@ type SensorconfItem struct {
 
 // ChangeActive sets active to true if Active is false and vice versa.
 // It updates sensor's config line.
-func (s *SensorconfItem) ChangeActive() {
+func (s *SensconfItem) ChangeActive() {
 	if s.Active {
 		s.Line = _inactivePrefix + s.Line
 	} else {

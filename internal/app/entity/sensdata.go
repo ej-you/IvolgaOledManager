@@ -7,8 +7,8 @@ import (
 	"IvolgaOledManager/internal/pkg/display"
 )
 
-// SensorData is a data from station sensor.
-type SensorData struct {
+// Sensdata is a data from station sensor.
+type Sensdata struct {
 	// measurement name to output
 	Title string
 	// sensor data value to output
@@ -19,7 +19,7 @@ type SensorData struct {
 }
 
 // Render implements display.Renderer. It renders sensor data on display.
-func (s *SensorData) Render(device display.Display) error {
+func (s *Sensdata) Render(device display.Display) error {
 	// output text screen
 	err := device.DisplayTextLines(
 		display.TextLine{Content: s.Title, RelativeSize: 2},

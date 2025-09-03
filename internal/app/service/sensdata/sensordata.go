@@ -1,5 +1,5 @@
 // Package sensordata provides services to update sensors data.
-package sensordata
+package sensdata
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 )
 
 // getDataFunc is a function to get new sensor data value from usecase.
-type getDataFunc func() (*entity.SensorData, error)
+type getDataFunc func() (*entity.Sensdata, error)
 
 // Updater represents a sensor data updater.
 type Updater struct {
@@ -44,7 +44,7 @@ func (s *Updater) StartWithShutdown(ctx context.Context) error {
 	// notify that service is ready-to-use
 	close(s.ready)
 
-	var newData *entity.SensorData
+	var newData *entity.Sensdata
 	var err error
 	for {
 		select {
@@ -73,35 +73,35 @@ func (s *Updater) Ready() <-chan struct{} {
 
 // NewTemperatureUpdater returns a new instance of temperature Updater.
 func NewTemperatureUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensordataUsecase) *Updater {
+	sensorUC usecase.SensdataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetTemperature, repo.SensTempKey)
 }
 
 // NewHumidityUpdater returns a new instance of humidity Updater.
 func NewHumidityUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensordataUsecase) *Updater {
+	sensorUC usecase.SensdataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetHumidity, repo.SensHumidKey)
 }
 
 // NewPressureUpdater returns a new instance of pressure Updater.
 func NewPressureUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensordataUsecase) *Updater {
+	sensorUC usecase.SensdataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetPressure, repo.SensPressKey)
 }
 
 // NewWindSpeedUpdater returns a new instance of wind speed Updater.
 func NewWindSpeedUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensordataUsecase) *Updater {
+	sensorUC usecase.SensdataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetWindSpeed, repo.SensWindSpeedKey)
 }
 
 // NewWindDirUpdater returns a new instance of wind direction Updater.
 func NewWindDirUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensordataUsecase) *Updater {
+	sensorUC usecase.SensdataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetWindDirection, repo.SensWindDirKey)
 }
@@ -111,8 +111,8 @@ func newUpdater(cfg *config.Config, store pubsub.Storage,
 	getData getDataFunc, sensorKey string) *Updater {
 
 	// publish empty sensor data into storage
-	emptyData := &entity.SensorData{
-		Title: usecase.SensorTitleMap[sensorKey],
+	emptyData := &entity.Sensdata{
+		Title: usecase.SensTitleMap[sensorKey],
 		Data:  "------",
 	}
 	store.Publish(sensorKey, emptyData)

@@ -11,6 +11,7 @@ import (
 
 // SensTempScreen represents a temperature sensor data screen.
 type SensTempScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.SensorData
@@ -27,6 +28,7 @@ func NewSensTempScreen(screenName Name, activeChanMap ActiveChanMap, btns button
 		repo.SensTempKey,
 	)
 	return &SensTempScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
@@ -58,21 +60,21 @@ func (s *SensTempScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *SensTempScreen) btnEsc() error {
-	s.activeChanMap[SensTemp] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSens] <- true
 	return nil
 }
 
 // btnUp represents an up button handler for screen.
 func (s *SensTempScreen) btnUp() error {
-	s.activeChanMap[SensTemp] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensHumid] <- true
 	return nil
 }
 
 // btnDown represents an down button handler for screen.
 func (s *SensTempScreen) btnDown() error {
-	s.activeChanMap[SensTemp] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensWindDir] <- true
 	return nil
 }

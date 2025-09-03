@@ -4,37 +4,56 @@ import (
 	"context"
 
 	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/screen/template"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
+// newMenuSensorconfGetter returns menu getter func for sensorconf menu.
+// Also it saves new sensorconf into storage with repo.SensorconfMenu key.
+func newMenuSensorconfGetter(storage pubsub.Storage,
+	sensorconfUC usecase.SensconfUsecase) template.MenuGetter {
+
+	return func() (*entity.Menu, error) {
+		data, err := sensorconfUC.Get()
+		if err != nil {
+			return nil, err
+		}
+		menu := sensorconfUC.ToMenu(data)
+		storage.Publish(repo.MenuSensconf, menu)
+		return menu, nil
+	}
+}
+
 // MenuSensorconfScreen represents the main menu data screen.
 type MenuSensorconfScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	storage       pubsub.Storage
-	sensorconfUC  usecase.SensorconfUsecase
 	templ         *template.Menu
+	storage       pubsub.Storage
+	sensorconfUC  usecase.SensconfUsecase
 }
 
 // NewMenuSensorconfScreen returns a new instance of MenuMainScreen.
 func NewMenuSensorconfScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage, sensorconfUC usecase.SensorconfUsecase) *MenuSensorconfScreen {
+	storage pubsub.Storage, sensorconfUC usecase.SensconfUsecase) *MenuSensorconfScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensconfGetter(sensorconfUC),
+		newMenuSensorconfGetter(storage, sensorconfUC),
 	)
 	return &MenuSensorconfScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
+		templ:         templ,
 		storage:       storage,
 		sensorconfUC:  sensorconfUC,
-		templ:         templ,
 	}
 }
 
@@ -54,7 +73,7 @@ func (s *MenuSensorconfScreen) prepareBtnHandlers() {
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
 		button.Down: s.templ.BtnDownDefault,
-		// button.ButtonEnt:  s.btnEnt,
+		button.Ent:  s.btnEnt,
 	}
 
 	s.templ.SetBtnHandlersReg(func() {
@@ -64,44 +83,21 @@ func (s *MenuSensorconfScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *MenuSensorconfScreen) btnEsc() error {
-	s.activeChanMap[MenuSensorconf] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSens] <- true
 	return nil
 }
 
-// // btnEnt represents an enter button handler for screen.
-// func (s *MenuSensorconfScreen) btnEnt() error {
-// 	// get object from storage and assert it to menu instance
-// 	storageData := s.storage.Get(repo.RendererKey)
-// 	menuInst, ok := storageData.(*entity.Menu)
-// 	if !ok {
-// 		logrus.Error("screen:menu:main: btn ent: storage value is not menu object")
-// 	}
-
-// 	s.activeChanMap[MenuMain] <- false
-// 	// set active screen according to selected menu item
-// 	switch menuInst.Items[menuInst.SelectedItem] {
-// 	case _mainMenuInst.Items[0]:
-// 		s.activeChanMap[SensTemp] <- true
-// 	case _mainMenuInst.Items[1]:
-// 		s.activeChanMap[SensHumid] <- true
-// 	case _mainMenuInst.Items[2]:
-// 		s.activeChanMap[SensPress] <- true
-// 	case _mainMenuInst.Items[3]:
-// 		s.activeChanMap[SensWindSpeed] <- true
-// 	case _mainMenuInst.Items[4]:
-// 		s.activeChanMap[SensWindDir] <- true
-// 	}
-// return nil
-// }
-
-// newMenuSensconfGetter returns menu getter func for sensorconf menu.
-func newMenuSensconfGetter(sensorconfUC usecase.SensorconfUsecase) template.MenuGetter {
-	return func() (*entity.Menu, error) {
-		data, err := sensorconfUC.GetSensorconf()
-		if err != nil {
-			return nil, err
-		}
-		return sensorconfUC.ToMenu(data), nil
+// btnEnt represents an enter button handler for screen.
+func (s *MenuSensorconfScreen) btnEnt() error {
+	// update sensorconf menu in storage (for new selected item record)
+	data, err := s.templ.GetFromStorage()
+	if err != nil {
+		return err
 	}
+	s.storage.Publish(repo.MenuSensconf, data)
+
+	s.activeChanMap[s.name] <- false
+	s.activeChanMap[MenuSensorconfItem] <- true
+	return nil
 }

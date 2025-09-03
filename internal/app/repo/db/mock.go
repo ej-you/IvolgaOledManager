@@ -14,39 +14,39 @@ const (
 )
 
 // Ensure sensors mock implements interface.
-var _ repo.SensordataRepoDB = (*SensordataMock)(nil)
+var _ repo.SensdataRepoDB = (*SensdataMock)(nil)
 
-// SensordataMock is a mock of repo for sensors data.
+// SensdataMock is a mock of repo for sensors data.
 // It generates random data values.
-type SensordataMock struct{}
+type SensdataMock struct{}
 
-// NewMockSensordataRepoDB returns a new instance of SensorsMock.
-func NewMockSensordataRepoDB() *SensordataMock {
-	return &SensordataMock{}
+// NewMockSensdataRepoDB returns a new instance of SensdataMock.
+func NewMockSensdataRepoDB() *SensdataMock {
+	return &SensdataMock{}
 }
 
 // GetTemperature returns random temperature value.
-func (r *SensordataMock) GetTemperature() (float64, error) {
+func (r *SensdataMock) GetTemperature() (float64, error) {
 	return getRandomFloat64(_fromRand, _toRand), nil
 }
 
 // GetHumidity returns random humidity value.
-func (r *SensordataMock) GetHumidity() (float64, error) {
+func (r *SensdataMock) GetHumidity() (float64, error) {
 	return getRandomFloat64(_fromRand, _toRand), nil
 }
 
 // GetPressure returns random pressure value.
-func (r *SensordataMock) GetPressure() (float64, error) {
+func (r *SensdataMock) GetPressure() (float64, error) {
 	return getRandomFloat64(_fromRand2, _toRand2), nil
 }
 
 // GetWindSpeed returns random wind speed value.
-func (r *SensordataMock) GetWindSpeed() (float64, error) {
+func (r *SensdataMock) GetWindSpeed() (float64, error) {
 	return getRandomFloat64(_fromRand, _toRand), nil
 }
 
 // GetWindDirection returns random wind direction value.
-func (r *SensordataMock) GetWindDirection() (float64, error) {
+func (r *SensdataMock) GetWindDirection() (float64, error) {
 	return getRandomFloat64(_fromRand2, _toRand2), nil
 }
 

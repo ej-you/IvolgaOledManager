@@ -11,6 +11,7 @@ import (
 
 // SensTempScreen represents a humidity sensor data screen.
 type SensHumidScreen struct {
+	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.SensorData
@@ -27,6 +28,7 @@ func NewSensHumidScreen(screenName Name, activeChanMap ActiveChanMap, btns butto
 		repo.SensHumidKey,
 	)
 	return &SensHumidScreen{
+		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
@@ -58,21 +60,21 @@ func (s *SensHumidScreen) prepareBtnHandlers() {
 
 // btnEsc represents an escape button handler for screen.
 func (s *SensHumidScreen) btnEsc() error {
-	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSens] <- true
 	return nil
 }
 
 // btnUp represents an up button handler for screen.
 func (s *SensHumidScreen) btnUp() error {
-	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensPress] <- true
 	return nil
 }
 
 // btnDown represents an down button handler for screen.
 func (s *SensHumidScreen) btnDown() error {
-	s.activeChanMap[SensHumid] <- false
+	s.activeChanMap[s.name] <- false
 	s.activeChanMap[SensTemp] <- true
 	return nil
 }

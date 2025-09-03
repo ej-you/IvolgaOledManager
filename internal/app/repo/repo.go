@@ -3,8 +3,8 @@ package repo
 
 import "IvolgaOledManager/internal/app/entity"
 
-// SensordataRepoDB describes a DB repo for sensor data.
-type SensordataRepoDB interface {
+// SensdataRepoDB describes a DB repo for sensor data.
+type SensdataRepoDB interface {
 	// GetTemperature returns temperature value from DB.
 	GetTemperature() (float64, error)
 	// GetHumidity returns humidity value from DB.
@@ -31,22 +31,23 @@ type MessageRepoDB interface {
 	DeleteAllWithLevel(level string) error
 }
 
-// SensorconfRepoFS describes a file repo for sensors' config.
-type SensorconfRepoFS interface {
-	// ParseSensors returns slice of station sensors.
+// SensconfRepoFS describes a file repo for sensors' config.
+type SensconfRepoFS interface {
+	// ParseSensconf returns slice of station sensors.
 	// It parse station config file with the next layout:
 	// `_sensorSectionPrefix \n _openBracket ...[config-lines]... \n _closeBracket`.
-	ParseSensors() (entity.Sensorconf, error)
-	// UpdateSensors updates sensor section of config file according to given sensors data.
-	UpdateSensors(sensors entity.Sensorconf) error
+	ParseSensconf() (entity.Sensconf, error)
+	// UpdateSensconf updates sensor section of config file according to given sensors data.
+	UpdateSensconf(sensors entity.Sensconf) error
 }
 
 // Precompiled string keys for pub/sub storage.
 const (
 	RendererKey      = "renderer"
-	SensTempKey      = "sensordata:temperature"
-	SensHumidKey     = "sensordata:humidity"
-	SensPressKey     = "sensordata:pressure"
-	SensWindSpeedKey = "sensordata:wind:speed"
-	SensWindDirKey   = "sensordata:wind:direction"
+	MenuSensconf     = "menu:sensconf"
+	SensTempKey      = "sensdata:temperature"
+	SensHumidKey     = "sensdata:humidity"
+	SensPressKey     = "sensdata:pressure"
+	SensWindSpeedKey = "sensdata:wind:speed"
+	SensWindDirKey   = "sensdata:wind:direction"
 )

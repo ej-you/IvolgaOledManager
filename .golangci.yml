@@ -79,7 +79,7 @@ linters:
         text: variable name 'wg' is too short for the scope of its usage
       - linters: # relative value of text line height
           - mnd
-        path: internal/app/entity/sensordata\.go
+        path: internal/app/entity/sensdata\.go
         text: "Magic number: [42], in (<argument>|<assign>) detected"
       - linters:
           - lll
@@ -87,7 +87,7 @@ linters:
       - linters: # different screen sctucts are more understandable
           - dupl
         path: internal/app/service/screen/sens_.*?\.go
-        text: "1-78 lines are duplicate of `internal/app/service/screen/sens_.*?.go:1-78`"
+        text: "1-80 lines are duplicate of `internal/app/service/screen/sens_.*?.go:1-80`"
     paths:
       - bin
 

@@ -19,7 +19,7 @@ import (
 	displayservice "IvolgaOledManager/internal/app/service/display"
 	"IvolgaOledManager/internal/app/service/render"
 	"IvolgaOledManager/internal/app/service/screen"
-	"IvolgaOledManager/internal/app/service/sensordata"
+	"IvolgaOledManager/internal/app/service/sensdata"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/db"
 	"IvolgaOledManager/internal/pkg/display"
@@ -37,7 +37,7 @@ var _ Service = (*display.Service)(nil)
 var _ Service = (*render.Render)(nil)
 
 // Ensure sensor data updater implements interface.
-var _ Service = (*sensordata.Updater)(nil)
+var _ Service = (*sensdata.Updater)(nil)
 
 // Ensure screen implements interface.
 var _ Service = screen.Screen(nil)
@@ -86,14 +86,14 @@ func New() (*App, error) {
 	storage := pubsub.NewKeyValueStorage()
 
 	// init repos
-	sensordataRepoDB := repodb.NewMockSensordataRepoDB()
-	sensorconfRepoFS, err := repofs.NewSensorconfRepoFS(cfg.Other.Station.ConfigPath)
+	sensdataRepoDB := repodb.NewMockSensdataRepoDB()
+	sensconfRepoFS, err := repofs.NewSensconfRepoFS(cfg.Other.Station.ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("sensorconf repo fs: %w", err)
 	}
 	// init usecases
-	sensordataUC := usecase.NewSensordataUsecase(sensordataRepoDB, storage)
-	sensorconfUC := usecase.NewSensorconfUsecase(sensorconfRepoFS)
+	sensdataUC := usecase.NewSensdataUsecase(sensdataRepoDB, storage)
+	sensconfUC := usecase.NewSensconfUsecase(sensconfRepoFS)
 
 	// init buttons services
 	btns, err := button.New(cfg)
@@ -108,13 +108,13 @@ func New() (*App, error) {
 	// init render service
 	rend := render.New(disp, storage)
 	// init updater services
-	tempUpdater := sensordata.NewTemperatureUpdater(cfg, storage, sensordataUC)
-	humidUpdater := sensordata.NewHumidityUpdater(cfg, storage, sensordataUC)
-	pressUpdater := sensordata.NewPressureUpdater(cfg, storage, sensordataUC)
-	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensordataUC)
-	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensordataUC)
+	tempUpdater := sensdata.NewTemperatureUpdater(cfg, storage, sensdataUC)
+	humidUpdater := sensdata.NewHumidityUpdater(cfg, storage, sensdataUC)
+	pressUpdater := sensdata.NewPressureUpdater(cfg, storage, sensdataUC)
+	windSpeedUpdater := sensdata.NewWindSpeedUpdater(cfg, storage, sensdataUC)
+	windDirUpdater := sensdata.NewWindDirUpdater(cfg, storage, sensdataUC)
 	// init screens services
-	screenManager := screen.NewManager(cfg, btns, rend, storage, sensorconfUC)
+	screenManager := screen.NewManager(cfg, btns, rend, storage, sensconfUC)
 
 	return &App{
 		cfg:     cfg,

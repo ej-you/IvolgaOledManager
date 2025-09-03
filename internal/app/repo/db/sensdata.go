@@ -10,7 +10,7 @@ import (
 )
 
 // Ensure sensors repo implements interface.
-var _ repo.SensordataRepoDB = (*SensordataRepo)(nil)
+var _ repo.SensdataRepoDB = (*SensordataRepo)(nil)
 
 // SensordataRepo is a repo for sensor data.
 // It gets data values from DB.
