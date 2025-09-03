@@ -17,14 +17,19 @@ type GreetingsScreen struct {
 }
 
 // NewGreetingsScreen returns a new instance of GreetingsScreen.
-func NewGreetingsScreen(activeChanMap ActiveChanMap, btns button.Buttons,
+func NewGreetingsScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage, imagePath string) *GreetingsScreen {
 
-	image := &entity.Image{ImagePath: imagePath}
+	templ := template.NewImage(
+		string(screenName),
+		activeChanMap[screenName],
+		storage,
+		&entity.Image{ImagePath: imagePath},
+	)
 	return &GreetingsScreen{
 		activeChanMap: activeChanMap,
 		btns:          btns,
-		templ:         template.NewImage(string(Greetings), activeChanMap[Greetings], storage, image),
+		templ:         templ,
 	}
 }
 
@@ -41,7 +46,7 @@ func (g *GreetingsScreen) StartWithShutdown(ctx context.Context) error {
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
 func (g *GreetingsScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
-		button.ButtonEnt: g.btnEnt,
+		button.Ent: g.btnEnt,
 	}
 
 	g.templ.SetBtnHandlersReg(func() {
@@ -50,7 +55,8 @@ func (g *GreetingsScreen) prepareBtnHandlers() {
 }
 
 // btnEnt represents an enter button handler for screen.
-func (g *GreetingsScreen) btnEnt() {
-	g.activeChanMap[Greetings] <- false
+func (g *GreetingsScreen) btnEnt() error {
+	g.activeChanMap[ImgGreetings] <- false
 	g.activeChanMap[MenuMain] <- true
+	return nil
 }

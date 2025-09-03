@@ -13,10 +13,10 @@ import (
 const _buttonsAmount = 4 // amount of buttons
 
 var (
-	ButtonEsc  button.Name = "esc"  // escape button
-	ButtonUp   button.Name = "up"   // up button
-	ButtonDown button.Name = "down" // down button
-	ButtonEnt  button.Name = "ent"  // enter button
+	Esc  button.Name = "button:esc"  // escape button
+	Up   button.Name = "button:up"   // up button
+	Down button.Name = "button:down" // down button
+	Ent  button.Name = "button:ent"  // enter button
 )
 
 // Buttons is a map of button services.
@@ -27,22 +27,22 @@ func New(cfg *config.Config) (Buttons, error) {
 	var err error
 	btns := make(Buttons, _buttonsAmount)
 
-	btns[ButtonEsc], err = button.New(ButtonEsc,
+	btns[Esc], err = button.New(Esc,
 		cfg.Buttons.Escape, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[ButtonUp], err = button.New(ButtonUp,
+	btns[Up], err = button.New(Up,
 		cfg.Buttons.Up, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[ButtonDown], err = button.New(ButtonDown,
+	btns[Down], err = button.New(Down,
 		cfg.Buttons.Down, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
 	}
-	btns[ButtonEnt], err = button.New(ButtonEnt,
+	btns[Ent], err = button.New(Ent,
 		cfg.Buttons.Enter, cfg.Hardware.Buttons.CheckAliveTimeout)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (b Buttons) StartWithShutdown(ctx context.Context) error {
 			if err := btn.StartWithShutdown(btnsCtx); err != nil {
 				// use default to prevent goroutine blocking if errChan is filled
 				select {
-				case errChan <- fmt.Errorf("start %s btn: %w", btnName, err):
+				case errChan <- fmt.Errorf("start %s: %w", btnName, err):
 					cancel()
 				default:
 				}

@@ -9,37 +9,34 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// Static main menu instance.
-var _menuMainInst = &entity.Menu{
-	Title: "Главное меню",
+// Static sensor menu instance.
+var _menuSensInst = &entity.Menu{
+	Title: "Датчики",
 	Items: []*entity.MenuItem{
-		entity.NewMenuItem(context.Background(), "Датчики"),
-		entity.NewMenuItem(context.Background(), "Что-то"),
-		entity.NewMenuItem(context.Background(), "И ещё"),
-		entity.NewMenuItem(context.Background(), "И для проверки прокрутки - ещё!"),
-		entity.NewMenuItem(context.Background(), "And the last for test"),
+		entity.NewMenuItem(context.Background(), "Данные"),
+		entity.NewMenuItem(context.Background(), "Настройка"),
 	},
 }
 
-// MenuMainScreen represents the main menu screen.
-type MenuMainScreen struct {
+// MenuSensScreen represents the sensor menu screen.
+type MenuSensScreen struct {
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	storage       pubsub.Storage
 	templ         *template.Menu
 }
 
-// NewMenuMainScreen returns a new instance of MenuMainScreen.
-func NewMenuMainScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage) *MenuMainScreen {
+// NewMenuSensScreen returns a new instance of MenuSensScreen.
+func NewMenuSensScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
+	storage pubsub.Storage) *MenuSensScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuMainGetter(),
+		newMenuSensGetter(),
 	)
-	return &MenuMainScreen{
+	return &MenuSensScreen{
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		storage:       storage,
@@ -48,17 +45,17 @@ func NewMenuMainScreen(screenName Name, activeChanMap ActiveChanMap, btns button
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuMainScreen) Ready() <-chan struct{} {
+func (s *MenuSensScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuMainScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuSensScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuMainScreen) prepareBtnHandlers() {
+func (s *MenuSensScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -72,35 +69,35 @@ func (s *MenuMainScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuMainScreen) btnEsc() error {
-	s.activeChanMap[MenuMain] <- false
-	s.activeChanMap[ImgGreetings] <- true
+func (s *MenuSensScreen) btnEsc() error {
+	s.activeChanMap[MenuSens] <- false
+	s.activeChanMap[MenuMain] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuMainScreen) btnEnt() error {
+func (s *MenuSensScreen) btnEnt() error {
 	menuInst, err := s.templ.GetFromStorage()
 	if err != nil {
 		return err
 	}
 
-	s.activeChanMap[MenuMain] <- false
+	s.activeChanMap[MenuSens] <- false
 	// set active screen according to selected menu item
 	switch menuInst.Items[menuInst.SelectedItem] {
-	case _menuMainInst.Items[0]:
-		s.activeChanMap[MenuSens] <- true
-	case _menuMainInst.Items[1]:
+	case _menuSensInst.Items[0]:
 		s.activeChanMap[SensTemp] <- true
+	case _menuSensInst.Items[1]:
+		s.activeChanMap[MenuSensorconf] <- true
 	}
 	return nil
 }
 
-// newMenuMainGetter returns menu getter func for main menu.
-func newMenuMainGetter() template.MenuGetter {
+// newMenuSensGetter returns menu getter func for sensor menu.
+func newMenuSensGetter() template.MenuGetter {
 	return func() (*entity.Menu, error) {
-		_menuMainInst.FirstItem = 0
-		_menuMainInst.SelectedItem = 0
-		return _menuMainInst, nil
+		_menuSensInst.FirstItem = 0
+		_menuSensInst.SelectedItem = 0
+		return _menuSensInst, nil
 	}
 }

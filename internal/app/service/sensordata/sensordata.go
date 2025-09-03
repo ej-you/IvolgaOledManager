@@ -35,7 +35,8 @@ type Updater struct {
 
 // StartWithShutdown starts updater loop. It may be stopped by context cancellaiton.
 func (s *Updater) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start %s service...", s.storageKey)
+	logrus.Infof("start %s...", s.storageKey)
+	defer logrus.Infof("stop %s: ok", s.storageKey)
 
 	// init ticker for sensor data periodically updates
 	ticker := time.NewTicker(s.updatesDuration)
@@ -72,35 +73,35 @@ func (s *Updater) Ready() <-chan struct{} {
 
 // NewTemperatureUpdater returns a new instance of temperature Updater.
 func NewTemperatureUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensorDataUsecase) *Updater {
+	sensorUC usecase.SensordataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetTemperature, repo.SensTempKey)
 }
 
 // NewHumidityUpdater returns a new instance of humidity Updater.
 func NewHumidityUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensorDataUsecase) *Updater {
+	sensorUC usecase.SensordataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetHumidity, repo.SensHumidKey)
 }
 
 // NewPressureUpdater returns a new instance of pressure Updater.
 func NewPressureUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensorDataUsecase) *Updater {
+	sensorUC usecase.SensordataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetPressure, repo.SensPressKey)
 }
 
 // NewWindSpeedUpdater returns a new instance of wind speed Updater.
 func NewWindSpeedUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensorDataUsecase) *Updater {
+	sensorUC usecase.SensordataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetWindSpeed, repo.SensWindSpeedKey)
 }
 
 // NewWindDirUpdater returns a new instance of wind direction Updater.
 func NewWindDirUpdater(cfg *config.Config, store pubsub.Storage,
-	sensorUC usecase.SensorDataUsecase) *Updater {
+	sensorUC usecase.SensordataUsecase) *Updater {
 
 	return newUpdater(cfg, store, sensorUC.GetWindDirection, repo.SensWindDirKey)
 }

@@ -1,6 +1,7 @@
-package menuitem
+package entity
 
 import (
+	"context"
 	"unicode/utf8"
 )
 
@@ -11,14 +12,10 @@ const (
 	_maxItemLen = 15 // max item value len
 )
 
-// ItemFunc represents a custom func for active menu item.
-type ItemFunc func() error
-
 // Menu item
 type MenuItem struct {
-	Title      string   // item title
-	Value      any      // item value is used for DB
-	customFunc ItemFunc // func that can be used if menu item is active
+	Title string          // item title
+	Ctx   context.Context // context for additional values
 
 	firstSymbol  int  // idx of first displayed symbol of the item (default: 0)
 	lastSymbol   int  // idx of last displayed symbol of the item (use NewMenuItem to set up)
@@ -26,42 +23,14 @@ type MenuItem struct {
 	skipScroll   bool // true if length of item title is less than _maxItemLen (default: false)
 }
 
-// Option represents option for menu item constructor.
-type Option func(*MenuItem)
-
-// New returns new prepared menu item. It's not recommended to init menu item directly.
-func New(title string, options ...Option) *MenuItem {
+// NewMenuItem returns new prepared menu item. It's not recommended to init menu item directly.
+func NewMenuItem(ctx context.Context, title string) *MenuItem {
 	menuItem := &MenuItem{
-		Title:      title,
-		Value:      nil,
-		customFunc: func() error { return nil },
+		Title: title,
+		Ctx:   ctx,
 	}
 	menuItem.setLastSymbol()
-
-	// apply options
-	for _, option := range options {
-		option(menuItem)
-	}
 	return menuItem
-}
-
-// WithValue sets value for menu item.
-func WithValue(v any) Option {
-	return func(i *MenuItem) {
-		i.Value = v
-	}
-}
-
-// WithCustomFunc sets custom func for menu item.
-func WithCustomFunc(f ItemFunc) Option {
-	return func(i *MenuItem) {
-		i.customFunc = f
-	}
-}
-
-// Exec runs custom item func.
-func (i *MenuItem) Exec() error {
-	return i.customFunc()
 }
 
 // Scroll updates item state for running line imitation
@@ -89,15 +58,15 @@ func (i *MenuItem) Scroll() {
 	i.moveRight()
 }
 
-// FormattedTitleDefault returns substring of the item title to print it out
+// ToOutput returns substring of the item title to print it out
 // according to the current item scroll status with default prefix (unselected item).
-func (i *MenuItem) FormattedTitleDefault() string {
+func (i *MenuItem) ToOutput() string {
 	return _defaultPrefix + i.Title[i.firstSymbol:i.lastSymbol]
 }
 
-// FormattedTitleSelected returns substring of the item title to print it out
+// ToOutputSelected returns substring of the item title to print it out
 // according to the current item scroll status with selected prefix (selected item).
-func (i *MenuItem) FormattedTitleSelected() string {
+func (i *MenuItem) ToOutputSelected() string {
 	return _selectedPrefix + i.Title[i.firstSymbol:i.lastSymbol]
 }
 

@@ -17,12 +17,12 @@ type SensHumidScreen struct {
 }
 
 // NewSensHumidScreen returns a new instance of SensHumidScreen.
-func NewSensHumidScreen(activeChanMap ActiveChanMap, btns button.Buttons,
+func NewSensHumidScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensHumidScreen {
 
 	templ := template.NewSensorData(
-		string(SensHumid),
-		activeChanMap[SensHumid],
+		string(screenName),
+		activeChanMap[screenName],
 		storage,
 		repo.SensHumidKey,
 	)
@@ -46,9 +46,9 @@ func (s *SensHumidScreen) StartWithShutdown(ctx context.Context) error {
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
 func (s *SensHumidScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
-		button.ButtonEsc:  s.btnEsc,
-		button.ButtonUp:   s.btnUp,
-		button.ButtonDown: s.btnDown,
+		button.Esc:  s.btnEsc,
+		button.Up:   s.btnUp,
+		button.Down: s.btnDown,
 	}
 
 	s.templ.SetBtnHandlersReg(func() {
@@ -57,19 +57,22 @@ func (s *SensHumidScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *SensHumidScreen) btnEsc() {
+func (s *SensHumidScreen) btnEsc() error {
 	s.activeChanMap[SensHumid] <- false
-	s.activeChanMap[MenuMain] <- true
+	s.activeChanMap[MenuSens] <- true
+	return nil
 }
 
 // btnUp represents an up button handler for screen.
-func (s *SensHumidScreen) btnUp() {
+func (s *SensHumidScreen) btnUp() error {
 	s.activeChanMap[SensHumid] <- false
 	s.activeChanMap[SensPress] <- true
+	return nil
 }
 
 // btnDown represents an down button handler for screen.
-func (s *SensHumidScreen) btnDown() {
+func (s *SensHumidScreen) btnDown() error {
 	s.activeChanMap[SensHumid] <- false
 	s.activeChanMap[SensTemp] <- true
+	return nil
 }

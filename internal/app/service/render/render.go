@@ -35,7 +35,8 @@ func New(displayDev *display.Service, storage pubsub.Storage) *Render {
 // StartWithShutdown starts render service.
 // It may be stopped by context cancellaiton.
 func (r *Render) StartWithShutdown(ctx context.Context) error {
-	logrus.Info("start render service...")
+	logrus.Info("start render...")
+	defer logrus.Info("stop render: ok")
 	// notify chan for display updates
 	needRender := r.storage.Subscribe(ctx, repo.RendererKey)
 

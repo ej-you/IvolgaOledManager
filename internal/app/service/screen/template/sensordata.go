@@ -11,7 +11,7 @@ import (
 
 // SensorData represents any sensor data screen.
 type SensorData struct {
-	screenName string
+	serviceName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
@@ -22,11 +22,11 @@ type SensorData struct {
 }
 
 // NewSensorData returns a new instance of SensorData.
-func NewSensorData(screenName string, active <-chan bool,
+func NewSensorData(serviceName string, active <-chan bool,
 	storage pubsub.Storage, storageKey string) *SensorData {
 
 	return &SensorData{
-		screenName:     screenName,
+		serviceName:    serviceName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
@@ -49,7 +49,8 @@ func (s *SensorData) Ready() <-chan struct{} {
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
 func (s *SensorData) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start screen:%s service...", s.screenName)
+	logrus.Infof("start %s...", s.serviceName)
+	defer logrus.Infof("stop %s: ok", s.serviceName)
 	// notify that service is ready-to-use
 	close(s.ready)
 

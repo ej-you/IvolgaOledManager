@@ -29,17 +29,17 @@ type Button interface {
 type Name string
 
 // HandlerFunc is a function to handle button rising/falling.
-type HandlerFunc func()
+type HandlerFunc func() error
 
 // DefaultHandlerFunc is an empty handler func.
-var DefaultHandlerFunc HandlerFunc = func() {}
+var DefaultHandlerFunc HandlerFunc = func() error { return nil }
 
 // GPIOButton represents a button based on GPIO.
 type GPIOButton struct {
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
-	Name              Name
+	serviceName       Name
 	gpioPin           gpio.PinIO
 	checkAliveTimeout time.Duration
 	state             gpio.Level
@@ -51,20 +51,20 @@ type GPIOButton struct {
 
 // New sets up new GPIO button and returns it. Rising and falling handlers are empty.
 // Use SetRisingHandler/SetFallingHandler to set up handlers for button.
-func New(name Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) {
+func New(serviceName Name, gpioName string, checkAliveTimeout time.Duration) (*GPIOButton, error) {
 	// get button by GPIO name
 	gpioPin := gpioreg.ByName(gpioName)
 	if gpioPin == nil {
-		return nil, fmt.Errorf("find button:%s gpio by name %s", name, gpioName)
+		return nil, fmt.Errorf("find button:%s gpio by name %s", serviceName, gpioName)
 	}
 	// set up input for button
 	if err := gpioPin.In(gpio.PullNoChange, gpio.BothEdges); err != nil {
-		return nil, fmt.Errorf("set up input for gpio button:%s %s: %w", name, gpioName, err)
+		return nil, fmt.Errorf("set up input for gpio button:%s %s: %w", serviceName, gpioName, err)
 	}
 
 	return &GPIOButton{
 		ready:             make(chan struct{}),
-		Name:              name,
+		serviceName:       serviceName,
 		gpioPin:           gpioPin,
 		checkAliveTimeout: checkAliveTimeout,
 		state:             gpio.High,
@@ -90,7 +90,8 @@ func (b *GPIOButton) SetFallingHandler(handler HandlerFunc) {
 // StartWithShutdown starts GPIO button handling and
 // gracefully shutdown it after context is done.
 func (b *GPIOButton) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start button:%s service...", b.Name)
+	logrus.Infof("start %s...", b.serviceName)
+	defer logrus.Infof("stop %s: ok", b.serviceName)
 
 	// notify that service is ready-to-use
 	close(b.ready)
@@ -105,7 +106,9 @@ func (b *GPIOButton) StartWithShutdown(ctx context.Context) error {
 			}
 		}
 		// handle button pressing
-		b.handle()
+		if err := b.handle(); err != nil {
+			logrus.Errorf("%s: %v", b.serviceName, err)
+		}
 	}
 }
 
@@ -115,14 +118,15 @@ func (b *GPIOButton) Ready() <-chan struct{} {
 }
 
 // handle handles button falling if level is HIGH else rising.
-func (b *GPIOButton) handle() {
+func (b *GPIOButton) handle() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
+	// run handler
 	if b.state {
-		b.fallingHandler()
+		return b.fallingHandler()
 	} else {
-		b.risingHandler()
+		return b.risingHandler()
 	}
 }
 

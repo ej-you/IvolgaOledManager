@@ -14,6 +14,7 @@ import (
 
 	"IvolgaOledManager/config"
 	repodb "IvolgaOledManager/internal/app/repo/db"
+	repofs "IvolgaOledManager/internal/app/repo/fs"
 	"IvolgaOledManager/internal/app/service/button"
 	displayservice "IvolgaOledManager/internal/app/service/display"
 	"IvolgaOledManager/internal/app/service/render"
@@ -85,9 +86,14 @@ func New() (*App, error) {
 	storage := pubsub.NewKeyValueStorage()
 
 	// init repos
-	sensorRepoDB := repodb.NewMockStationResultRepoDB()
+	sensordataRepoDB := repodb.NewMockSensordataRepoDB()
+	sensorconfRepoFS, err := repofs.NewSensorconfRepoFS(cfg.Other.Station.ConfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("sensorconf repo fs: %w", err)
+	}
 	// init usecases
-	sensorUC := usecase.NewSensorDataUsecase(sensorRepoDB, storage)
+	sensordataUC := usecase.NewSensordataUsecase(sensordataRepoDB, storage)
+	sensorconfUC := usecase.NewSensorconfUsecase(sensorconfRepoFS)
 
 	// init buttons services
 	btns, err := button.New(cfg)
@@ -102,13 +108,13 @@ func New() (*App, error) {
 	// init render service
 	rend := render.New(disp, storage)
 	// init updater services
-	tempUpdater := sensordata.NewTemperatureUpdater(cfg, storage, sensorUC)
-	humidUpdater := sensordata.NewHumidityUpdater(cfg, storage, sensorUC)
-	pressUpdater := sensordata.NewPressureUpdater(cfg, storage, sensorUC)
-	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensorUC)
-	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensorUC)
+	tempUpdater := sensordata.NewTemperatureUpdater(cfg, storage, sensordataUC)
+	humidUpdater := sensordata.NewHumidityUpdater(cfg, storage, sensordataUC)
+	pressUpdater := sensordata.NewPressureUpdater(cfg, storage, sensordataUC)
+	windSpeedUpdater := sensordata.NewWindSpeedUpdater(cfg, storage, sensordataUC)
+	windDirUpdater := sensordata.NewWindDirUpdater(cfg, storage, sensordataUC)
 	// init screens services
-	screenManager := screen.NewManager(cfg, btns, rend, storage)
+	screenManager := screen.NewManager(cfg, btns, rend, storage, sensorconfUC)
 
 	return &App{
 		cfg:     cfg,

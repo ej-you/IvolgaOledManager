@@ -3,7 +3,6 @@ package entity
 import (
 	"fmt"
 
-	"IvolgaOledManager/internal/app/entity/menuitem"
 	"IvolgaOledManager/internal/pkg/display"
 )
 
@@ -11,10 +10,10 @@ const _menuLinesAmount = 4 // amount of menu lines on screen (menu title and ite
 
 // Menu represents any menu.
 type Menu struct {
-	Title        string               // menu title
-	Items        []*menuitem.MenuItem // menu items
-	FirstItem    int                  // idx of first displayed item on the device (default: 0)
-	SelectedItem int                  // idx of selected item on the device (default: 0)
+	Title        string      // menu title
+	Items        []*MenuItem // menu items
+	FirstItem    int         // idx of first displayed item on the device (default: 0)
+	SelectedItem int         // idx of selected item on the device (default: 0)
 }
 
 // Render implements display.Renderer. It renders menu on display.
@@ -34,10 +33,10 @@ func (m *Menu) Render(device display.Display) error {
 			continue
 		}
 		if idx == m.SelectedItem {
-			lineContent = menuItem.FormattedTitleSelected()
+			lineContent = menuItem.ToOutputSelected()
 			menuItem.Scroll() // scroll item if needed
 		} else {
-			lineContent = menuItem.FormattedTitleDefault()
+			lineContent = menuItem.ToOutput()
 		}
 		// add new item
 		textLines = append(textLines, display.TextLine{

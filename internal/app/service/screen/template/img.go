@@ -12,7 +12,7 @@ import (
 
 // Image represents any image screen.
 type Image struct {
-	screenName string
+	serviceName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
@@ -23,11 +23,11 @@ type Image struct {
 }
 
 // NewImage returns a new instance of Image.
-func NewImage(screenName string, active <-chan bool,
+func NewImage(serviceName string, active <-chan bool,
 	storage pubsub.Storage, image *entity.Image) *Image {
 
 	return &Image{
-		screenName:     screenName,
+		serviceName:    serviceName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
@@ -50,7 +50,8 @@ func (m *Image) Ready() <-chan struct{} {
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
 func (m *Image) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start screen:%s service...", m.screenName)
+	logrus.Infof("start %s...", m.serviceName)
+	defer logrus.Infof("stop %s: ok", m.serviceName)
 	// notify that service is ready-to-use
 	close(m.ready)
 

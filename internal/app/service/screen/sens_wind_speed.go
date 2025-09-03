@@ -17,12 +17,12 @@ type SensWindSpeedScreen struct {
 }
 
 // NewSensWindSpeedScreen returns a new instance of SensWindSpeedScreen.
-func NewSensWindSpeedScreen(activeChanMap ActiveChanMap, btns button.Buttons,
+func NewSensWindSpeedScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensWindSpeedScreen {
 
 	templ := template.NewSensorData(
-		string(SensWindSpeed),
-		activeChanMap[SensWindSpeed],
+		string(screenName),
+		activeChanMap[screenName],
 		storage,
 		repo.SensWindSpeedKey,
 	)
@@ -46,9 +46,9 @@ func (s *SensWindSpeedScreen) StartWithShutdown(ctx context.Context) error {
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
 func (s *SensWindSpeedScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
-		button.ButtonEsc:  s.btnEsc,
-		button.ButtonUp:   s.btnUp,
-		button.ButtonDown: s.btnDown,
+		button.Esc:  s.btnEsc,
+		button.Up:   s.btnUp,
+		button.Down: s.btnDown,
 	}
 
 	s.templ.SetBtnHandlersReg(func() {
@@ -57,19 +57,22 @@ func (s *SensWindSpeedScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *SensWindSpeedScreen) btnEsc() {
+func (s *SensWindSpeedScreen) btnEsc() error {
 	s.activeChanMap[SensWindSpeed] <- false
-	s.activeChanMap[MenuMain] <- true
+	s.activeChanMap[MenuSens] <- true
+	return nil
 }
 
 // btnUp represents an up button handler for screen.
-func (s *SensWindSpeedScreen) btnUp() {
+func (s *SensWindSpeedScreen) btnUp() error {
 	s.activeChanMap[SensWindSpeed] <- false
 	s.activeChanMap[SensWindDir] <- true
+	return nil
 }
 
 // btnDown represents an down button handler for screen.
-func (s *SensWindSpeedScreen) btnDown() {
+func (s *SensWindSpeedScreen) btnDown() error {
 	s.activeChanMap[SensWindSpeed] <- false
 	s.activeChanMap[SensPress] <- true
+	return nil
 }

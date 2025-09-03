@@ -2,36 +2,41 @@ package template
 
 import (
 	"context"
-
-	"github.com/sirupsen/logrus"
+	"fmt"
 
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/pkg/pubsub"
+
+	"github.com/sirupsen/logrus"
 )
+
+// MenuGetter represents a getter func for any menu.
+// It is used to update menu with screen activation.
+type MenuGetter func() (*entity.Menu, error)
 
 // Menu represents any menu screen.
 type Menu struct {
-	screenName string
+	serviceName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
 
 	active         <-chan bool
 	storage        pubsub.Storage
-	menu           *entity.Menu
+	menuGetter     MenuGetter
 	btnHandlersReg func()
 }
 
 // NewMenu returns a new instance of Menu.
-func NewMenu(screenName string, active <-chan bool,
-	storage pubsub.Storage, menu *entity.Menu) *Menu {
+func NewMenu(serviceName string, active <-chan bool,
+	storage pubsub.Storage, menuGetter MenuGetter) *Menu {
 
 	return &Menu{
-		screenName:     screenName,
+		serviceName:    serviceName,
 		ready:          make(chan struct{}),
 		active:         active,
 		storage:        storage,
-		menu:           menu,
+		menuGetter:     menuGetter,
 		btnHandlersReg: func() {},
 	}
 }
@@ -50,10 +55,13 @@ func (m *Menu) Ready() <-chan struct{} {
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
 func (m *Menu) StartWithShutdown(ctx context.Context) error {
-	logrus.Infof("start screen:%s service...", m.screenName)
+	logrus.Infof("start %s...", m.serviceName)
+	defer logrus.Infof("stop %s: ok", m.serviceName)
 	// notify that service is ready-to-use
 	close(m.ready)
 
+	var menu *entity.Menu
+	var err error
 	for {
 		select {
 		case <-ctx.Done():
@@ -68,8 +76,47 @@ func (m *Menu) StartWithShutdown(ctx context.Context) error {
 				continue
 			}
 			m.btnHandlersReg()
-			// publish image data for render service
-			m.storage.Publish(repo.RendererKey, m.menu)
+			// update menu after screen activation
+			menu, err = m.menuGetter()
+			if err != nil {
+				logrus.Errorf("%s: update menu: %v", m.serviceName, err)
+			}
+			// publish menu for render service
+			m.storage.Publish(repo.RendererKey, menu)
 		}
 	}
+}
+
+// GetFromStorage returns data from storage asserted to menu object.
+func (m *Menu) GetFromStorage() (*entity.Menu, error) {
+	storageData := m.storage.Get(repo.RendererKey)
+	menuInst, ok := storageData.(*entity.Menu)
+	if !ok {
+		return nil, fmt.Errorf("%s: storage value is not menu object", m.serviceName)
+	}
+	return menuInst, nil
+}
+
+// BtnUpDefault represents a default up button handler for menu screen.
+func (m *Menu) BtnUpDefault() error {
+	menuInst, err := m.GetFromStorage()
+	if err != nil {
+		return err
+	}
+	// update menu and publish into storage as renderer
+	menuInst.SelectPrevious()
+	m.storage.Publish(repo.RendererKey, menuInst)
+	return nil
+}
+
+// BtnDownDefault represents a default down button handler for menu screen.
+func (m *Menu) BtnDownDefault() error {
+	menuInst, err := m.GetFromStorage()
+	if err != nil {
+		return err
+	}
+	// update menu and publish into storage as renderer
+	menuInst.SelectNext()
+	m.storage.Publish(repo.RendererKey, menuInst)
+	return nil
 }

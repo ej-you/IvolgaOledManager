@@ -9,7 +9,7 @@ import (
 )
 
 // Ensure sensor data usecase implementats interface.
-var _ SensorDataUsecase = (*SensorDataUC)(nil)
+var _ SensordataUsecase = (*SensordataUC)(nil)
 
 var (
 	// map with user-friendly sensor titles
@@ -30,17 +30,17 @@ var (
 	}
 )
 
-// SensorDataUC represents a usecase for sensor data.
-type SensorDataUC struct {
-	sensorRepoDB repo.SensorRepoDB
+// SensordataUC represents a usecase for sensor data.
+type SensordataUC struct {
+	sensorRepoDB repo.SensordataRepoDB
 	storage      pubsub.Storage
 }
 
-// NewSensorDataUsecase returns a new instance of SensorDataUC.
-func NewSensorDataUsecase(sensorsRepoDB repo.SensorRepoDB,
-	storage pubsub.Storage) *SensorDataUC {
+// NewSensordataUsecase returns a new instance of SensorDataUC.
+func NewSensordataUsecase(sensorsRepoDB repo.SensordataRepoDB,
+	storage pubsub.Storage) *SensordataUC {
 
-	return &SensorDataUC{
+	return &SensordataUC{
 		sensorRepoDB: sensorsRepoDB,
 		storage:      storage,
 	}
@@ -48,31 +48,31 @@ func NewSensorDataUsecase(sensorsRepoDB repo.SensorRepoDB,
 
 // GetTemperature returns last temperature value from DB.
 // If value was not found it returns nil.
-func (u *SensorDataUC) GetTemperature() (*entity.SensorData, error) {
+func (u *SensordataUC) GetTemperature() (*entity.SensorData, error) {
 	return getSensorData(repo.SensTempKey, u.sensorRepoDB.GetTemperature)
 }
 
 // GetHumidity returns last humidity value from DB.
 // If value was not found it returns nil.
-func (u *SensorDataUC) GetHumidity() (*entity.SensorData, error) {
+func (u *SensordataUC) GetHumidity() (*entity.SensorData, error) {
 	return getSensorData(repo.SensHumidKey, u.sensorRepoDB.GetHumidity)
 }
 
 // GetPressure returns last pressure value from DB.
 // If value was not found it returns nil.
-func (u *SensorDataUC) GetPressure() (*entity.SensorData, error) {
+func (u *SensordataUC) GetPressure() (*entity.SensorData, error) {
 	return getSensorData(repo.SensPressKey, u.sensorRepoDB.GetPressure)
 }
 
 // GetWindSpeed returns last wind speed value from DB.
 // If value was not found it returns nil.
-func (u *SensorDataUC) GetWindSpeed() (*entity.SensorData, error) {
+func (u *SensordataUC) GetWindSpeed() (*entity.SensorData, error) {
 	return getSensorData(repo.SensWindSpeedKey, u.sensorRepoDB.GetWindSpeed)
 }
 
 // GetWindDirection returns last wind direction value from DB.
 // If value was not found it returns nil.
-func (u *SensorDataUC) GetWindDirection() (*entity.SensorData, error) {
+func (u *SensordataUC) GetWindDirection() (*entity.SensorData, error) {
 	return getSensorData(repo.SensWindDirKey, u.sensorRepoDB.GetWindDirection)
 }
 
