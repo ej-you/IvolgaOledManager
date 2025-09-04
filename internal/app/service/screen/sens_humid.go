@@ -14,14 +14,14 @@ type SensHumidScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	templ         *template.SensorData
+	templ         *template.Sensdata
 }
 
 // NewSensHumidScreen returns a new instance of SensHumidScreen.
 func NewSensHumidScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensHumidScreen {
 
-	templ := template.NewSensorData(
+	templ := template.NewSensdata(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,

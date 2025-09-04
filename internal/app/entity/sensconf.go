@@ -1,9 +1,12 @@
 package entity
 
-import "strings"
+import (
+	"IvolgaOledManager/internal/pkg/display"
+	"fmt"
+	"strings"
+)
 
 const (
-	SensconfCtxKey     = "sensorconf"     // key for sensorconf value in context
 	SensconfItemCtxKey = "sensorconfItem" // key for sensorconf item value in context
 
 	_inactivePrefix = "#" // prefix for config line of inactive sensor
@@ -36,4 +39,27 @@ func (s *SensconfItem) ChangeActive() {
 		s.Line = strings.TrimPrefix(s.Line, _inactivePrefix)
 	}
 	s.Active = !s.Active
+}
+
+// Status returns string according to active value of sensorconf item.
+func (s *SensconfItem) Status() string {
+	if s.Active {
+		return "Статус: ON"
+	}
+	return "Статус: OFF"
+}
+
+// Render implements display.Renderer. It renders sensor config item on display.
+func (s *SensconfItem) Render(device display.Display) error {
+	// output text screen
+	err := device.DisplayTextLines(
+		display.TextLine{Content: s.Name, RelativeSize: 1},
+		display.TextLine{Content: s.Status(), RelativeSize: 1},
+		display.TextLine{Content: "", RelativeSize: 1},
+		display.TextLine{Content: "", RelativeSize: 1},
+	)
+	if err != nil {
+		return fmt.Errorf("display text screen: %w", err)
+	}
+	return nil
 }

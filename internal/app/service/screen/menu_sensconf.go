@@ -11,64 +11,63 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// newMenuSensorconfGetter returns menu getter func for sensorconf menu.
+// newMenuSensconfGetter returns menu getter func for sensorconf menu.
 // Also it saves new sensorconf into storage with repo.SensorconfMenu key.
-func newMenuSensorconfGetter(storage pubsub.Storage,
+func newMenuSensconfGetter(storage pubsub.Storage,
 	sensorconfUC usecase.SensconfUsecase) template.MenuGetter {
 
 	return func() (*entity.Menu, error) {
-		data, err := sensorconfUC.Get()
+		sensconfMenu, err := sensorconfUC.GetAsMenu()
 		if err != nil {
 			return nil, err
 		}
-		menu := sensorconfUC.ToMenu(data)
-		storage.Publish(repo.MenuSensconf, menu)
-		return menu, nil
+		storage.Publish(repo.MenuSensconf, sensconfMenu)
+		return sensconfMenu, nil
 	}
 }
 
-// MenuSensorconfScreen represents the main menu data screen.
-type MenuSensorconfScreen struct {
+// MenuSensconfScreen represents the main menu data screen.
+type MenuSensconfScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.Menu
 	storage       pubsub.Storage
-	sensorconfUC  usecase.SensconfUsecase
+	sensconfUC    usecase.SensconfUsecase
 }
 
-// NewMenuSensorconfScreen returns a new instance of MenuMainScreen.
-func NewMenuSensorconfScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage, sensorconfUC usecase.SensconfUsecase) *MenuSensorconfScreen {
+// NewMenuSensconfScreen returns a new instance of MenuMainScreen.
+func NewMenuSensconfScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
+	storage pubsub.Storage, sensconfUC usecase.SensconfUsecase) *MenuSensconfScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensorconfGetter(storage, sensorconfUC),
+		newMenuSensconfGetter(storage, sensconfUC),
 	)
-	return &MenuSensorconfScreen{
+	return &MenuSensconfScreen{
 		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
 		storage:       storage,
-		sensorconfUC:  sensorconfUC,
+		sensconfUC:    sensconfUC,
 	}
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuSensorconfScreen) Ready() <-chan struct{} {
+func (s *MenuSensconfScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuSensorconfScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuSensconfScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuSensorconfScreen) prepareBtnHandlers() {
+func (s *MenuSensconfScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -82,22 +81,15 @@ func (s *MenuSensorconfScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuSensorconfScreen) btnEsc() error {
+func (s *MenuSensconfScreen) btnEsc() error {
 	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSens] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuSensorconfScreen) btnEnt() error {
-	// update sensorconf menu in storage (for new selected item record)
-	data, err := s.templ.GetFromStorage()
-	if err != nil {
-		return err
-	}
-	s.storage.Publish(repo.MenuSensconf, data)
-
+func (s *MenuSensconfScreen) btnEnt() error {
 	s.activeChanMap[s.name] <- false
-	s.activeChanMap[MenuSensorconfItem] <- true
+	s.activeChanMap[MenuSensconfItem] <- true
 	return nil
 }

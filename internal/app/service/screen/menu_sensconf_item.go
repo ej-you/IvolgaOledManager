@@ -9,10 +9,12 @@ import (
 	"IvolgaOledManager/internal/app/service/screen/template"
 	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/pubsub"
+
+	"github.com/sirupsen/logrus"
 )
 
-// newMenuSensorconfItemGetter returns menu getter func for sensorconf item menu.
-func newMenuSensorconfItemGetter() template.MenuGetter {
+// newMenuSensconfItemGetter returns menu getter func for sensorconf item menu.
+func newMenuSensconfItemGetter() template.MenuGetter {
 	menu := &entity.Menu{
 		Title: "Действия",
 		Items: []*entity.MenuItem{
@@ -27,8 +29,8 @@ func newMenuSensorconfItemGetter() template.MenuGetter {
 	}
 }
 
-// MenuSensorconfItemScreen represents the sensorconf item menu screen.
-type MenuSensorconfItemScreen struct {
+// MenuSensconfItemScreen represents the sensorconf item menu screen.
+type MenuSensconfItemScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
@@ -37,18 +39,18 @@ type MenuSensorconfItemScreen struct {
 	sensorconfUC  usecase.SensconfUsecase
 }
 
-// NewMenuSensorconfItemScreen returns a new instance of MenuSensorconfItemScreen.
-func NewMenuSensorconfItemScreen(screenName Name, activeChanMap ActiveChanMap,
+// NewMenuSensconfItemScreen returns a new instance of MenuSensorconfItemScreen.
+func NewMenuSensconfItemScreen(screenName Name, activeChanMap ActiveChanMap,
 	btns button.Buttons, storage pubsub.Storage,
-	sensorconfUC usecase.SensconfUsecase) *MenuSensorconfItemScreen {
+	sensorconfUC usecase.SensconfUsecase) *MenuSensconfItemScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensorconfItemGetter(),
+		newMenuSensconfItemGetter(),
 	)
-	return &MenuSensorconfItemScreen{
+	return &MenuSensconfItemScreen{
 		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
@@ -59,17 +61,17 @@ func NewMenuSensorconfItemScreen(screenName Name, activeChanMap ActiveChanMap,
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuSensorconfItemScreen) Ready() <-chan struct{} {
+func (s *MenuSensconfItemScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuSensorconfItemScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuSensconfItemScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuSensorconfItemScreen) prepareBtnHandlers() {
+func (s *MenuSensconfItemScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -83,39 +85,36 @@ func (s *MenuSensorconfItemScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuSensorconfItemScreen) btnEsc() error {
+func (s *MenuSensconfItemScreen) btnEsc() error {
 	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuSensorconf] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuSensorconfItemScreen) btnEnt() error {
-	curMenu, err := s.templ.GetFromStorage()
+func (s *MenuSensconfItemScreen) btnEnt() error {
+	menu, err := s.templ.GetFromStorage()
 	if err != nil {
 		return err
 	}
 
-	menuSensconf := s.storage.Get(repo.MenuSensconf).(*entity.Menu)
-
-	selectedItemCtx := menuSensconf.Items[menuSensconf.SelectedItem].Ctx
-
-	sensconfItemFromStorage := selectedItemCtx.Value(entity.SensconfItemCtxKey)
-	switch curMenu.SelectedItem {
+	s.activeChanMap[s.name] <- false
+	switch menu.SelectedItem {
 	// show info
 	case 0:
-		s.storage.Publish(repo.RendererKey, sensconfItemFromStorage)
-		s.activeChanMap[s.name] <- false
-		s.activeChanMap[ImgGreetings] <- true
+		s.activeChanMap[Sensconf] <- true
 	// change active status
 	case 1:
-		sensconf := selectedItemCtx.Value(entity.SensconfCtxKey).(entity.Sensconf)
-		sensconfItem := sensconfItemFromStorage.(*entity.SensconfItem)
+		menuSensconf := s.storage.Get(repo.MenuSensconf).(*entity.Menu)
+		menuSensconfCtx := menuSensconf.Items[menuSensconf.SelectedItem].Ctx
+		// get sensconf item and change active status
+		sensconfItem := menuSensconfCtx.Value(entity.SensconfItemCtxKey).(*entity.SensconfItem)
 		sensconfItem.ChangeActive()
-		if err := s.sensorconfUC.Update(sensconf); err != nil {
+		// update sensors' config file
+		if err := s.sensorconfUC.UpdateAsMenu(menuSensconf); err != nil {
 			return err
 		}
-		return s.btnEsc()
+		logrus.Infof("sensor %s: new status: %s", sensconfItem.Name, sensconfItem.Status())
 	}
 	return nil
 }

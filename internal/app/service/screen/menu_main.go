@@ -15,7 +15,7 @@ func newMenuMainGetter() template.MenuGetter {
 		Title: "Главное меню",
 		Items: []*entity.MenuItem{
 			entity.NewMenuItem(context.Background(), "Датчики"),
-			entity.NewMenuItem(context.Background(), "Что-то"),
+			entity.NewMenuItem(context.Background(), "Назад"),
 			entity.NewMenuItem(context.Background(), "И ещё"),
 			entity.NewMenuItem(context.Background(), "И для проверки прокрутки - ещё!"),
 			entity.NewMenuItem(context.Background(), "And the last for test"),
@@ -87,18 +87,18 @@ func (s *MenuMainScreen) btnEsc() error {
 
 // btnEnt represents an enter button handler for screen.
 func (s *MenuMainScreen) btnEnt() error {
-	menuInst, err := s.templ.GetFromStorage()
+	menu, err := s.templ.GetFromStorage()
 	if err != nil {
 		return err
 	}
 
 	s.activeChanMap[s.name] <- false
 	// set active screen according to selected menu item
-	switch menuInst.SelectedItem {
+	switch menu.SelectedItem {
 	case 0:
 		s.activeChanMap[MenuSens] <- true
 	case 1:
-		s.activeChanMap[SensTemp] <- true
+		s.activeChanMap[ImgGreetings] <- true
 	}
 	return nil
 }

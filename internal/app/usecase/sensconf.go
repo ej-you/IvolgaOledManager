@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"IvolgaOledManager/internal/app/entity"
@@ -23,35 +24,36 @@ func NewSensconfUsecase(sensorconfRepoFS repo.SensconfRepoFS) *SensconfUC {
 	}
 }
 
-// Get parses sensors' config file and
+// GetAsMenu parses sensors' config file and
 // returns if as slice of sensor config lines.
-func (s *SensconfUC) Get() (entity.Sensconf, error) {
+func (s *SensconfUC) GetAsMenu() (*entity.Menu, error) {
 	data, err := s.sensorconfRepoFS.ParseSensconf()
 	if err != nil {
 		return nil, fmt.Errorf("parse sensor conf: %w", err)
 	}
-	return data, nil
+	return sensconfToMenu(data), nil
 }
 
-// Update rewrite old sensors' config with new data.
-func (s *SensconfUC) Update(data entity.Sensconf) error {
-	err := s.sensorconfRepoFS.UpdateSensconf(data)
+// UpdateAsMenu rewrite old sensors' config with new data.
+func (s *SensconfUC) UpdateAsMenu(menu *entity.Menu) error {
+	sensconf, err := menuToSensconf(menu)
 	if err != nil {
+		return fmt.Errorf("convert menu to sensorconf: %w", err)
+	}
+
+	if err := s.sensorconfRepoFS.UpdateSensconf(sensconf); err != nil {
 		return fmt.Errorf("update sensor conf: %w", err)
 	}
 	return nil
 }
 
-// ToMenu translate sensors' config (parsed into slice) into menu for output.
-// Each sensor config line will be a separate menu item.
-func (s *SensconfUC) ToMenu(data entity.Sensconf) *entity.Menu {
-	// context with full sensorconf slice
-	ctxWithData := context.WithValue(context.Background(), entity.SensconfCtxKey, data)
+// sensconfToMenu translates sensconf object to menu representation.
+func sensconfToMenu(sensconf entity.Sensconf) *entity.Menu {
 	// collect menu items
-	menuItems := make([]*entity.MenuItem, 0, len(data))
-	for _, sensorconfItem := range data {
+	menuItems := make([]*entity.MenuItem, 0, len(sensconf))
+	for _, sensorconfItem := range sensconf {
 		menuItems = append(menuItems, entity.NewMenuItem(
-			context.WithValue(ctxWithData, entity.SensconfItemCtxKey, sensorconfItem),
+			context.WithValue(context.Background(), entity.SensconfItemCtxKey, sensorconfItem),
 			sensorconfItem.Name,
 		))
 	}
@@ -59,4 +61,21 @@ func (s *SensconfUC) ToMenu(data entity.Sensconf) *entity.Menu {
 		Title: "Датчики",
 		Items: menuItems,
 	}
+}
+
+// menuToSensconf translates menu representation to sensconf object.
+func menuToSensconf(menu *entity.Menu) (entity.Sensconf, error) {
+	sensconf := make(entity.Sensconf, 0, len(menu.Items))
+
+	var ok bool
+	var sensconfItem *entity.SensconfItem
+	// extract sensconf items from every menu item
+	for _, menuItem := range menu.Items {
+		sensconfItem, ok = menuItem.Ctx.Value(entity.SensconfItemCtxKey).(*entity.SensconfItem)
+		if !ok {
+			return nil, errors.New("menu item has not sensconf item value")
+		}
+		sensconf = append(sensconf, sensconfItem)
+	}
+	return sensconf, nil
 }

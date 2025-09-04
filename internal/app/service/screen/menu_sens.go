@@ -84,14 +84,14 @@ func (s *MenuSensScreen) btnEsc() error {
 
 // btnEnt represents an enter button handler for screen.
 func (s *MenuSensScreen) btnEnt() error {
-	menuInst, err := s.templ.GetFromStorage()
+	menu, err := s.templ.GetFromStorage()
 	if err != nil {
 		return err
 	}
 
 	s.activeChanMap[s.name] <- false
 	// set active screen according to selected menu item
-	switch menuInst.SelectedItem {
+	switch menu.SelectedItem {
 	case 0:
 		s.activeChanMap[SensTemp] <- true
 	case 1:

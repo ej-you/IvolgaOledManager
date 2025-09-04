@@ -9,8 +9,8 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// SensorData represents any sensor data screen.
-type SensorData struct {
+// Sensdata represents any sensor data screen.
+type Sensdata struct {
 	serviceName string
 	// will be closed if the service was completely started and is ready-to-use now
 	ready chan struct{}
@@ -21,11 +21,11 @@ type SensorData struct {
 	btnHandlersReg func()
 }
 
-// NewSensorData returns a new instance of SensorData.
-func NewSensorData(serviceName string, active <-chan bool,
-	storage pubsub.Storage, storageKey string) *SensorData {
+// NewSensdata returns a new instance of SensorData.
+func NewSensdata(serviceName string, active <-chan bool,
+	storage pubsub.Storage, storageKey string) *Sensdata {
 
-	return &SensorData{
+	return &Sensdata{
 		serviceName:    serviceName,
 		ready:          make(chan struct{}),
 		active:         active,
@@ -37,18 +37,18 @@ func NewSensorData(serviceName string, active <-chan bool,
 
 // SetBtnHandlersReg sets btn handlers reg func
 // used to update btn handlers when screen is active.
-func (s *SensorData) SetBtnHandlersReg(btnHandlersReg func()) {
+func (s *Sensdata) SetBtnHandlersReg(btnHandlersReg func()) {
 	s.btnHandlersReg = btnHandlersReg
 }
 
 // Ready signals that the service is ready-to-use.
-func (s *SensorData) Ready() <-chan struct{} {
+func (s *Sensdata) Ready() <-chan struct{} {
 	return s.ready
 }
 
 // StartWithShutdown starts screen service.
 // It can be stopped by cancellaiton the given context.
-func (s *SensorData) StartWithShutdown(ctx context.Context) error {
+func (s *Sensdata) StartWithShutdown(ctx context.Context) error {
 	logrus.Infof("start %s...", s.serviceName)
 	defer logrus.Infof("stop %s: ok", s.serviceName)
 	// notify that service is ready-to-use
@@ -92,7 +92,7 @@ func (s *SensorData) StartWithShutdown(ctx context.Context) error {
 }
 
 // run subscribes on sensor data updates and publishes gotten data for render service.
-func (s *SensorData) run(ctx context.Context) {
+func (s *Sensdata) run(ctx context.Context) {
 	s.sendRenderTask()
 
 	newSensorData := s.storage.Subscribe(ctx, s.storageKey)
@@ -107,7 +107,7 @@ func (s *SensorData) run(ctx context.Context) {
 }
 
 // sendRenderTask publishes sensor data to storage as renderer for render service.
-func (s *SensorData) sendRenderTask() {
+func (s *Sensdata) sendRenderTask() {
 	newData := s.storage.Get(s.storageKey)
 	s.storage.Publish(repo.RendererKey, newData)
 }

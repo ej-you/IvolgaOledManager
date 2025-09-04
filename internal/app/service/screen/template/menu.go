@@ -60,8 +60,6 @@ func (m *Menu) StartWithShutdown(ctx context.Context) error {
 	// notify that service is ready-to-use
 	close(m.ready)
 
-	var menu *entity.Menu
-	var err error
 	for {
 		select {
 		case <-ctx.Done():
@@ -76,13 +74,9 @@ func (m *Menu) StartWithShutdown(ctx context.Context) error {
 				continue
 			}
 			m.btnHandlersReg()
-			// update menu after screen activation
-			menu, err = m.menuGetter()
-			if err != nil {
-				logrus.Errorf("%s: update menu: %v", m.serviceName, err)
+			if err := m.sendRenderTask(); err != nil {
+				logrus.Error(err)
 			}
-			// publish menu for render service
-			m.storage.Publish(repo.RendererKey, menu)
 		}
 	}
 }
@@ -118,5 +112,17 @@ func (m *Menu) BtnDownDefault() error {
 	// update menu and publish into storage as renderer
 	menuInst.SelectNext()
 	m.storage.Publish(repo.RendererKey, menuInst)
+	return nil
+}
+
+// sendRenderTask publishes menu to storage as renderer for render service.
+func (m *Menu) sendRenderTask() error {
+	// update menu after screen activation
+	menu, err := m.menuGetter()
+	if err != nil {
+		return fmt.Errorf("%s: update menu: %w", m.serviceName, err)
+	}
+	// publish menu for render service
+	m.storage.Publish(repo.RendererKey, menu)
 	return nil
 }

@@ -14,14 +14,14 @@ type SensWindSpeedScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	templ         *template.SensorData
+	templ         *template.Sensdata
 }
 
 // NewSensWindSpeedScreen returns a new instance of SensWindSpeedScreen.
 func NewSensWindSpeedScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensWindSpeedScreen {
 
-	templ := template.NewSensorData(
+	templ := template.NewSensdata(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,

@@ -18,7 +18,7 @@ import (
 var _ Screen = (*GreetingsScreen)(nil)
 var _ Screen = (*MenuMainScreen)(nil)
 var _ Screen = (*MenuSensScreen)(nil)
-var _ Screen = (*MenuSensorconfScreen)(nil)
+var _ Screen = (*MenuSensconfScreen)(nil)
 var _ Screen = (*SensTempScreen)(nil)
 var _ Screen = (*SensHumidScreen)(nil)
 var _ Screen = (*SensPressScreen)(nil)
@@ -29,16 +29,17 @@ var _ Screen = (*SensWindDirScreen)(nil)
 type Name string
 
 var (
-	ImgGreetings       Name = "screen:greetings"
-	MenuMain           Name = "screen:menu:main"
-	MenuSens           Name = "screen:menu:sensor"
-	MenuSensorconf     Name = "screen:menu:sensorconf"
-	MenuSensorconfItem Name = "screen:menu:sensorconf:item"
-	SensTemp           Name = "screen:sensordata:temperature"
-	SensHumid          Name = "screen:sensordata:humidity"
-	SensPress          Name = "screen:sensordata:pressure"
-	SensWindSpeed      Name = "screen:sensordata:wind:speed"
-	SensWindDir        Name = "screen:sensordata:wind:direction"
+	ImgGreetings     Name = "screen:greetings"
+	MenuMain         Name = "screen:menu:main"
+	MenuSens         Name = "screen:menu:sensor"
+	MenuSensorconf   Name = "screen:menu:sensorconf"
+	MenuSensconfItem Name = "screen:menu:sensorconf:item"
+	SensTemp         Name = "screen:sensdata:temperature"
+	SensHumid        Name = "screen:sensdata:humidity"
+	SensPress        Name = "screen:sensdata:pressure"
+	SensWindSpeed    Name = "screen:sensdata:wind:speed"
+	SensWindDir      Name = "screen:sensdata:wind:direction"
+	Sensconf         Name = "screen:sensorconf"
 )
 
 // ActiveChan represents an active chan for screen.
@@ -50,16 +51,17 @@ type ActiveChanMap map[Name]ActiveChan
 // newActiveChanMap returns a new instance of ActiveChMap.
 func newActiveChanMap() ActiveChanMap {
 	return ActiveChanMap{
-		ImgGreetings:       make(ActiveChan, 1),
-		MenuMain:           make(ActiveChan, 1),
-		MenuSens:           make(ActiveChan, 1),
-		MenuSensorconf:     make(ActiveChan, 1),
-		MenuSensorconfItem: make(ActiveChan, 1),
-		SensTemp:           make(ActiveChan, 1),
-		SensHumid:          make(ActiveChan, 1),
-		SensPress:          make(ActiveChan, 1),
-		SensWindSpeed:      make(ActiveChan, 1),
-		SensWindDir:        make(ActiveChan, 1),
+		ImgGreetings:     make(ActiveChan, 1),
+		MenuMain:         make(ActiveChan, 1),
+		MenuSens:         make(ActiveChan, 1),
+		MenuSensorconf:   make(ActiveChan, 1),
+		MenuSensconfItem: make(ActiveChan, 1),
+		SensTemp:         make(ActiveChan, 1),
+		SensHumid:        make(ActiveChan, 1),
+		SensPress:        make(ActiveChan, 1),
+		SensWindSpeed:    make(ActiveChan, 1),
+		SensWindDir:      make(ActiveChan, 1),
+		Sensconf:         make(ActiveChan, 1),
 	}
 }
 
@@ -97,9 +99,9 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	// menu screens
 	menuMain := NewMenuMainScreen(MenuMain, activeCh, btns, storage)
 	menuSens := NewMenuSensScreen(MenuSens, activeCh, btns, storage)
-	menuSensorconf := NewMenuSensorconfScreen(MenuSensorconf,
+	menuSensorconf := NewMenuSensconfScreen(MenuSensorconf,
 		activeCh, btns, storage, sensorconfUC)
-	menuSensorconfItem := NewMenuSensorconfItemScreen(MenuSensorconfItem,
+	menuSensorconfItem := NewMenuSensconfItemScreen(MenuSensconfItem,
 		activeCh, btns, storage, sensorconfUC)
 	// sensor data screens
 	sensTemp := NewSensTempScreen(SensTemp, activeCh, btns, storage)
@@ -107,11 +109,14 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	sensPress := NewSensPressScreen(SensPress, activeCh, btns, storage)
 	sensWindSpeed := NewSensWindSpeedScreen(SensWindSpeed, activeCh, btns, storage)
 	sensWindDir := NewSensWindDirScreen(SensWindDir, activeCh, btns, storage)
+	// sensor config item
+	sensconf := NewSensconfScreen(Sensconf, activeCh, btns, storage)
 
 	screens := []Screen{
 		greetings, menuMain,
 		menuSens, menuSensorconf, menuSensorconfItem,
 		sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir,
+		sensconf,
 	}
 	// prepare button handlers for all screens
 	for _, screen := range screens {

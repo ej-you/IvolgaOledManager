@@ -14,14 +14,14 @@ type SensPressScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	templ         *template.SensorData
+	templ         *template.Sensdata
 }
 
 // NewSensPressScreen returns a new instance of SensPressScreen.
 func NewSensPressScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensPressScreen {
 
-	templ := template.NewSensorData(
+	templ := template.NewSensdata(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,

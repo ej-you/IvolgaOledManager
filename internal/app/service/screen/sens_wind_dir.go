@@ -14,14 +14,14 @@ type SensWindDirScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
-	templ         *template.SensorData
+	templ         *template.Sensdata
 }
 
 // NewSensWindDirScreen returns a new instance of SensWindDirScreen.
 func NewSensWindDirScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
 	storage pubsub.Storage) *SensWindDirScreen {
 
-	templ := template.NewSensorData(
+	templ := template.NewSensdata(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,

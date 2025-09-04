@@ -25,12 +25,10 @@ type SensdataUsecase interface {
 
 // SensconfUsecase describes a usecase for sensors' config.
 type SensconfUsecase interface {
-	// Get parses sensors' config file and
-	// returns if as slice of sensor config lines.
-	Get() (entity.Sensconf, error)
-	// Update rewrite old sensors' config with new data.
-	Update(data entity.Sensconf) error
-	// ToMenu translate sensors' config (parsed into slice) into menu for output.
-	// Each sensor config line will be a separate menu item.
-	ToMenu(data entity.Sensconf) *entity.Menu
+	// GetAsMenu parses sensors' config file into a slice of sensor config lines
+	// and returns it as menu.
+	GetAsMenu() (*entity.Menu, error)
+	// UpdateAsMenu gets sensor config data from given menu and
+	// rewrite old sensors' config with new data.
+	UpdateAsMenu(menu *entity.Menu) error
 }
