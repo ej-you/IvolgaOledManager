@@ -30,5 +30,6 @@ type SensconfUsecase interface {
 	GetAsMenu() (*entity.Menu, error)
 	// UpdateAsMenu gets sensor config data from given menu and
 	// rewrite old sensors' config with new data.
+	// After the config is updated, it restarts the station service.
 	UpdateAsMenu(menu *entity.Menu) error
 }

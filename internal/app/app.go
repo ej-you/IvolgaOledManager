@@ -93,7 +93,7 @@ func New() (*App, error) {
 	}
 	// init usecases
 	sensdataUC := usecase.NewSensdataUsecase(sensdataRepoDB, storage)
-	sensconfUC := usecase.NewSensconfUsecase(sensconfRepoFS)
+	sensconfUC := usecase.NewSensconfUsecase(sensconfRepoFS, cfg.Other.Station.ServiceName)
 
 	// init buttons services
 	btns, err := button.New(cfg)

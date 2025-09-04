@@ -7,6 +7,7 @@ import (
 
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo"
+	"IvolgaOledManager/internal/pkg/system"
 )
 
 // Ensure sensors' config usecase implements interface.
@@ -14,35 +15,46 @@ var _ SensconfUsecase = (*SensconfUC)(nil)
 
 // SensconfUC represents a usecase for sensors' config.
 type SensconfUC struct {
-	sensorconfRepoFS repo.SensconfRepoFS
+	sensconfRepoFS     repo.SensconfRepoFS
+	stationServiceName string
 }
 
 // NewSensconfUsecase returns a new instance of SensconfUC.
-func NewSensconfUsecase(sensorconfRepoFS repo.SensconfRepoFS) *SensconfUC {
+func NewSensconfUsecase(sensconfRepoFS repo.SensconfRepoFS,
+	stationServiceName string) *SensconfUC {
+
 	return &SensconfUC{
-		sensorconfRepoFS: sensorconfRepoFS,
+		sensconfRepoFS:     sensconfRepoFS,
+		stationServiceName: stationServiceName,
 	}
 }
 
 // GetAsMenu parses sensors' config file and
 // returns if as slice of sensor config lines.
 func (s *SensconfUC) GetAsMenu() (*entity.Menu, error) {
-	data, err := s.sensorconfRepoFS.ParseSensconf()
+	data, err := s.sensconfRepoFS.ParseSensconf()
 	if err != nil {
 		return nil, fmt.Errorf("parse sensor conf: %w", err)
 	}
 	return sensconfToMenu(data), nil
 }
 
-// UpdateAsMenu rewrite old sensors' config with new data.
+// UpdateAsMenu gets sensor config data from given menu and
+// rewrite old sensors' config with new data.
+// After the config is updated, it restarts the station service.
 func (s *SensconfUC) UpdateAsMenu(menu *entity.Menu) error {
+	// convert menu to sensconf
 	sensconf, err := menuToSensconf(menu)
 	if err != nil {
 		return fmt.Errorf("convert menu to sensorconf: %w", err)
 	}
-
-	if err := s.sensorconfRepoFS.UpdateSensconf(sensconf); err != nil {
+	// update sensors' config file
+	if err := s.sensconfRepoFS.UpdateSensconf(sensconf); err != nil {
 		return fmt.Errorf("update sensor conf: %w", err)
+	}
+	// restart station service
+	if err := system.RestartService(s.stationServiceName); err != nil {
+		return err
 	}
 	return nil
 }
