@@ -44,17 +44,19 @@ func (s *SensconfItem) ChangeActive() {
 // Status returns string according to active value of sensorconf item.
 func (s *SensconfItem) Status() string {
 	if s.Active {
-		return "Статус: ON"
+		return "on"
 	}
-	return "Статус: OFF"
+	return "off"
 }
 
 // Render implements display.Renderer. It renders sensor config item on display.
 func (s *SensconfItem) Render(device display.Display) error {
+	status := "Статус: " + strings.ToUpper(s.Status())
+
 	// output text screen
 	err := device.DisplayTextLines(
 		display.TextLine{Content: s.Name, RelativeSize: 1},
-		display.TextLine{Content: s.Status(), RelativeSize: 1},
+		display.TextLine{Content: status, RelativeSize: 1},
 		display.TextLine{Content: "", RelativeSize: 1},
 		display.TextLine{Content: "", RelativeSize: 1},
 	)
