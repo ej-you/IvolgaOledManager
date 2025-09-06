@@ -11,25 +11,25 @@ import (
 )
 
 // Ensure message repo implementats interface.
-var _ repo.MessageRepoDB = (*MessageRepo)(nil)
+var _ repo.LogMsgRepoDB = (*LogMsgRepo)(nil)
 
-// MessageRepo represents a DB repo for logs messages.
-type MessageRepo struct {
+// LogMsgRepo represents a DB repo for logs messages.
+type LogMsgRepo struct {
 	dbStorage *gorm.DB
 }
 
-// NewMessageRepoDB returns a new instance of MessageRepo.
-func NewMessageRepoDB(dbStorage *gorm.DB) *MessageRepo {
-	return &MessageRepo{
+// NewLogMsgRepoDB returns a new instance of LogMsgRepo.
+func NewLogMsgRepoDB(dbStorage *gorm.DB) *LogMsgRepo {
+	return &LogMsgRepo{
 		dbStorage: dbStorage,
 	}
 }
 
 // GetLevelsCount returns map with level numbers and amount of messages with this level.
-func (r *MessageRepo) GetLevelsCount() ([]entity.MessageLevelCount, error) {
-	var results []entity.MessageLevelCount
+func (r *LogMsgRepo) GetLevelsCount() ([]entity.LogMsgLevelCount, error) {
+	var results []entity.LogMsgLevelCount
 	err := r.dbStorage.
-		Model(&entity.Message{}).
+		Model(&entity.LogMsg{}).
 		Select("level, count(1) as count").
 		Group("level").
 		Find(&results).Error
@@ -40,10 +40,10 @@ func (r *MessageRepo) GetLevelsCount() ([]entity.MessageLevelCount, error) {
 }
 
 // GetWithLevel returns slice of messages with given level ordered by created datetime.
-func (r *MessageRepo) GetWithLevel(level string) ([]entity.MessageWithLevel, error) {
-	var results []entity.MessageWithLevel
+func (r *LogMsgRepo) GetWithLevel(level string) ([]entity.LogMsgWithLevel, error) {
+	var results []entity.LogMsgWithLevel
 	err := r.dbStorage.
-		Model(&entity.Message{}).
+		Model(&entity.LogMsg{}).
 		Where("level = ?", level).
 		Order("created_at DESC").
 		Find(&results).Error
@@ -55,7 +55,7 @@ func (r *MessageRepo) GetWithLevel(level string) ([]entity.MessageWithLevel, err
 
 // GetByID returns message with given ID.
 // Field ID must be presented.
-func (r *MessageRepo) GetByID(msg *entity.Message) error {
+func (r *LogMsgRepo) GetByID(msg *entity.LogMsg) error {
 	err := r.dbStorage.Where("id = ?", msg.ID).First(&msg).Error
 	// not found error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -70,8 +70,8 @@ func (r *MessageRepo) GetByID(msg *entity.Message) error {
 
 // DeleteByID deletes message record by its ID.
 // ID field must be presented.
-func (r *MessageRepo) DeleteByID(id string) error {
-	err := r.dbStorage.Delete(&entity.Message{}, id).Error
+func (r *LogMsgRepo) DeleteByID(id string) error {
+	err := r.dbStorage.Delete(&entity.LogMsg{}, id).Error
 	if err != nil {
 		return fmt.Errorf("delete by id: %w", err)
 	}
@@ -79,8 +79,8 @@ func (r *MessageRepo) DeleteByID(id string) error {
 }
 
 // DeleteAllWithLevel deletes all message records with given level.
-func (r *MessageRepo) DeleteAllWithLevel(level string) error {
-	err := r.dbStorage.Delete(&entity.Message{}, "level = ?", level).Error
+func (r *LogMsgRepo) DeleteAllWithLevel(level string) error {
+	err := r.dbStorage.Delete(&entity.LogMsg{}, "level = ?", level).Error
 	if err != nil {
 		return fmt.Errorf("delete with level: %w", err)
 	}

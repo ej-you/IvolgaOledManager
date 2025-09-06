@@ -13,11 +13,11 @@ import (
 
 const (
 	_level   = "1"
-	_id      = "6"
+	_id      = "1"
 	_testDSN = "test_user:test_password@tcp(127.0.0.1:3306)/test_db?parseTime=true&timeout=10s"
 )
 
-var _repo repo.MessageRepoDB
+var _repo repo.LogMsgRepoDB
 
 func TestMain(m *testing.M) {
 	// create repo
@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		panic(err)
 	}
-	_repo = NewMessageRepoDB(dbStorage)
+	_repo = NewLogMsgRepoDB(dbStorage)
 	// run tests
 	os.Exit(m.Run())
 }
@@ -53,7 +53,7 @@ func TestGetWithLevel(t *testing.T) {
 func TestGetByID(t *testing.T) {
 	t.Log("Get message by ID")
 
-	msg := &entity.Message{ID: _id}
+	msg := &entity.LogMsg{ID: _id}
 
 	err := _repo.GetByID(msg)
 	require.NoError(t, err, "get message by id")

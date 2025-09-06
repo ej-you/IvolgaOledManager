@@ -9,7 +9,7 @@ const (
 	_defaultPrefix  = "   " // menu item prefix for default item
 	_selectedPrefix = "> "  // menu item prefix for selected item
 
-	_maxItemLen = 15 // max item value len
+	_menuItemSymbols = 15 // max amount of symbols on one line (without prefix)
 )
 
 // Menu item
@@ -73,7 +73,7 @@ func (i *MenuItem) ToOutputSelected() string {
 // setLastSymbol computes and sets lastSymbol value for menu item.
 func (i *MenuItem) setLastSymbol() {
 	// if length of item title is less than _maxItemLen
-	if utf8.RuneCountInString(i.Title) <= _maxItemLen {
+	if utf8.RuneCountInString(i.Title) <= _menuItemSymbols {
 		i.lastSymbol = len(i.Title)
 		i.skipScroll = true
 		return
@@ -81,7 +81,7 @@ func (i *MenuItem) setLastSymbol() {
 	// loop from 0 to _maxItemLen rune of item title
 	var runeIdx int
 	for runeIdx = range i.Title {
-		if utf8.RuneCountInString(i.Title[:runeIdx]) == _maxItemLen {
+		if utf8.RuneCountInString(i.Title[:runeIdx]) == _menuItemSymbols {
 			break
 		}
 	}

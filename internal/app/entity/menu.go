@@ -6,7 +6,10 @@ import (
 	"IvolgaOledManager/internal/pkg/display"
 )
 
-const _menuLinesAmount = 4 // amount of menu lines on screen (menu title and items)
+const (
+	_displayLinesBlue = 3 // amount of lines on screen (items/lines only)
+	_displayLinesAll  = 4 // amount of lines on screen (title and items/lines)
+)
 
 // Menu represents any menu.
 type Menu struct {
@@ -19,13 +22,13 @@ type Menu struct {
 // Render implements display.Renderer. It renders menu on display.
 func (m *Menu) Render(device display.Display) error {
 	// create slice of text lines with menu title line
-	textLines := make([]display.TextLine, 0, _menuLinesAmount)
+	textLines := make([]display.TextLine, 0, _displayLinesAll)
 	textLines = append(textLines, display.TextLine{Content: m.Title, RelativeSize: 1})
 
 	var lineContent string
 	// iterate menu items
 	for idx, menuItem := range m.Items {
-		if len(textLines) == _menuLinesAmount {
+		if len(textLines) == _displayLinesAll {
 			break
 		}
 		// skip items that are before first visible item
@@ -45,8 +48,8 @@ func (m *Menu) Render(device display.Display) error {
 		})
 	}
 	// append empty lines if items are not enough
-	if len(textLines) < _menuLinesAmount {
-		for range _menuLinesAmount - len(textLines) {
+	if len(textLines) < _displayLinesAll {
+		for range _displayLinesAll - len(textLines) {
 			textLines = append(textLines, display.TextLine{
 				Content:      "",
 				RelativeSize: 1,
@@ -66,7 +69,7 @@ func (m *Menu) SelectPrevious() {
 	// extreme up position
 	if m.SelectedItem == 0 {
 		m.SelectedItem = len(m.Items) - 1
-		m.FirstItem = max(len(m.Items)-MaxDisplayedItems, 0)
+		m.FirstItem = max(len(m.Items)-_displayLinesBlue, 0)
 		return
 	}
 
@@ -88,7 +91,7 @@ func (m *Menu) SelectNext() {
 
 	m.SelectedItem++
 	// if selected item after update will not be visible
-	if m.SelectedItem >= m.FirstItem+MaxDisplayedItems {
+	if m.SelectedItem >= m.FirstItem+_displayLinesBlue {
 		m.FirstItem++
 	}
 }
