@@ -75,3 +75,7 @@ Extra docs are located in the `./docs/` directory.
 
 File `./docs/IvolgaOledManager.excalidraw` is an exported schema from [Excalidraw service](https://excalidraw.com/)
 You can open this service and import this file there to explore `app schema`.
+
+### Display screens navigation
+
+![image](./docs/mind_map.jpg)
