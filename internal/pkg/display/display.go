@@ -23,14 +23,6 @@ type Display interface {
 	DisplayTextLines(lines ...TextLine) error
 }
 
-// TextLine represents a one text line on display screen.
-type TextLine struct {
-	// text
-	Content string
-	// relative part of the total display height occupied by the text line
-	RelativeSize int
-}
-
 // Service represents a display service. It starts with StartWithShutdown method
 // and implements Display interface to output data.
 type Service struct {

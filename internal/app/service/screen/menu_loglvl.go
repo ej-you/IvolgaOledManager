@@ -4,65 +4,70 @@ import (
 	"context"
 
 	"IvolgaOledManager/internal/app/entity"
+	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/screen/template"
+	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// newMenuSensGetter returns menu getter func for sensor menu.
-func newMenuSensGetter() template.MenuGetter {
-	menu := &entity.Menu{
-		Title: "Датчики",
-		Items: []*entity.MenuItem{
-			entity.NewMenuItem(context.Background(), "Данные"),
-			entity.NewMenuItem(context.Background(), "Настройка"),
-		},
-	}
+// newMenuLogLvlGetter returns menu getter func for log level menu.
+// Also it saves new log level into storage with repo.MenuLogLvl key.
+func newMenuLogLvlGetter(storage pubsub.Storage,
+	logMsgUC usecase.LogMsgUsecase) template.MenuGetter {
+
 	return func() (*entity.Menu, error) {
-		menu.FirstItem = 0
-		menu.SelectedItem = 0
+		menu, err := logMsgUC.GetLevelCountAsMenu()
+		if err != nil {
+			return nil, err
+		}
+		storage.Publish(repo.MenuLogLvl, menu)
 		return menu, nil
 	}
 }
 
-// MenuSensScreen represents the sensor menu screen.
-type MenuSensScreen struct {
+// MenuLogLvlScreen represents the screen with menu of log levels.
+type MenuLogLvlScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.Menu
+	storage       pubsub.Storage
+	logMsgUC      usecase.LogMsgUsecase
 }
 
-// NewMenuSensScreen returns a new instance of MenuSensScreen.
-func NewMenuSensScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage) *MenuSensScreen {
+// NewMenuLogLvlScreen returns a new instance of MenuLogLvlScreen.
+func NewMenuLogLvlScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
+	storage pubsub.Storage, logMsgUC usecase.LogMsgUsecase) *MenuLogLvlScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensGetter(),
+		newMenuLogLvlGetter(storage, logMsgUC),
 	)
-	return &MenuSensScreen{
+	return &MenuLogLvlScreen{
 		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
+		storage:       storage,
+		logMsgUC:      logMsgUC,
 	}
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuSensScreen) Ready() <-chan struct{} {
+func (s *MenuLogLvlScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuSensScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuLogLvlScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuSensScreen) prepareBtnHandlers() {
+func (s *MenuLogLvlScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -76,26 +81,15 @@ func (s *MenuSensScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuSensScreen) btnEsc() error {
+func (s *MenuLogLvlScreen) btnEsc() error {
 	s.activeChanMap[s.name] <- false
 	s.activeChanMap[MenuMain] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuSensScreen) btnEnt() error {
-	menu, err := s.templ.GetFromStorage()
-	if err != nil {
-		return err
-	}
-
+func (s *MenuLogLvlScreen) btnEnt() error {
 	s.activeChanMap[s.name] <- false
-	// set active screen according to selected menu item
-	switch menu.SelectedItem {
-	case 0:
-		s.activeChanMap[SensTemp] <- true
-	case 1:
-		s.activeChanMap[MenuSensconf] <- true
-	}
+	s.activeChanMap[MenuLogLvlAction] <- true
 	return nil
 }

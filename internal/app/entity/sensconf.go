@@ -55,10 +55,10 @@ func (s *SensconfItem) Render(device display.Display) error {
 
 	// output text screen
 	err := device.DisplayTextLines(
-		display.TextLine{Content: s.Name, RelativeSize: 1},
-		display.TextLine{Content: status, RelativeSize: 1},
-		display.TextLine{Content: "", RelativeSize: 1},
-		display.TextLine{Content: "", RelativeSize: 1},
+		display.NewDefaultTextLine(s.Name),
+		display.NewDefaultTextLine(status),
+		display.NewDefaultTextLine(""),
+		display.NewDefaultTextLine(""),
 	)
 	if err != nil {
 		return fmt.Errorf("display text screen: %w", err)

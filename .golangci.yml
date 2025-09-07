@@ -84,10 +84,10 @@ linters:
       - linters:
           - lll
         path: config/config\.go
-      - linters: # different screen sctucts are more understandable
+      - linters: # different screen structs are more understandable
           - dupl
-        path: internal/app/service/screen/sens_.*?\.go
-        text: "1-80 lines are duplicate of `internal/app/service/screen/sens_.*?.go:1-80`"
+        path: internal/app/service/screen
+        text: "1-1?[123456789][0123456789] lines are duplicate of `internal/app/service/screen/.*?.go:1-1?[123456789][0123456789]`"
     paths:
       - bin
 

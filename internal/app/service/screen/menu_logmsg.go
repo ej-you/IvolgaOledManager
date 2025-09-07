@@ -2,6 +2,7 @@ package screen
 
 import (
 	"context"
+	"strconv"
 
 	"IvolgaOledManager/internal/app/entity"
 	"IvolgaOledManager/internal/app/repo"
@@ -11,63 +12,70 @@ import (
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
-// newMenuSensconfGetter returns menu getter func for sensorconf menu.
-// Also it saves new sensorconf into storage with repo.MenuSensconf key.
-func newMenuSensconfGetter(storage pubsub.Storage,
-	sensorconfUC usecase.SensconfUsecase) template.MenuGetter {
+// newMenuLogMsgGetter returns menu getter func for log messages menu.
+// Also it saves new log messages into storage with repo.MenuLogMsg key.
+func newMenuLogMsgGetter(storage pubsub.Storage,
+	logMsgUC usecase.LogMsgUsecase) template.MenuGetter {
 
 	return func() (*entity.Menu, error) {
-		menu, err := sensorconfUC.GetAsMenu()
+		// get menu log level from storage
+		menuLogLvl := storage.Get(repo.MenuLogLvl).(*entity.Menu)
+		menuLogLvlCtx := menuLogLvl.Items[menuLogLvl.SelectedItem].Ctx
+		// get log level count item and delete all messages with it
+		logLvlItem := menuLogLvlCtx.Value(entity.LogLvlCountCtxKey).(*entity.LogMsgLevelCount)
+
+		// get log messages as menu
+		menu, err := logMsgUC.GetWithLevelAsMenu(strconv.Itoa(logLvlItem.Level))
 		if err != nil {
 			return nil, err
 		}
-		storage.Publish(repo.MenuSensconf, menu)
+		storage.Publish(repo.MenuLogMsg, menu)
 		return menu, nil
 	}
 }
 
-// MenuSensconfScreen represents the main menu data screen.
-type MenuSensconfScreen struct {
+// MenuLogMsgScreen represents the screen with menu of log level messages.
+type MenuLogMsgScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.Menu
 	storage       pubsub.Storage
-	sensconfUC    usecase.SensconfUsecase
+	logMsgUC      usecase.LogMsgUsecase
 }
 
-// NewMenuSensconfScreen returns a new instance of MenuMainScreen.
-func NewMenuSensconfScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage, sensconfUC usecase.SensconfUsecase) *MenuSensconfScreen {
+// NewMenuLogMsgScreen returns a new instance of MenuLogMsgScreen.
+func NewMenuLogMsgScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
+	storage pubsub.Storage, logMsgUC usecase.LogMsgUsecase) *MenuLogMsgScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensconfGetter(storage, sensconfUC),
+		newMenuLogMsgGetter(storage, logMsgUC),
 	)
-	return &MenuSensconfScreen{
+	return &MenuLogMsgScreen{
 		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
 		storage:       storage,
-		sensconfUC:    sensconfUC,
+		logMsgUC:      logMsgUC,
 	}
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuSensconfScreen) Ready() <-chan struct{} {
+func (s *MenuLogMsgScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuSensconfScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuLogMsgScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuSensconfScreen) prepareBtnHandlers() {
+func (s *MenuLogMsgScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -81,15 +89,15 @@ func (s *MenuSensconfScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuSensconfScreen) btnEsc() error {
+func (s *MenuLogMsgScreen) btnEsc() error {
 	s.activeChanMap[s.name] <- false
-	s.activeChanMap[MenuSens] <- true
+	s.activeChanMap[MenuLogLvlAction] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuSensconfScreen) btnEnt() error {
+func (s *MenuLogMsgScreen) btnEnt() error {
 	s.activeChanMap[s.name] <- false
-	s.activeChanMap[MenuSensconfItem] <- true
+	s.activeChanMap[MenuLogMsgAction] <- true
 	return nil
 }

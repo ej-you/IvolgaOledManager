@@ -35,7 +35,7 @@ func TestMain(m *testing.M) {
 func TestGetLevelsCount(t *testing.T) {
 	t.Log("Get levels count")
 
-	levelsCount, err := _repo.GetLevelsCount()
+	levelsCount, err := _repo.GetLevelCount()
 	require.NoError(t, err, "get levels count")
 
 	t.Logf("levelsCount: %+v", levelsCount)

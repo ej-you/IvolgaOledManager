@@ -13,13 +13,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// newMenuSensconfItemGetter returns menu getter func for sensorconf item menu.
-func newMenuSensconfItemGetter() template.MenuGetter {
+// newMenuLogMsgActionGetter returns menu getter func for log message actions menu.
+func newMenuLogMsgActionGetter() template.MenuGetter {
 	menu := &entity.Menu{
 		Title: "Действия",
 		Items: []*entity.MenuItem{
 			entity.NewMenuItem(context.Background(), "Просмотреть"),
-			entity.NewMenuItem(context.Background(), "Изменить статус"),
+			entity.NewMenuItem(context.Background(), "Удалить"),
 		},
 	}
 	return func() (*entity.Menu, error) {
@@ -29,49 +29,49 @@ func newMenuSensconfItemGetter() template.MenuGetter {
 	}
 }
 
-// MenuSensconfItemScreen represents the sensorconf item menu screen.
-type MenuSensconfItemScreen struct {
+// MenuLogMsgActionScreen represents the screen with menu of log message actions.
+type MenuLogMsgActionScreen struct {
 	name          Name
 	activeChanMap ActiveChanMap
 	btns          button.Buttons
 	templ         *template.Menu
 	storage       pubsub.Storage
-	sensorconfUC  usecase.SensconfUsecase
+	logMsgUC      usecase.LogMsgUsecase
 }
 
-// NewMenuSensconfItemScreen returns a new instance of MenuSensorconfItemScreen.
-func NewMenuSensconfItemScreen(screenName Name, activeChanMap ActiveChanMap,
+// NewMenuLogMsgActionScreen returns a new instance of MenuLogMsgActionScreen.
+func NewMenuLogMsgActionScreen(screenName Name, activeChanMap ActiveChanMap,
 	btns button.Buttons, storage pubsub.Storage,
-	sensorconfUC usecase.SensconfUsecase) *MenuSensconfItemScreen {
+	logMsgUC usecase.LogMsgUsecase) *MenuLogMsgActionScreen {
 
 	templ := template.NewMenu(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newMenuSensconfItemGetter(),
+		newMenuLogMsgActionGetter(),
 	)
-	return &MenuSensconfItemScreen{
+	return &MenuLogMsgActionScreen{
 		name:          screenName,
 		activeChanMap: activeChanMap,
 		btns:          btns,
 		templ:         templ,
 		storage:       storage,
-		sensorconfUC:  sensorconfUC,
+		logMsgUC:      logMsgUC,
 	}
 }
 
 // Ready returns true if service was completely started and is ready-to-use now.
-func (s *MenuSensconfItemScreen) Ready() <-chan struct{} {
+func (s *MenuLogMsgActionScreen) Ready() <-chan struct{} {
 	return s.templ.Ready()
 }
 
 // StartWithShutdown starts service and wait for context cancellation to shutdown it.
-func (s *MenuSensconfItemScreen) StartWithShutdown(ctx context.Context) error {
+func (s *MenuLogMsgActionScreen) StartWithShutdown(ctx context.Context) error {
 	return s.templ.StartWithShutdown(ctx)
 }
 
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
-func (s *MenuSensconfItemScreen) prepareBtnHandlers() {
+func (s *MenuLogMsgActionScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
 		button.Esc:  s.btnEsc,
 		button.Up:   s.templ.BtnUpDefault,
@@ -85,14 +85,14 @@ func (s *MenuSensconfItemScreen) prepareBtnHandlers() {
 }
 
 // btnEsc represents an escape button handler for screen.
-func (s *MenuSensconfItemScreen) btnEsc() error {
+func (s *MenuLogMsgActionScreen) btnEsc() error {
 	s.activeChanMap[s.name] <- false
-	s.activeChanMap[MenuSensconf] <- true
+	s.activeChanMap[MenuLogMsg] <- true
 	return nil
 }
 
 // btnEnt represents an enter button handler for screen.
-func (s *MenuSensconfItemScreen) btnEnt() error {
+func (s *MenuLogMsgActionScreen) btnEnt() error {
 	menu, err := s.templ.GetFromStorage()
 	if err != nil {
 		return err
@@ -102,19 +102,17 @@ func (s *MenuSensconfItemScreen) btnEnt() error {
 	switch menu.SelectedItem {
 	// show info
 	case 0:
-		s.activeChanMap[Sensconf] <- true
-	// change active status
+		s.activeChanMap[LogMsg] <- true
+	// delete selected log messages
 	case 1:
-		menuSensconf := s.storage.Get(repo.MenuSensconf).(*entity.Menu)
-		menuSensconfCtx := menuSensconf.Items[menuSensconf.SelectedItem].Ctx
-		// get sensconf item and change active status
-		sensconfItem := menuSensconfCtx.Value(entity.SensconfItemCtxKey).(*entity.SensconfItem)
-		sensconfItem.ChangeActive()
-		// update sensors' config file
-		if err := s.sensorconfUC.UpdateAsMenu(menuSensconf); err != nil {
+		menuLogMsg := s.storage.Get(repo.MenuLogLvl).(*entity.Menu)
+		menuLogMsgCtx := menuLogMsg.Items[menuLogMsg.SelectedItem].Ctx
+		// get log message item and delete it
+		logMsgItem := menuLogMsgCtx.Value(entity.LogMsgCtxKey).(*entity.LogMsgWithLevel)
+		if err := s.logMsgUC.DeleteByID(logMsgItem.ID); err != nil {
 			return err
 		}
-		logrus.Infof("sensor %s: new status: %s", sensconfItem.Name, sensconfItem.Status())
+		logrus.Infof("log message %s - %s: deleted", logMsgItem.ID, logMsgItem.Header)
 	}
 	return nil
 }

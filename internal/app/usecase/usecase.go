@@ -33,3 +33,17 @@ type SensconfUsecase interface {
 	// After the config is updated, it restarts the station service.
 	UpdateAsMenu(menu *entity.Menu) error
 }
+
+// LogMsgUsecase describes a usecase for log messages.
+type LogMsgUsecase interface {
+	// GetLevelCount returns menu with level numbers and amount of messages with this levels.
+	GetLevelCountAsMenu() (*entity.Menu, error)
+	// GetWithLevel returns menu with messages with given level ordered by created datetime.
+	GetWithLevelAsMenu(level string) (*entity.Menu, error)
+	// GetByID returns message with given ID. ID field must be presented.
+	GetByID(msg *entity.LogMsg) error
+	// DeleteByID deletes message record by its ID. ID field must be presented.
+	DeleteByID(id string) error
+	// DeleteAllWithLevel deletes all message records with given level.
+	DeleteAllWithLevel(level string) error
+}

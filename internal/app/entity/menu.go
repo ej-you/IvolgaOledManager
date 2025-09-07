@@ -6,9 +6,8 @@ import (
 	"IvolgaOledManager/internal/pkg/display"
 )
 
-const (
-	_displayLinesBlue = 3 // amount of lines on screen (items/lines only)
-	_displayLinesAll  = 4 // amount of lines on screen (title and items/lines)
+var (
+	_displayLinesBlue = display.DefaultLinesAmount - 1 // amount of lines on screen (items/lines only)
 )
 
 // Menu represents any menu.
@@ -22,13 +21,13 @@ type Menu struct {
 // Render implements display.Renderer. It renders menu on display.
 func (m *Menu) Render(device display.Display) error {
 	// create slice of text lines with menu title line
-	textLines := make([]display.TextLine, 0, _displayLinesAll)
-	textLines = append(textLines, display.TextLine{Content: m.Title, RelativeSize: 1})
+	textLines := make([]display.TextLine, 0, display.DefaultLinesAmount)
+	textLines = append(textLines, display.NewDefaultTextLine(m.Title))
 
 	var lineContent string
 	// iterate menu items
 	for idx, menuItem := range m.Items {
-		if len(textLines) == _displayLinesAll {
+		if len(textLines) == display.DefaultLinesAmount {
 			break
 		}
 		// skip items that are before first visible item
@@ -42,18 +41,12 @@ func (m *Menu) Render(device display.Display) error {
 			lineContent = menuItem.ToOutput()
 		}
 		// add new item
-		textLines = append(textLines, display.TextLine{
-			Content:      lineContent,
-			RelativeSize: 1,
-		})
+		textLines = append(textLines, display.NewDefaultTextLine(lineContent))
 	}
 	// append empty lines if items are not enough
-	if len(textLines) < _displayLinesAll {
-		for range _displayLinesAll - len(textLines) {
-			textLines = append(textLines, display.TextLine{
-				Content:      "",
-				RelativeSize: 1,
-			})
+	if len(textLines) < display.DefaultLinesAmount {
+		for range display.DefaultLinesAmount - len(textLines) {
+			textLines = append(textLines, display.NewDefaultTextLine(""))
 		}
 	}
 	// output text screen

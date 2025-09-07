@@ -19,8 +19,8 @@ type SensdataRepoDB interface {
 
 // LogMsgRepoDB describes a DB repo for log messages.
 type LogMsgRepoDB interface {
-	// GetLevelsCount returns map with level numbers and amount of messages with this level.
-	GetLevelsCount() ([]entity.LogMsgLevelCount, error)
+	// GetLevelCount returns map with level numbers and amount of messages with this levels.
+	GetLevelCount() ([]entity.LogMsgLevelCount, error)
 	// GetWithLevel returns slice of messages with given level ordered by created datetime.
 	GetWithLevel(level string) ([]entity.LogMsgWithLevel, error)
 	// GetByID returns message with given ID. ID field must be presented.
@@ -44,10 +44,12 @@ type SensconfRepoFS interface {
 // Precompiled string keys for pub/sub storage.
 const (
 	RendererKey      = "renderer"
-	MenuSensconf     = "menu:sensconf"
 	SensTempKey      = "sensdata:temperature"
 	SensHumidKey     = "sensdata:humidity"
 	SensPressKey     = "sensdata:pressure"
 	SensWindSpeedKey = "sensdata:wind:speed"
 	SensWindDirKey   = "sensdata:wind:direction"
+	MenuSensconf     = "menu:sensconf"
+	MenuLogLvl       = "menu:loglevel"
+	MenuLogMsg       = "menu:logmessage"
 )

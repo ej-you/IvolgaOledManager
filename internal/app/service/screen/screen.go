@@ -32,7 +32,7 @@ var (
 	ImgGreetings     Name = "screen:greetings"
 	MenuMain         Name = "screen:menu:main"
 	MenuSens         Name = "screen:menu:sensor"
-	MenuSensorconf   Name = "screen:menu:sensorconf"
+	MenuSensconf     Name = "screen:menu:sensorconf"
 	MenuSensconfItem Name = "screen:menu:sensorconf:item"
 	SensTemp         Name = "screen:sensdata:temperature"
 	SensHumid        Name = "screen:sensdata:humidity"
@@ -40,6 +40,11 @@ var (
 	SensWindSpeed    Name = "screen:sensdata:wind:speed"
 	SensWindDir      Name = "screen:sensdata:wind:direction"
 	Sensconf         Name = "screen:sensorconf"
+	MenuLogLvl       Name = "screen:menu:loglevel"
+	MenuLogLvlAction Name = "screen:menu:loglevel:action"
+	MenuLogMsg       Name = "screen:menu:logmessage"
+	MenuLogMsgAction Name = "screen:menu:logmessage:action"
+	LogMsg           Name = "screen:logmessage"
 )
 
 // ActiveChan represents an active chan for screen.
@@ -54,7 +59,7 @@ func newActiveChanMap() ActiveChanMap {
 		ImgGreetings:     make(ActiveChan, 1),
 		MenuMain:         make(ActiveChan, 1),
 		MenuSens:         make(ActiveChan, 1),
-		MenuSensorconf:   make(ActiveChan, 1),
+		MenuSensconf:     make(ActiveChan, 1),
 		MenuSensconfItem: make(ActiveChan, 1),
 		SensTemp:         make(ActiveChan, 1),
 		SensHumid:        make(ActiveChan, 1),
@@ -62,6 +67,11 @@ func newActiveChanMap() ActiveChanMap {
 		SensWindSpeed:    make(ActiveChan, 1),
 		SensWindDir:      make(ActiveChan, 1),
 		Sensconf:         make(ActiveChan, 1),
+		MenuLogLvl:       make(ActiveChan, 1),
+		MenuLogLvlAction: make(ActiveChan, 1),
+		MenuLogMsg:       make(ActiveChan, 1),
+		MenuLogMsgAction: make(ActiveChan, 1),
+		LogMsg:           make(ActiveChan, 1),
 	}
 }
 
@@ -86,7 +96,7 @@ type Manager struct {
 // NewManager returns a new instance of ScreenManager.
 func NewManager(cfg *config.Config, btns button.Buttons,
 	renderService *render.Render, storage pubsub.Storage,
-	sensorconfUC usecase.SensconfUsecase) *Manager {
+	sensorconfUC usecase.SensconfUsecase, logMsgUC usecase.LogMsgUsecase) *Manager {
 
 	// init screen active chans
 	activeCh := newActiveChanMap()
@@ -96,10 +106,10 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	// greetings screen
 	greetings := NewGreetingsScreen(ImgGreetings,
 		activeCh, btns, storage, cfg.App.GreetingsImgPath)
-	// menu screens
+	// menu screens for sensors
 	menuMain := NewMenuMainScreen(MenuMain, activeCh, btns, storage)
 	menuSens := NewMenuSensScreen(MenuSens, activeCh, btns, storage)
-	menuSensorconf := NewMenuSensconfScreen(MenuSensorconf,
+	menuSensorconf := NewMenuSensconfScreen(MenuSensconf,
 		activeCh, btns, storage, sensorconfUC)
 	menuSensorconfItem := NewMenuSensconfItemScreen(MenuSensconfItem,
 		activeCh, btns, storage, sensorconfUC)
@@ -111,12 +121,21 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	sensWindDir := NewSensWindDirScreen(SensWindDir, activeCh, btns, storage)
 	// sensor config item
 	sensconf := NewSensconfScreen(Sensconf, activeCh, btns, storage)
+	// menu screens for log messages
+	menuLogLvl := NewMenuLogLvlScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
+	menuLogLvlAction := NewMenuLogLvlActionScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
+	menuLogMsg := NewMenuLogMsgScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
+	menuLogMsgAction := NewMenuLogMsgActionScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
+	// log message
+	logMsg := NewLogMsgScreen(LogMsg, activeCh, btns, storage)
 
 	screens := []Screen{
 		greetings, menuMain,
 		menuSens, menuSensorconf, menuSensorconfItem,
 		sensTemp, sensHumid, sensPress, sensWindSpeed, sensWindDir,
 		sensconf,
+		menuLogLvl, menuLogLvlAction, menuLogMsg, menuLogMsgAction,
+		logMsg,
 	}
 	// prepare button handlers for all screens
 	for _, screen := range screens {

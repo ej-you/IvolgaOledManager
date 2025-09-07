@@ -2,12 +2,17 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 
+	"IvolgaOledManager/internal/pkg/display"
 	"IvolgaOledManager/internal/pkg/text"
 )
 
 const (
+	LogLvlCountCtxKey = "logLvlCount" // key for log level count value in context
+	LogMsgCtxKey      = "logMsg"      // key for log level count value in context
+
 	_datetimeFormat = "02.01.06 15:04:05" // datetime format for createdAt message field
 	_lineSymbols    = 16                  // max amount of symbols on one line
 )
@@ -62,6 +67,30 @@ func (l *LogMsg) ScrollDown() {
 		return
 	}
 	l.FirstLine++
+}
+
+// Render implements display.Renderer. It renders log message on display.
+func (l *LogMsg) Render(device display.Display) error {
+	// create slice of text lines with menu title line
+	textLines := make([]display.TextLine, 0, display.DefaultLinesAmount)
+	textLines = append(textLines, display.NewDefaultTextLine(l.Datetime()))
+
+	content := l.Formated()
+	// iterate menu items
+	for _, line := range content {
+		if len(textLines) == display.DefaultLinesAmount {
+			break
+		}
+		// add new line
+		textLines = append(textLines, display.NewDefaultTextLine(line))
+	}
+
+	// output text screen
+	err := device.DisplayTextLines(textLines...)
+	if err != nil {
+		return fmt.Errorf("display text screen: %w", err)
+	}
+	return nil
 }
 
 // LogMsgLevelCount is a subset of LogMsg object fields with

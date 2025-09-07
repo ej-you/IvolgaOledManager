@@ -73,7 +73,7 @@ func New() (*App, error) {
 	logger.InitLogrus(cfg.App.LogLevel, cfg.App.LogFormat)
 
 	// connect to DB
-	_, err = db.New(cfg.DB.DSN,
+	dbStorage, err := db.New(cfg.DB.DSN,
 		db.WithTranslateError(),
 		db.WithIgnoreNotFound(),
 		db.WithDisableColorful(),
@@ -87,12 +87,14 @@ func New() (*App, error) {
 
 	// init repos
 	sensdataRepoDB := repodb.NewMockSensdataRepoDB()
+	logMsgRepoDB := repodb.NewLogMsgRepoDB(dbStorage)
 	sensconfRepoFS, err := repofs.NewSensconfRepoFS(cfg.Other.Station.ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("sensorconf repo fs: %w", err)
 	}
 	// init usecases
 	sensdataUC := usecase.NewSensdataUsecase(sensdataRepoDB, storage)
+	logMsgUC := usecase.NewLogMsgUsecase(logMsgRepoDB)
 	sensconfUC := usecase.NewSensconfUsecase(sensconfRepoFS, cfg.Other.Station.ServiceName)
 
 	// init buttons services
@@ -114,7 +116,7 @@ func New() (*App, error) {
 	windSpeedUpdater := sensdata.NewWindSpeedUpdater(cfg, storage, sensdataUC)
 	windDirUpdater := sensdata.NewWindDirUpdater(cfg, storage, sensdataUC)
 	// init screens services
-	screenManager := screen.NewManager(cfg, btns, rend, storage, sensconfUC)
+	screenManager := screen.NewManager(cfg, btns, rend, storage, sensconfUC, logMsgUC)
 
 	return &App{
 		cfg:     cfg,
