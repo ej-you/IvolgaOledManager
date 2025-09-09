@@ -22,7 +22,7 @@ func newMenuLogMsgGetter(storage pubsub.Storage,
 		menuLogLvl := storage.Get(repo.MenuLogLvl).(*entity.Menu)
 		menuLogLvlCtx := menuLogLvl.Items[menuLogLvl.SelectedItem].Ctx
 		// get log level count item and delete all messages with it
-		logLvlItem := menuLogLvlCtx.Value(entity.LogLvlCountCtxKey).(*entity.LogMsgLevelCount)
+		logLvlItem := menuLogLvlCtx.Value(entity.LogLvlCountCtxKey).(entity.LogMsgLvlCount)
 
 		// get log messages as menu
 		menu, err := logMsgUC.GetWithLevelAsMenu(strconv.Itoa(logLvlItem.Level))

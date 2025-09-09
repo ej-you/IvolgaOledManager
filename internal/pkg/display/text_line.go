@@ -1,6 +1,9 @@
 package display
 
-const DefaultLinesAmount = 4 // amount of lines on screen (title and items/lines)
+const (
+	DefaultLinesAmount = 4 // amount of lines on screen (title and items/lines)
+	BlueLinesAmount    = 3 // amount of lines on screen (items/lines only)
+)
 
 // TextLine represents a one text line on display screen.
 type TextLine struct {

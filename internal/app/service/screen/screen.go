@@ -123,11 +123,11 @@ func NewManager(cfg *config.Config, btns button.Buttons,
 	sensconf := NewSensconfScreen(Sensconf, activeCh, btns, storage)
 	// menu screens for log messages
 	menuLogLvl := NewMenuLogLvlScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
-	menuLogLvlAction := NewMenuLogLvlActionScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
-	menuLogMsg := NewMenuLogMsgScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
-	menuLogMsgAction := NewMenuLogMsgActionScreen(MenuLogLvl, activeCh, btns, storage, logMsgUC)
+	menuLogLvlAction := NewMenuLogLvlActionScreen(MenuLogLvlAction, activeCh, btns, storage, logMsgUC)
+	menuLogMsg := NewMenuLogMsgScreen(MenuLogMsg, activeCh, btns, storage, logMsgUC)
+	menuLogMsgAction := NewMenuLogMsgActionScreen(MenuLogMsgAction, activeCh, btns, storage, logMsgUC)
 	// log message
-	logMsg := NewLogMsgScreen(LogMsg, activeCh, btns, storage)
+	logMsg := NewLogMsgScreen(LogMsg, activeCh, btns, storage, logMsgUC)
 
 	screens := []Screen{
 		greetings, menuMain,

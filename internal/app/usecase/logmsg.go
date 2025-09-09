@@ -45,7 +45,7 @@ func (l *LogMsgUC) GetLevelCountAsMenu() (*entity.Menu, error) {
 	}
 
 	// create slice for all levels count and fill it with zeros
-	allLevels := make([]entity.LogMsgLevelCount, _levelsAmount)
+	allLevels := make([]entity.LogMsgLvlCount, _levelsAmount)
 	for idx := range allLevels {
 		allLevels[idx].Level = idx
 	}
@@ -97,7 +97,7 @@ func (l *LogMsgUC) GetWithLevelAsMenu(level string) (*entity.Menu, error) {
 	var itemCtx context.Context
 	for _, msg := range levelMessages {
 		itemName = msg.Header
-		itemCtx = context.WithValue(context.Background(), entity.LogMsgCtxKey, msg)
+		itemCtx = context.WithValue(context.Background(), entity.LogMsgWithLvlCtxKey, msg)
 		menu.Items = append(menu.Items, entity.NewMenuItem(itemCtx, itemName))
 	}
 	return menu, nil

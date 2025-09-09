@@ -109,11 +109,12 @@ func (s *MenuLogLvlActionScreen) btnEnt() error {
 		menuLogLvl := s.storage.Get(repo.MenuLogLvl).(*entity.Menu)
 		menuLogLvlCtx := menuLogLvl.Items[menuLogLvl.SelectedItem].Ctx
 		// get log level count item and delete all messages with it
-		logLvlItem := menuLogLvlCtx.Value(entity.LogLvlCountCtxKey).(*entity.LogMsgLevelCount)
+		logLvlItem := menuLogLvlCtx.Value(entity.LogLvlCountCtxKey).(entity.LogMsgLvlCount)
 		if err := s.logMsgUC.DeleteAllWithLevel(strconv.Itoa(logLvlItem.Level)); err != nil {
 			return err
 		}
 		logrus.Infof("log level %d: delete all messages", logLvlItem.Level)
+		s.activeChanMap[MenuLogLvl] <- true
 	}
 	return nil
 }

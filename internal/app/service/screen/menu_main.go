@@ -15,10 +15,7 @@ func newMenuMainGetter() template.MenuGetter {
 		Title: "Главное меню",
 		Items: []*entity.MenuItem{
 			entity.NewMenuItem(context.Background(), "Датчики"),
-			entity.NewMenuItem(context.Background(), "Назад"),
-			entity.NewMenuItem(context.Background(), "И ещё"),
-			entity.NewMenuItem(context.Background(), "И для проверки прокрутки - ещё!"),
-			entity.NewMenuItem(context.Background(), "And the last for test"),
+			entity.NewMenuItem(context.Background(), "Логи"),
 		},
 	}
 	return func() (*entity.Menu, error) {
@@ -98,7 +95,7 @@ func (s *MenuMainScreen) btnEnt() error {
 	case 0:
 		s.activeChanMap[MenuSens] <- true
 	case 1:
-		s.activeChanMap[ImgGreetings] <- true
+		s.activeChanMap[MenuLogLvl] <- true
 	}
 	return nil
 }

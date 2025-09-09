@@ -20,9 +20,9 @@ type SensdataRepoDB interface {
 // LogMsgRepoDB describes a DB repo for log messages.
 type LogMsgRepoDB interface {
 	// GetLevelCount returns map with level numbers and amount of messages with this levels.
-	GetLevelCount() ([]entity.LogMsgLevelCount, error)
+	GetLevelCount() ([]entity.LogMsgLvlCount, error)
 	// GetWithLevel returns slice of messages with given level ordered by created datetime.
-	GetWithLevel(level string) ([]entity.LogMsgWithLevel, error)
+	GetWithLevel(level string) ([]entity.LogMsgWithLvl, error)
 	// GetByID returns message with given ID. ID field must be presented.
 	GetByID(msg *entity.LogMsg) error
 	// DeleteByID deletes message record by its ID. ID field must be presented.

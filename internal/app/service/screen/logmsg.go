@@ -7,18 +7,26 @@ import (
 	"IvolgaOledManager/internal/app/repo"
 	"IvolgaOledManager/internal/app/service/button"
 	"IvolgaOledManager/internal/app/service/screen/template"
+	"IvolgaOledManager/internal/app/usecase"
 	"IvolgaOledManager/internal/pkg/pubsub"
 )
 
 // newLogMsgGetter returns getter func for log message.
-func newLogMsgGetter(storage pubsub.Storage) template.LogMsgGetter {
+func newLogMsgGetter(storage pubsub.Storage,
+	logMsgUC usecase.LogMsgUsecase) template.LogMsgGetter {
+
 	return func() (*entity.LogMsg, error) {
 		// get menu log message from storage
 		menuLogMsg := storage.Get(repo.MenuLogMsg).(*entity.Menu)
 		menuLogMsgCtx := menuLogMsg.Items[menuLogMsg.SelectedItem].Ctx
-		// get log message from selected menu item
-		logMsg := menuLogMsgCtx.Value(entity.LogMsgCtxKey).(*entity.LogMsg)
+		// get log message with level from selected menu item
+		logMsgWithLevel := menuLogMsgCtx.Value(entity.LogMsgWithLvlCtxKey).(entity.LogMsgWithLvl)
 
+		// get full log message from DB by its ID
+		logMsg := &entity.LogMsg{ID: logMsgWithLevel.ID}
+		if err := logMsgUC.GetByID(logMsg); err != nil {
+			return nil, err
+		}
 		return logMsg, nil
 	}
 }
@@ -34,13 +42,13 @@ type LogMsgScreen struct {
 
 // NewLogMsgScreen returns a new instance of LogMsgScreen.
 func NewLogMsgScreen(screenName Name, activeChanMap ActiveChanMap, btns button.Buttons,
-	storage pubsub.Storage) *LogMsgScreen {
+	storage pubsub.Storage, logMsgUC usecase.LogMsgUsecase) *LogMsgScreen {
 
 	templ := template.NewLogMsg(
 		string(screenName),
 		activeChanMap[screenName],
 		storage,
-		newLogMsgGetter(storage),
+		newLogMsgGetter(storage, logMsgUC),
 	)
 	return &LogMsgScreen{
 		name:          screenName,
@@ -64,7 +72,9 @@ func (s *LogMsgScreen) StartWithShutdown(ctx context.Context) error {
 // prepareBtnHandlers creates button handlers to apply them after the screen is active
 func (s *LogMsgScreen) prepareBtnHandlers() {
 	btnHandlers := button.Handlers{
-		button.Esc: s.btnEsc,
+		button.Esc:  s.btnEsc,
+		button.Up:   s.templ.BtnUpDefault,
+		button.Down: s.templ.BtnDownDefault,
 	}
 
 	s.templ.SetBtnHandlersReg(func() {

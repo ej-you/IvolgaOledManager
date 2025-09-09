@@ -26,8 +26,8 @@ func NewLogMsgRepoDB(dbStorage *gorm.DB) *LogMsgRepo {
 }
 
 // GetLevelCount returns map with level numbers and amount of messages with this level.
-func (r *LogMsgRepo) GetLevelCount() ([]entity.LogMsgLevelCount, error) {
-	var results []entity.LogMsgLevelCount
+func (r *LogMsgRepo) GetLevelCount() ([]entity.LogMsgLvlCount, error) {
+	var results []entity.LogMsgLvlCount
 	err := r.dbStorage.
 		Model(&entity.LogMsg{}).
 		Select("level, count(1) as count").
@@ -40,8 +40,8 @@ func (r *LogMsgRepo) GetLevelCount() ([]entity.LogMsgLevelCount, error) {
 }
 
 // GetWithLevel returns slice of messages with given level ordered by created datetime.
-func (r *LogMsgRepo) GetWithLevel(level string) ([]entity.LogMsgWithLevel, error) {
-	var results []entity.LogMsgWithLevel
+func (r *LogMsgRepo) GetWithLevel(level string) ([]entity.LogMsgWithLvl, error) {
+	var results []entity.LogMsgWithLvl
 	err := r.dbStorage.
 		Model(&entity.LogMsg{}).
 		Where("level = ?", level).

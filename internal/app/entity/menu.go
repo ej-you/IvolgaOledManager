@@ -6,10 +6,6 @@ import (
 	"IvolgaOledManager/internal/pkg/display"
 )
 
-var (
-	_displayLinesBlue = display.DefaultLinesAmount - 1 // amount of lines on screen (items/lines only)
-)
-
 // Menu represents any menu.
 type Menu struct {
 	Title        string      // menu title
@@ -62,7 +58,7 @@ func (m *Menu) SelectPrevious() {
 	// extreme up position
 	if m.SelectedItem == 0 {
 		m.SelectedItem = len(m.Items) - 1
-		m.FirstItem = max(len(m.Items)-_displayLinesBlue, 0)
+		m.FirstItem = max(len(m.Items)-display.BlueLinesAmount, 0)
 		return
 	}
 
@@ -84,7 +80,7 @@ func (m *Menu) SelectNext() {
 
 	m.SelectedItem++
 	// if selected item after update will not be visible
-	if m.SelectedItem >= m.FirstItem+_displayLinesBlue {
+	if m.SelectedItem >= m.FirstItem+display.BlueLinesAmount {
 		m.FirstItem++
 	}
 }

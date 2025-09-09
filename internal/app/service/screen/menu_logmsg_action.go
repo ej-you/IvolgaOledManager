@@ -105,14 +105,15 @@ func (s *MenuLogMsgActionScreen) btnEnt() error {
 		s.activeChanMap[LogMsg] <- true
 	// delete selected log messages
 	case 1:
-		menuLogMsg := s.storage.Get(repo.MenuLogLvl).(*entity.Menu)
+		menuLogMsg := s.storage.Get(repo.MenuLogMsg).(*entity.Menu)
 		menuLogMsgCtx := menuLogMsg.Items[menuLogMsg.SelectedItem].Ctx
 		// get log message item and delete it
-		logMsgItem := menuLogMsgCtx.Value(entity.LogMsgCtxKey).(*entity.LogMsgWithLevel)
+		logMsgItem := menuLogMsgCtx.Value(entity.LogMsgWithLvlCtxKey).(entity.LogMsgWithLvl)
 		if err := s.logMsgUC.DeleteByID(logMsgItem.ID); err != nil {
 			return err
 		}
 		logrus.Infof("log message %s - %s: deleted", logMsgItem.ID, logMsgItem.Header)
+		s.activeChanMap[MenuLogMsg] <- true
 	}
 	return nil
 }

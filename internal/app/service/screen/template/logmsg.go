@@ -93,13 +93,13 @@ func (l *LogMsg) GetFromStorage() (*entity.LogMsg, error) {
 
 // BtnUpDefault represents a default up button handler for log message screen.
 func (l *LogMsg) BtnUpDefault() error {
-	menuInst, err := l.GetFromStorage()
+	msg, err := l.GetFromStorage()
 	if err != nil {
 		return err
 	}
 	// update log message and publish into storage as renderer
-	menuInst.ScrollUp()
-	l.storage.Publish(repo.RendererKey, menuInst)
+	msg.ScrollUp()
+	l.storage.Publish(repo.RendererKey, msg)
 	return nil
 }
 

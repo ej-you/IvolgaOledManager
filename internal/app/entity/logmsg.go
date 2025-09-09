@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	LogLvlCountCtxKey = "logLvlCount" // key for log level count value in context
-	LogMsgCtxKey      = "logMsg"      // key for log level count value in context
+	LogLvlCountCtxKey   = "logLvlCount" // key for log level count value in context
+	LogMsgWithLvlCtxKey = "logMsg"      // key for log level count value in context
 
 	_datetimeFormat = "02.01.06 15:04:05" // datetime format for createdAt message field
 	_lineSymbols    = 16                  // max amount of symbols on one line
@@ -63,7 +63,7 @@ func (l *LogMsg) ScrollUp() {
 // ScrollDown updates message FirstLine for scrolling down imitation.
 func (l *LogMsg) ScrollDown() {
 	// extreme down position
-	if l.FirstLine >= len(l.lines)-_displayLinesBlue {
+	if l.FirstLine >= len(l.lines)-display.BlueLinesAmount {
 		return
 	}
 	l.FirstLine++
@@ -76,11 +76,13 @@ func (l *LogMsg) Render(device display.Display) error {
 	textLines = append(textLines, display.NewDefaultTextLine(l.Datetime()))
 
 	content := l.Formated()
+	// count limit lines amount
+	limit := min(display.BlueLinesAmount, len(content[l.FirstLine:]))
 	// iterate menu items
-	for _, line := range content {
-		if len(textLines) == display.DefaultLinesAmount {
-			break
-		}
+	for _, line := range content[l.FirstLine : l.FirstLine+limit] {
+		// if len(textLines) == display.DefaultLinesAmount {
+		// 	break
+		// }
 		// add new line
 		textLines = append(textLines, display.NewDefaultTextLine(line))
 	}
@@ -93,16 +95,16 @@ func (l *LogMsg) Render(device display.Display) error {
 	return nil
 }
 
-// LogMsgLevelCount is a subset of LogMsg object fields with
+// LogMsgLvlCount is a subset of LogMsg object fields with
 // all log levels and messages amount for each of log level.
-type LogMsgLevelCount struct {
+type LogMsgLvlCount struct {
 	Level int
 	Count int
 }
 
-// LogMsgWithLevel is a subset of LogMsg object fields with
+// LogMsgWithLvl is a subset of LogMsg object fields with
 // messages and their levels.
-type LogMsgWithLevel struct {
+type LogMsgWithLvl struct {
 	ID     string
 	Header string
 }
