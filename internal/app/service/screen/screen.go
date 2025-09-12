@@ -1,5 +1,6 @@
 // Package screen provides screen services for serving
 // specific screens and navigating between them.
+// TODO: fix duplicates of screens and screen templates
 package screen
 
 import (
@@ -19,11 +20,18 @@ var _ Screen = (*GreetingsScreen)(nil)
 var _ Screen = (*MenuMainScreen)(nil)
 var _ Screen = (*MenuSensScreen)(nil)
 var _ Screen = (*MenuSensconfScreen)(nil)
+var _ Screen = (*MenuSensconfItemScreen)(nil)
 var _ Screen = (*SensTempScreen)(nil)
 var _ Screen = (*SensHumidScreen)(nil)
 var _ Screen = (*SensPressScreen)(nil)
 var _ Screen = (*SensWindSpeedScreen)(nil)
 var _ Screen = (*SensWindDirScreen)(nil)
+var _ Screen = (*SensconfScreen)(nil)
+var _ Screen = (*MenuLogLvlScreen)(nil)
+var _ Screen = (*MenuLogLvlActionScreen)(nil)
+var _ Screen = (*MenuLogMsgScreen)(nil)
+var _ Screen = (*MenuLogMsgActionScreen)(nil)
+var _ Screen = (*LogMsgScreen)(nil)
 
 // Name represents a screen name.
 type Name string
