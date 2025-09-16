@@ -86,7 +86,7 @@ func New() (*App, error) {
 	storage := pubsub.NewKeyValueStorage()
 
 	// init repos
-	sensdataRepoDB := repodb.NewMockSensdataRepoDB()
+	sensdataRepoDB := repodb.NewSensordataRepoDB(dbStorage)
 	logMsgRepoDB := repodb.NewLogMsgRepoDB(dbStorage)
 	sensconfRepoFS, err := repofs.NewSensconfRepoFS(cfg.Other.Station.ConfigPath)
 	if err != nil {

@@ -1,6 +1,6 @@
 // Package screen provides screen services for serving
 // specific screens and navigating between them.
-// TODO: fix duplicates of screens and screen templates
+// TD: fix duplicates of screens and screen templates
 package screen
 
 import (
